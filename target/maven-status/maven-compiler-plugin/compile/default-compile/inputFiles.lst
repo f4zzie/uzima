@@ -1,5 +1,8 @@
 /home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/services/ClientService.java
+/home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/ui/InvoiceListPanel.java
+/home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/database/ServiceRequestDAO.java
 /home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/models/Invoice.java
+/home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/models/ServiceRequestData.java
 /home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/models/TaxCalculation.java
 /home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/ui/DrillingServiceSelectionPanel.java
 /home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/reports/ServiceRevenueReport.java
@@ -8,6 +11,7 @@
 /home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/ui/InvoicePreviewPanel.java
 /home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/reports/ClientReportGenerator.java
 /home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/PasswordHashUtil.java
+/home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/ui/ServiceRequestPanel.java
 /home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/database/ServiceDAO.java
 /home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/models/PlumbingService.java
 /home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/models/PumpService.java
@@ -19,6 +23,7 @@
 /home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/models/Client.java
 /home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/ui/TankInstallationPanel.java
 /home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/ui/ServiceRequestWizardManager.java
+/home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/models/ServiceRequestSummary.java
 /home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/reports/CompanyRevenueReport.java
 /home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/ui/DepthHeightInputPanel.java
 /home/kali/Desktop/UZIMABOREHOLE/uzima/src/main/java/com/uzima/ui/MainMenuPanel.java

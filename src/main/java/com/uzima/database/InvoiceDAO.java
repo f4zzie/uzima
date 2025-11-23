@@ -19,7 +19,7 @@ public class InvoiceDAO {
         String sql = "INSERT INTO invoices (request_id, client_id, survey_fee, local_authority_fee, drilling_cost, pump_cost, plumbing_cost, tank_cost, depth_height_charge, subtotal, tax_amount, total_amount, payment_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
             pstmt.setInt(1, invoice.getRequestId());
             pstmt.setInt(2, invoice.getClientId());
@@ -35,9 +35,30 @@ public class InvoiceDAO {
             pstmt.setDouble(12, invoice.getTotalAmount());
             pstmt.setString(13, invoice.getPaymentStatus());
             
-            return pstmt.executeUpdate() > 0;
+            int affectedRows = pstmt.executeUpdate();
+            
+            if (affectedRows > 0) {
+                // Retrieve the generated invoice ID
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        invoice.setInvoiceId(generatedKeys.getInt(1));
+                    }
+                }
+                return true;
+            }
+            return false;
         } catch (SQLException e) {
             System.err.println("Error creating invoice: " + e.getMessage());
+            e.printStackTrace();
+            if (e.getMessage().contains("Unknown column 'depth_height_charge'") || 
+                e.getMessage().contains("depth_height_charge")) {
+                System.err.println("\n*** DATABASE MIGRATION NEEDED ***");
+                System.err.println("The 'depth_height_charge' column is missing from the invoices table.");
+                System.err.println("Please run the fix_database.sql script:");
+                System.err.println("  mysql -u root -pteddy < fix_database.sql");
+                System.err.println("Or manually run:");
+                System.err.println("  ALTER TABLE invoices ADD COLUMN depth_height_charge DECIMAL(10, 2) DEFAULT 0.00 AFTER tank_cost;\n");
+            }
             return false;
         }
     }

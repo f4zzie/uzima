@@ -1,5 +1,7 @@
 package com.uzima.ui;
 
+import com.uzima.models.ServiceRequestData;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -185,32 +187,4 @@ public class ServiceRequestWizardManager extends JPanel {
         return clientId;
     }
 
-    /**
-     * Data class to store request information across steps
-     */
-    public static class ServiceRequestData {
-        public String clientCategory;
-        public String drillingType;
-        public String pumpType;
-        public int depthMeters;
-        public int heightMeters;
-        public String pipeType;
-        public int pipeDiameterInches;
-        public int pipeLengthMeters;
-        public int numberOfOutlets;
-        public int tankCapacityLitres;
-        
-        // Calculated amounts
-        public double surveyFee;
-        public double localAuthorityFee;
-        public double drillingCost;
-        public double pumpCost;
-        public double plumbingCost;
-        public double tankCost;
-        public double depthHeightCharge;
-        public double subtotal;
-        public double taxAmount;
-        public double totalAmount;
-        public int invoiceId;
-    }
 }

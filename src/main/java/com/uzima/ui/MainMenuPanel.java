@@ -193,11 +193,12 @@ public class MainMenuPanel extends JPanel {
     }
 
     private void onViewInvoices() {
-        JOptionPane.showMessageDialog(this,
-            "View Invoices feature coming soon!\n" +
-            "You will be able to view all your service invoices here.",
-            "Invoices",
-            JOptionPane.INFORMATION_MESSAGE);
+        JFrame invoiceFrame = new JFrame("My Invoices");
+        invoiceFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        invoiceFrame.setSize(900, 600);
+        invoiceFrame.setLocationRelativeTo(null);
+        invoiceFrame.add(new InvoiceListPanel(clientId));
+        invoiceFrame.setVisible(true);
     }
 
     private void onViewServices() {

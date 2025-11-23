@@ -2,9 +2,12 @@ package com.uzima;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import com.uzima.services.ClientService;
 import com.uzima.models.Client;
+import com.uzima.ui.InvoiceListPanel;
+import com.uzima.ui.ServiceRequestPanel;
 import com.uzima.ui.MainMenuPanel;
 
 /**
@@ -216,99 +219,126 @@ public class Main extends JFrame {
         subtitleLabel.setForeground(TEXT_SECONDARY);
         mainContainer.add(subtitleLabel, gbc);
         
-        // Form fields
+        // Form fields - 2 column layout
         gbc.gridwidth = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         
-        // Full Name
+        // Column 1 - Full Name
         gbc.gridx = 0;
         gbc.gridy++;
-        gbc.insets = new Insets(10, 60, 2, 30);
-        mainContainer.add(new JLabel("Full Name:"), gbc);
+        gbc.insets = new Insets(10, 60, 2, 10);
+        JLabel nameLabel = new JLabel("Full Name:");
+        nameLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        mainContainer.add(nameLabel, gbc);
         
         gbc.gridy++;
-        gbc.insets = new Insets(2, 60, 10, 30);
-        JTextField nameField = new JTextField();
+        gbc.insets = new Insets(2, 60, 10, 10);
+        JTextField nameField = new JTextField(20);
         styleTextField(nameField);
         mainContainer.add(nameField, gbc);
         
-        // Email
+        // Column 2 - Email
         gbc.gridx = 1;
         gbc.gridy -= 2;
-        gbc.insets = new Insets(10, 30, 2, 60);
-        mainContainer.add(new JLabel("Email Address:"), gbc);
+        gbc.insets = new Insets(10, 10, 2, 60);
+        JLabel emailLabel = new JLabel("Email Address:");
+        emailLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        mainContainer.add(emailLabel, gbc);
         
         gbc.gridy++;
-        gbc.insets = new Insets(2, 30, 10, 60);
-        JTextField emailField = new JTextField();
+        gbc.insets = new Insets(2, 10, 10, 60);
+        JTextField emailField = new JTextField(20);
         styleTextField(emailField);
         mainContainer.add(emailField, gbc);
         
-        // Phone
+        // Column 1 - Phone
         gbc.gridx = 0;
         gbc.gridy++;
-        gbc.insets = new Insets(10, 60, 2, 30);
-        mainContainer.add(new JLabel("Phone Number:"), gbc);
+        gbc.insets = new Insets(10, 60, 2, 10);
+        JLabel phoneLabel = new JLabel("Phone Number:");
+        phoneLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        mainContainer.add(phoneLabel, gbc);
         
         gbc.gridy++;
-        gbc.insets = new Insets(2, 60, 10, 30);
-        JTextField phoneField = new JTextField();
+        gbc.insets = new Insets(2, 60, 10, 10);
+        JTextField phoneField = new JTextField(20);
         styleTextField(phoneField);
         mainContainer.add(phoneField, gbc);
         
-        // County
+        // Column 2 - County (All 47 Counties of Kenya)
         gbc.gridx = 1;
         gbc.gridy -= 2;
-        gbc.insets = new Insets(10, 30, 2, 60);
-        mainContainer.add(new JLabel("County:"), gbc);
+        gbc.insets = new Insets(10, 10, 2, 60);
+        JLabel countyLabel = new JLabel("County:");
+        countyLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        mainContainer.add(countyLabel, gbc);
         
         gbc.gridy++;
-        gbc.insets = new Insets(2, 30, 10, 60);
-        String[] counties = {"Nairobi", "Mombasa", "Kisumu", "Nakuru", "Uasin Gishu", "Kiambu", "Muranga", "Nyeri"};
+        gbc.insets = new Insets(2, 10, 10, 60);
+        String[] counties = {
+            "Mombasa", "Kwale", "Kilifi", "Tana River", "Lamu", "Taita-Taveta", "Garissa",
+            "Wajir", "Mandera", "Marsabit", "Isiolo", "Meru", "Tharaka-Nithi", "Embu",
+            "Kitui", "Machakos", "Makueni", "Nyandarua", "Nyeri", "Kirinyaga", "Murang'a",
+            "Kiambu", "Turkana", "West Pokot", "Samburu", "Trans Nzoia", "Uasin Gishu",
+            "Elgeyo-Marakwet", "Nandi", "Baringo", "Laikipia", "Nakuru", "Narok", "Kajiado",
+            "Kericho", "Bomet", "Kakamega", "Vihiga", "Bungoma", "Busia", "Siaya", "Kisumu",
+            "Homa Bay", "Migori", "Kisii", "Nyamira", "Nairobi"
+        };
         JComboBox<String> countyBox = new JComboBox<>(counties);
+        countyBox.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        countyBox.setBackground(Color.WHITE);
         mainContainer.add(countyBox, gbc);
         
-        // Password
+        // Column 1 - Password
         gbc.gridx = 0;
         gbc.gridy++;
-        gbc.insets = new Insets(10, 60, 2, 30);
-        mainContainer.add(new JLabel("Password:"), gbc);
+        gbc.insets = new Insets(10, 60, 2, 10);
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        mainContainer.add(passwordLabel, gbc);
         
         gbc.gridy++;
-        gbc.insets = new Insets(2, 60, 10, 30);
-        JPasswordField passwordField = new JPasswordField();
+        gbc.insets = new Insets(2, 60, 10, 10);
+        JPasswordField passwordField = new JPasswordField(20);
         styleTextField(passwordField);
         mainContainer.add(passwordField, gbc);
         
-        // Confirm Password
+        // Column 2 - Confirm Password
         gbc.gridx = 1;
         gbc.gridy -= 2;
-        gbc.insets = new Insets(10, 30, 2, 60);
-        mainContainer.add(new JLabel("Confirm Password:"), gbc);
+        gbc.insets = new Insets(10, 10, 2, 60);
+        JLabel confirmLabel = new JLabel("Confirm Password:");
+        confirmLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        mainContainer.add(confirmLabel, gbc);
         
         gbc.gridy++;
-        gbc.insets = new Insets(2, 30, 10, 60);
-        JPasswordField confirmPasswordField = new JPasswordField();
+        gbc.insets = new Insets(2, 10, 10, 60);
+        JPasswordField confirmPasswordField = new JPasswordField(20);
         styleTextField(confirmPasswordField);
         mainContainer.add(confirmPasswordField, gbc);
         
-        // Service Category
+        // Service Category (Full width)
         gbc.gridx = 0;
         gbc.gridy++;
         gbc.gridwidth = 2;
         gbc.insets = new Insets(10, 60, 2, 60);
-        mainContainer.add(new JLabel("Service Category:"), gbc);
+        JLabel categoryLabel = new JLabel("Service Category:");
+        categoryLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        mainContainer.add(categoryLabel, gbc);
         
         gbc.gridy++;
         gbc.insets = new Insets(2, 60, 15, 60);
-        String[] categories = {"Domestic", "Commercial", "Industrial"};
+        String[] categories = {"Individual", "Commercial", "NGO", "Government"};
         JComboBox<String> categoryBox = new JComboBox<>(categories);
+        categoryBox.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        categoryBox.setBackground(Color.WHITE);
         mainContainer.add(categoryBox, gbc);
         
         // Sign Up Button
         gbc.gridy++;
         gbc.insets = new Insets(20, 60, 10, 60);
         JButton signUpButton = new JButton("Create Account");
+        signUpButton.setPreferredSize(new Dimension(200, 40));
         styleButton(signUpButton, SUCCESS_COLOR);
         signUpButton.addActionListener(e -> handleSignUp(
             nameField.getText(),
@@ -340,8 +370,7 @@ public class Main extends JFrame {
     
     // ============ ADMIN PANEL SCREEN ============
     private JPanel createAdminPanel() {
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BorderLayout());
+        JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(CARD_BACKGROUND);
         
         // Top panel with title and logout
@@ -359,8 +388,6 @@ public class Main extends JFrame {
         styleButton(logoutButton, DANGER_COLOR);
         logoutButton.addActionListener(e -> showLogin());
         topPanel.add(logoutButton, BorderLayout.EAST);
-        
-        mainPanel.add(topPanel, BorderLayout.NORTH);
         
         // Search and Filter Panel
         JPanel filterPanel = new JPanel();
@@ -409,12 +436,7 @@ public class Main extends JFrame {
         gbc.gridx = 5;
         filterPanel.add(categoryCombo, gbc);
         
-        mainPanel.add(filterPanel, BorderLayout.NORTH);
-        
         // Center - Clients Table
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
         String[] columnNames = {"ID", "Name", "Email", "Phone", "County", "Category"};
         Object[][] data = loadClientsData();
         
@@ -444,11 +466,8 @@ public class Main extends JFrame {
         
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setPreferredSize(new Dimension(800, 400));
-        centerPanel.add(scrollPane, BorderLayout.CENTER);
-        
-        mainPanel.add(centerPanel, BorderLayout.CENTER);
-        
-        // Bottom panel with buttons
+
+        // Bottom panel with buttons for client grid
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 15));
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
@@ -509,8 +528,72 @@ public class Main extends JFrame {
             }
         });
         bottomPanel.add(deleteButton);
-        
-        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+        // Card layout to switch between client grid and invoices
+        CardLayout centerCardLayout = new CardLayout();
+        JPanel centerCardPanel = new JPanel(centerCardLayout);
+        centerCardPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+    JPanel clientView = new JPanel(new BorderLayout());
+        clientView.setBackground(CARD_BACKGROUND);
+        clientView.add(scrollPane, BorderLayout.CENTER);
+        clientView.add(bottomPanel, BorderLayout.SOUTH);
+
+        centerCardPanel.add(clientView, "CLIENTS");
+
+        InvoiceListPanel invoicePanel = new InvoiceListPanel(-1);
+        invoicePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        centerCardPanel.add(invoicePanel, "INVOICES");
+
+        ServiceRequestPanel requestPanel = new ServiceRequestPanel();
+        requestPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        centerCardPanel.add(requestPanel, "REQUESTS");
+
+        mainPanel.add(centerCardPanel, BorderLayout.CENTER);
+
+        // Toggle panel for switching views
+        JPanel togglePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
+        togglePanel.setBackground(new Color(240, 242, 245));
+
+        List<JButton> toggleButtons = new ArrayList<>();
+        JButton recordsButton = new JButton("Client Records");
+        JButton invoicesButton = new JButton("Invoices");
+        JButton requestsButton = new JButton("Service Requests");
+        styleToggleButton(recordsButton);
+        styleToggleButton(invoicesButton);
+        styleToggleButton(requestsButton);
+
+        toggleButtons.add(recordsButton);
+        toggleButtons.add(invoicesButton);
+        toggleButtons.add(requestsButton);
+
+        recordsButton.addActionListener(e -> {
+            centerCardLayout.show(centerCardPanel, "CLIENTS");
+            setToggleState(recordsButton, toggleButtons);
+        });
+
+        invoicesButton.addActionListener(e -> {
+            centerCardLayout.show(centerCardPanel, "INVOICES");
+            setToggleState(invoicesButton, toggleButtons);
+        });
+
+        requestsButton.addActionListener(e -> {
+            centerCardLayout.show(centerCardPanel, "REQUESTS");
+            setToggleState(requestsButton, toggleButtons);
+        });
+
+        togglePanel.add(recordsButton);
+        togglePanel.add(invoicesButton);
+        togglePanel.add(requestsButton);
+
+        JPanel northContainer = new JPanel(new BorderLayout());
+        northContainer.add(topPanel, BorderLayout.NORTH);
+        northContainer.add(filterPanel, BorderLayout.CENTER);
+        northContainer.add(togglePanel, BorderLayout.SOUTH);
+        mainPanel.add(northContainer, BorderLayout.NORTH);
+
+    setToggleState(recordsButton, toggleButtons);
+        centerCardLayout.show(centerCardPanel, "CLIENTS");
         
         // Add listeners for search, sort, and filter
         searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
@@ -865,22 +948,41 @@ public class Main extends JFrame {
     private void styleButton(JButton button, Color bgColor) {
         button.setBackground(bgColor);
         button.setForeground(Color.WHITE);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        button.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        button.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setUI(new javax.swing.plaf.basic.BasicButtonUI());
     }
     
     private void styleTextField(JComponent field) {
+        field.setBackground(FIELD_BACKGROUND);
+        field.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
         field.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        if (field instanceof JTextField) {
-            ((JTextField) field).setBackground(FIELD_BACKGROUND);
-            ((JTextField) field).setCaretColor(PRIMARY_ACCENT);
-            ((JTextField) field).setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
-        } else if (field instanceof JPasswordField) {
-            ((JPasswordField) field).setBackground(FIELD_BACKGROUND);
-            ((JPasswordField) field).setCaretColor(PRIMARY_ACCENT);
-            ((JPasswordField) field).setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
+        field.setPreferredSize(new Dimension(250, 28));
+    }
+
+    private void styleToggleButton(JButton button) {
+        button.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(6, 18, 6, 18)
+        ));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setBackground(new Color(230, 233, 237));
+        button.setForeground(TEXT_PRIMARY);
+    }
+
+    private void setToggleState(JButton active, List<JButton> toggles) {
+        for (JButton button : toggles) {
+            if (button == active) {
+                button.setBackground(PRIMARY_ACCENT);
+                button.setForeground(Color.WHITE);
+            } else {
+                button.setBackground(new Color(230, 233, 237));
+                button.setForeground(TEXT_PRIMARY);
+            }
         }
     }
     
