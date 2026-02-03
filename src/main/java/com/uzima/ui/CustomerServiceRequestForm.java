@@ -1,6 +1,9 @@
 package com.uzima.ui;
 
+import com.uzima.dao.TransactionDAO;
 import com.uzima.model.Client;
+import com.uzima.model.Transaction;
+import com.uzima.util.UIHelper;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -860,33 +863,129 @@ public class CustomerServiceRequestForm extends JDialog {
             return;
         }
         
-        // Generate request ID
-        String requestId = "REQ-" + System.currentTimeMillis() % 100000;
+        // Calculate costs for database
+        double surveyFee = getSurveyFee();
+        double authorityFee = getLocalAuthorityFee();
+        double drillingCost = 0;
+        double pumpCost = 0;
+        double tankCost = 0;
+        double plumbingCost = 0;
+        
+        if (chkDrilling.isSelected()) {
+            int drillingBase = getDrillingBaseCost();
+            int depth = (int) spnBoreholeDepth.getValue();
+            drillingCost = drillingBase + calculateDepthHeightCost(depth);
+        }
+        
+        if (chkPump.isSelected()) {
+            int pumpBase = getPumpBaseCost();
+            int height = (int) spnTankHeight.getValue();
+            pumpCost = pumpBase + calculateDepthHeightCost(height);
+        }
+        
+        if (chkTank.isSelected()) {
+            int capacity = (int) spnTankCapacity.getValue();
+            tankCost = capacity * 15;
+        }
+        
+        if (chkPlumbing.isSelected()) {
+            int pipeCostPerMeter = getPipeCostPerMeter();
+            int length = (int) spnPipeLength.getValue();
+            double diameter = (double) spnPipeDiameter.getValue();
+            int outlets = (int) spnOutlets.getValue();
+            plumbingCost = (pipeCostPerMeter * length) + (diameter * 500) + (outlets * 2000);
+        }
+        
+        double subtotal = surveyFee + authorityFee + drillingCost + pumpCost + tankCost + plumbingCost;
+        double tax = subtotal * TAX_RATE;
+        double grandTotal = subtotal + tax;
         
         int confirm = JOptionPane.showConfirmDialog(this,
             "<html><div style='width: 400px; padding: 10px;'>" +
-            "<h2 style='color: #1E3A8A;'>📋 Confirm Service Request</h2>" +
-            "<p><b>Request ID:</b> " + requestId + "</p>" +
+            "<h2 style='color: #1E3A8A;'>\ud83d\udccb Confirm Service Request</h2>" +
             "<p><b>Selected Services:</b></p>" +
-            "<pre>" + services.toString() + "</pre>" +
+            "<div style='background: #F3F4F6; padding: 10px; border-radius: 5px;'>" + 
+            services.toString().replace("\n", "<br>") + 
+            "</div>" +
             "<hr>" +
             "<p><b>Total Cost:</b> <span style='color: #22C55E; font-size: 18px;'>" + lblGrandTotal.getText() + "</span></p>" +
-            "<p style='color: #92400E; background: #FEF3C7; padding: 8px;'>⚠️ A 30% down payment will be required upon approval.</p>" +
+            "<p style='color: #92400E; background: #FEF3C7; padding: 8px;'>\u26a0\ufe0f A 30% down payment will be required upon approval.</p>" +
             "</div></html>",
             "Confirm Request", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         
         if (confirm == JOptionPane.YES_OPTION) {
-            // Show success message
-            JOptionPane.showMessageDialog(this,
-                "<html><div style='padding: 20px; text-align: center;'>" +
-                "<h2 style='color: #22C55E;'>✅ Request Submitted Successfully!</h2>" +
-                "<p><b>Request ID:</b> " + requestId + "</p>" +
-                "<p>Your service request has been received.</p>" +
-                "<p style='color: #666;'>Our team will review and contact you within 24 hours.</p>" +
-                "<p><b>Date:</b> " + new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()) + "</p>" +
-                "</div></html>",
-                "Success", JOptionPane.PLAIN_MESSAGE);
-            dispose();
+            try {
+                // Create and save transaction
+                TransactionDAO dao = new TransactionDAO();
+                Transaction transaction = new Transaction();
+                
+                // Generate transaction number
+                transaction.setTransactionNo(dao.generateTransactionNo());
+                transaction.setClientId(currentClient.getClientId());
+                transaction.setTransactionDate(new Date());
+                
+                // Set drilling details
+                if (chkDrilling.isSelected()) {
+                    transaction.setBoreholeDepth((int) spnBoreholeDepth.getValue());
+                    transaction.setDrillingCost(drillingCost);
+                }
+                
+                // Set pump details
+                if (chkPump.isSelected()) {
+                    transaction.setTankHeight((int) spnTankHeight.getValue());
+                    transaction.setPumpCost(pumpCost);
+                }
+                
+                // Set tank details
+                if (chkTank.isSelected()) {
+                    transaction.setTankCost(tankCost);
+                }
+                
+                // Set plumbing
+                transaction.setHasPlumbing(chkPlumbing.isSelected());
+                transaction.setPlumbingCost(plumbingCost);
+                
+                // Set fees and totals
+                transaction.setSurveyFee(surveyFee);
+                transaction.setAuthorityFee(authorityFee);
+                transaction.setSubtotal(subtotal);
+                transaction.setTaxAmount(tax);
+                transaction.setGrandTotal(grandTotal);
+                
+                // Set payment status
+                transaction.setPaymentStatus("NOT_PAID");
+                transaction.setAmountPaid(0);
+                transaction.setBalance(grandTotal);
+                
+                // Set job status to PENDING_SURVEY (awaiting staff approval)
+                transaction.setJobStatus("PENDING_SURVEY");
+                
+                // Set notes
+                String notes = "Location: " + txtBoreholeLocation.getText().trim();
+                if (!txtNotes.getText().trim().isEmpty()) {
+                    notes += "\n\nNotes: " + txtNotes.getText().trim();
+                }
+                transaction.setNotes(notes);
+                
+                // Save to database
+                if (dao.saveTransaction(transaction)) {
+                    JOptionPane.showMessageDialog(this,
+                        "<html><div style='padding: 20px; text-align: center;'>" +
+                        "<h2 style='color: #22C55E;'>✅ Request Submitted Successfully!</h2>" +
+                        "<p><b>Transaction No:</b> " + transaction.getTransactionNo() + "</p>" +
+                        "<p>Your service request has been received.</p>" +
+                        "<p style='color: #666;'>Our team will review and contact you within 24 hours.</p>" +
+                        "<p><b>Date:</b> " + new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()) + "</p>" +
+                        "</div></html>",
+                        "Success", JOptionPane.PLAIN_MESSAGE);
+                    dispose();
+                } else {
+                    UIHelper.showError(this, "Failed to save service request. Please try again.");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                UIHelper.showError(this, "Error submitting request: " + e.getMessage());
+            }
         }
     }
 }

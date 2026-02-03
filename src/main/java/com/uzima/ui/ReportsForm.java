@@ -2,13 +2,20 @@ package com.uzima.ui;
 
 import com.uzima.report.ClientReportGenerator;
 import com.uzima.report.CompanyRevenueReport;
+import com.uzima.report.PlumbingRevenueReport;
 import com.uzima.report.ServiceRevenueReport;
 import com.uzima.report.TaxReport;
+import com.uzima.report.PDFReportGenerator;
+import com.uzima.report.DOCXReportGenerator;
 import com.uzima.util.UIHelper;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.print.PrinterException;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Reports Form - Generate and display various reports
@@ -16,11 +23,14 @@ import java.awt.print.PrinterException;
 public class ReportsForm extends JFrame {
     private JTextArea txtReportDisplay;
     private JComboBox<String> cmbReportType;
-    private JButton btnGenerate, btnPrint, btnClose;
+    private JButton btnGenerate, btnPrint, btnExportPDF, btnExportWord, btnClose;
     private ClientReportGenerator clientReportGen;
     private CompanyRevenueReport companyReportGen;
     private ServiceRevenueReport serviceReportGen;
     private TaxReport taxReportGen;
+    private PlumbingRevenueReport plumbingReportGen;
+    private String currentReportContent = "";
+    private String currentReportTitle = "";
     
     public ReportsForm() {
         setTitle("Reports - UZIMA Borehole System");
@@ -32,6 +42,7 @@ public class ReportsForm extends JFrame {
         companyReportGen = new CompanyRevenueReport();
         serviceReportGen = new ServiceRevenueReport();
         taxReportGen = new TaxReport();
+        plumbingReportGen = new PlumbingRevenueReport();
         
         initComponents();
     }
@@ -79,6 +90,7 @@ public class ReportsForm extends JFrame {
             "Fee Collection Report",
             "Payment Status Summary",
             "Service Revenue Report",
+            "Plumbing Revenue Report",
             "Average Transaction Report",
             "Tax Report"
         });
@@ -136,17 +148,17 @@ public class ReportsForm extends JFrame {
         btnPrint.setEnabled(false);
         panel.add(btnPrint);
         
-        JButton btnExportPDF = new JButton("Export PDF");
+        btnExportPDF = new JButton("Export PDF");
         UIHelper.styleSecondaryButton(btnExportPDF);
         btnExportPDF.addActionListener(e -> exportPDF());
-        btnExportPDF.setEnabled(false); // Will implement with iText
+        btnExportPDF.setEnabled(false);
         panel.add(btnExportPDF);
         
-        JButton btnExportExcel = new JButton("Export Excel");
-        UIHelper.styleSecondaryButton(btnExportExcel);
-        btnExportExcel.addActionListener(e -> exportExcel());
-        btnExportExcel.setEnabled(false); // Will implement with Apache POI
-        panel.add(btnExportExcel);
+        btnExportWord = new JButton("Export Word");
+        UIHelper.styleSecondaryButton(btnExportWord);
+        btnExportWord.addActionListener(e -> exportWord());
+        btnExportWord.setEnabled(false);
+        panel.add(btnExportWord);
         
         btnClose = new JButton("Close");
         UIHelper.styleDangerButton(btnClose);
@@ -188,6 +200,10 @@ public class ReportsForm extends JFrame {
                     reportContent = serviceReportGen.generateServiceRevenueReport();
                     break;
                     
+                case "Plumbing Revenue Report":
+                    reportContent = plumbingReportGen.generatePlumbingRevenueReport();
+                    break;
+                    
                 case "Average Transaction Report":
                     reportContent = serviceReportGen.generateAverageTransactionReport();
                     break;
@@ -200,13 +216,19 @@ public class ReportsForm extends JFrame {
                     reportContent = "Report type not implemented yet.";
             }
             
+            // Store current report data
+            currentReportContent = reportContent;
+            currentReportTitle = reportType;
+            
             // Add timestamp header
-            String timestamp = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new java.util.Date());
+            String timestamp = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date());
             String finalReport = "Generated: " + timestamp + "\n\n" + reportContent;
             
             txtReportDisplay.setText(finalReport);
             txtReportDisplay.setCaretPosition(0);
             btnPrint.setEnabled(true);
+            btnExportPDF.setEnabled(true);
+            btnExportWord.setEnabled(true);
             
             UIHelper.showSuccess(this, "Report generated successfully!");
             
@@ -232,48 +254,108 @@ public class ReportsForm extends JFrame {
     }
     
     private void exportPDF() {
-        // TODO: Implement PDF export using iText
-        UIHelper.showInfo(this, "PDF export feature will be implemented using iText library");
-        
-        /*
-        Example implementation:
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Save Report as PDF");
-        fileChooser.setFileFilter(new FileNameExtensionFilter("PDF files", "pdf"));
-        
-        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            // Use iText to create PDF from txtReportDisplay.getText()
-            // Document document = new Document();
-            // PdfWriter.getInstance(document, new FileOutputStream(file));
-            // document.open();
-            // document.add(new Paragraph(txtReportDisplay.getText(), FontFactory.getFont(FontFactory.COURIER, 10)));
-            // document.close();
+        try {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Save Report as PDF");
+            fileChooser.setFileFilter(new FileNameExtensionFilter("PDF files (*.pdf)", "pdf"));
+            
+            // Suggest filename
+            String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String suggestedName = currentReportTitle.replaceAll("[^a-zA-Z0-9]", "_") + "_" + timestamp + ".pdf";
+            fileChooser.setSelectedFile(new File(suggestedName));
+            
+            if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                
+                // Ensure .pdf extension
+                if (!file.getName().toLowerCase().endsWith(".pdf")) {
+                    file = new File(file.getAbsolutePath() + ".pdf");
+                }
+                
+                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                
+                // Generate PDF
+                PDFReportGenerator.generatePDFReport(
+                    file.getAbsolutePath(),
+                    currentReportTitle,
+                    currentReportContent,
+                    currentReportTitle
+                );
+                
+                setCursor(Cursor.getDefaultCursor());
+                
+                int result = JOptionPane.showConfirmDialog(
+                    this,
+                    "PDF report saved successfully!\n\nFile: " + file.getName() + "\n\nDo you want to open it?",
+                    "Export Successful",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+                
+                if (result == JOptionPane.YES_OPTION) {
+                    if (Desktop.isDesktopSupported()) {
+                        Desktop.getDesktop().open(file);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            setCursor(Cursor.getDefaultCursor());
+            UIHelper.showError(this, "Error exporting PDF: " + e.getMessage());
+            e.printStackTrace();
         }
-        */
     }
     
-    private void exportExcel() {
-        // TODO: Implement Excel export using Apache POI
-        UIHelper.showInfo(this, "Excel export feature will be implemented using Apache POI library");
-        
-        /*
-        Example implementation:
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Save Report as Excel");
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Excel files", "xlsx"));
-        
-        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            // Use Apache POI to create Excel from report data
-            // Workbook workbook = new XSSFWorkbook();
-            // Sheet sheet = workbook.createSheet("Report");
-            // Parse txtReportDisplay.getText() and populate rows/cells
-            // FileOutputStream out = new FileOutputStream(file);
-            // workbook.write(out);
-            // workbook.close();
+    private void exportWord() {
+        try {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Save Report as Word Document");
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Word files (*.docx)", "docx"));
+            
+            // Suggest filename
+            String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String suggestedName = currentReportTitle.replaceAll("[^a-zA-Z0-9]", "_") + "_" + timestamp + ".docx";
+            fileChooser.setSelectedFile(new File(suggestedName));
+            
+            if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                
+                // Ensure .docx extension
+                if (!file.getName().toLowerCase().endsWith(".docx")) {
+                    file = new File(file.getAbsolutePath() + ".docx");
+                }
+                
+                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                
+                // Generate Word document
+                DOCXReportGenerator.generateDOCXReport(
+                    file.getAbsolutePath(),
+                    currentReportTitle,
+                    currentReportContent,
+                    currentReportTitle
+                );
+                
+                setCursor(Cursor.getDefaultCursor());
+                
+                int result = JOptionPane.showConfirmDialog(
+                    this,
+                    "Word report saved successfully!\n\nFile: " + file.getName() + "\n\nDo you want to open it?",
+                    "Export Successful",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+                
+                if (result == JOptionPane.YES_OPTION) {
+                    if (Desktop.isDesktopSupported()) {
+                        Desktop.getDesktop().open(file);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            setCursor(Cursor.getDefaultCursor());
+            UIHelper.showError(this, "Error exporting Word document: " + e.getMessage());
+            e.printStackTrace();
         }
-        */
     }
 }
+
 

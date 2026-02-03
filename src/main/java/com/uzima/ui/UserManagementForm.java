@@ -97,8 +97,9 @@ public class UserManagementForm extends JPanel {
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         searchPanel.setOpaque(false);
         
-        JLabel lblSearch = new JLabel("🔍");
-        lblSearch.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
+        JLabel lblSearch = new JLabel("⊙");
+        lblSearch.setFont(new Font("Dialog", Font.BOLD, 18));
+        lblSearch.setForeground(new Color(100, 116, 139));
         
         txtSearch = new JTextField(20);
         txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));

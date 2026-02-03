@@ -87,8 +87,8 @@ public class CustomerDashboard extends JFrame {
         logoPanel.setMaximumSize(new Dimension(280, 100));
         logoPanel.setBorder(BorderFactory.createEmptyBorder(25, 20, 25, 20));
         
-        JLabel lblLogo = new JLabel("💧 UZIMA");
-        lblLogo.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        JLabel lblLogo = new JLabel("◉ UZIMA");
+        lblLogo.setFont(new Font("Dialog", Font.BOLD, 26));
         lblLogo.setForeground(Color.WHITE);
         lblLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
         
@@ -109,13 +109,14 @@ public class CustomerDashboard extends JFrame {
         sidebar.add(Box.createVerticalStrut(20));
         
         // Menu Items
-        sidebar.add(createMenuItem("🏠", "Dashboard", true, null));
-        sidebar.add(createMenuItem("📋", "My Services", false, e -> showMyServices()));
-        sidebar.add(createMenuItem("🛒", "Request New Service", false, e -> openServiceRequest()));
-        sidebar.add(createMenuItem("💳", "Payment History", false, e -> showPaymentHistory()));
-        sidebar.add(createMenuItem("📄", "Invoices", false, e -> showInvoices()));
-        sidebar.add(createMenuItem("📞", "Contact Support", false, e -> showSupport()));
-        sidebar.add(createMenuItem("👤", "My Profile", false, e -> showProfile()));
+        sidebar.add(createMenuItem("■", "Dashboard", true, null));
+        sidebar.add(createMenuItem("▣", "My Services", false, e -> showMyServices()));
+        sidebar.add(createMenuItem("◆", "Request New Service", false, e -> openServiceRequest()));
+        sidebar.add(createMenuItem("◈", "Payment History", false, e -> showPaymentHistory()));
+        sidebar.add(createMenuItem("▤", "Invoices", false, e -> showInvoices()));
+        sidebar.add(createMenuItem("📊", "My Reports", false, e -> openReports()));
+        sidebar.add(createMenuItem("●", "Contact Support", false, e -> showSupport()));
+        sidebar.add(createMenuItem("◉", "My Profile", false, e -> showProfile()));
         
         sidebar.add(Box.createVerticalGlue());
         
@@ -124,7 +125,7 @@ public class CustomerDashboard extends JFrame {
         logoutPanel.setBackground(SIDEBAR_BG);
         logoutPanel.setMaximumSize(new Dimension(280, 70));
         
-        JButton btnLogout = new JButton("🚪 Sign Out");
+        JButton btnLogout = new JButton("◆ Sign Out");
         btnLogout.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnLogout.setForeground(Color.WHITE);
         btnLogout.setBackground(PRIMARY_RED);
@@ -149,8 +150,9 @@ public class CustomerDashboard extends JFrame {
         card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
         // Avatar
-        JLabel avatar = new JLabel("👤");
-        avatar.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 40));
+        JLabel avatar = new JLabel("◉");
+        avatar.setFont(new Font("Dialog", Font.BOLD, 40));
+        avatar.setForeground(PRIMARY_GREEN);
         avatar.setAlignmentX(Component.CENTER_ALIGNMENT);
         
         // Name
@@ -193,7 +195,8 @@ public class CustomerDashboard extends JFrame {
         }
         
         JLabel lblIcon = new JLabel(icon);
-        lblIcon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 18));
+        lblIcon.setFont(new Font("Dialog", Font.BOLD, 20));
+        lblIcon.setForeground(new Color(180, 190, 200));
         
         JLabel lblText = new JLabel(text);
         lblText.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -234,7 +237,7 @@ public class CustomerDashboard extends JFrame {
         JPanel leftPanel = new JPanel(new GridLayout(2, 1, 0, 2));
         leftPanel.setBackground(CARD_BG);
         
-        JLabel lblTitle = new JLabel("Welcome back, " + currentClient.getFullName().split(" ")[0] + "! 👋");
+        JLabel lblTitle = new JLabel("Welcome back, " + currentClient.getFullName().split(" ")[0] + "!");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 22));
         lblTitle.setForeground(new Color(30, 41, 59));
         
@@ -249,8 +252,8 @@ public class CustomerDashboard extends JFrame {
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 5));
         rightPanel.setBackground(CARD_BG);
         
-        JButton btnRefresh = new JButton("🔄 Refresh");
-        btnRefresh.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        JButton btnRefresh = new JButton("↻ Refresh");
+        btnRefresh.setFont(new Font("Dialog", Font.BOLD, 13));
         btnRefresh.setPreferredSize(new Dimension(110, 40));
         btnRefresh.setBackground(new Color(241, 245, 249));
         btnRefresh.setBorder(BorderFactory.createLineBorder(new Color(226, 232, 240)));
@@ -258,8 +261,8 @@ public class CustomerDashboard extends JFrame {
         btnRefresh.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnRefresh.addActionListener(e -> loadCustomerData());
         
-        JButton btnSupport = new JButton("📞 Support");
-        btnSupport.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        JButton btnSupport = new JButton("☎ Support");
+        btnSupport.setFont(new Font("Dialog", Font.BOLD, 13));
         btnSupport.setPreferredSize(new Dimension(110, 40));
         btnSupport.setBackground(PRIMARY_GREEN);
         btnSupport.setForeground(Color.WHITE);
@@ -314,10 +317,10 @@ public class CustomerDashboard extends JFrame {
         lblPendingBalance = new JLabel("KSh 0");
         lblLastPayment = new JLabel("-");
         
-        panel.add(createStatCard("📋", "Total Services", lblTransactionCount, PRIMARY_BLUE, "All time"));
-        panel.add(createStatCard("💰", "Total Invested", lblTotalSpent, PRIMARY_GREEN, "Payments made"));
-        panel.add(createStatCard("⏳", "Outstanding", lblPendingBalance, PRIMARY_ORANGE, "Balance due"));
-        panel.add(createStatCard("📅", "Last Payment", lblLastPayment, PRIMARY_PURPLE, "Recent"));
+        panel.add(createStatCard("▣", "Total Services", lblTransactionCount, PRIMARY_BLUE, "All time"));
+        panel.add(createStatCard("◈", "Total Invested", lblTotalSpent, PRIMARY_GREEN, "Payments made"));
+        panel.add(createStatCard("◆", "Outstanding", lblPendingBalance, PRIMARY_ORANGE, "Balance due"));
+        panel.add(createStatCard("●", "Last Payment", lblLastPayment, PRIMARY_PURPLE, "Recent"));
         
         return panel;
     }
@@ -353,7 +356,8 @@ public class CustomerDashboard extends JFrame {
         iconPanel.setLayout(new GridBagLayout());
         
         JLabel lblIcon = new JLabel(icon);
-        lblIcon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 24));
+        lblIcon.setFont(new Font("Dialog", Font.BOLD, 26));
+        lblIcon.setForeground(color);
         iconPanel.add(lblIcon);
         
         // Right - Content
@@ -522,8 +526,8 @@ public class CustomerDashboard extends JFrame {
         card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         card.setMaximumSize(new Dimension(320, 200));
         
-        JLabel lblTitle = new JLabel("📊 Account Summary");
-        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        JLabel lblTitle = new JLabel("▣ Account Summary");
+        lblTitle.setFont(new Font("Dialog", Font.BOLD, 16));
         lblTitle.setForeground(new Color(30, 41, 59));
         lblTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         
@@ -568,35 +572,72 @@ public class CustomerDashboard extends JFrame {
                 g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 16, 16);
             }
         };
-        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setLayout(new BorderLayout(0, 15));
         card.setOpaque(false);
         card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         card.setMaximumSize(new Dimension(320, 180));
         
-        JLabel lblTitle = new JLabel("⚡ Quick Actions");
-        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        JLabel lblTitle = new JLabel("▲ Quick Actions");
+        lblTitle.setFont(new Font("Dialog", Font.BOLD, 16));
         lblTitle.setForeground(new Color(30, 41, 59));
         lblTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        card.add(lblTitle);
-        card.add(Box.createVerticalStrut(15));
+        card.add(lblTitle, BorderLayout.NORTH);
         
-        JButton btnPayment = createActionButton("💳 Make Payment", PRIMARY_GREEN);
-        JButton btnRequest = createActionButton("📝 Request Service", PRIMARY_BLUE);
-        JButton btnDownload = createActionButton("📄 Download Invoice", PRIMARY_PURPLE);
+        JPanel buttonsPanel = new JPanel();
+        buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.Y_AXIS));
+        buttonsPanel.setOpaque(false);
         
-        card.add(btnPayment);
-        card.add(Box.createVerticalStrut(10));
-        card.add(btnRequest);
-        card.add(Box.createVerticalStrut(10));
-        card.add(btnDownload);
+        JButton btnPayment = createActionButton("◆ Make Payment", PRIMARY_GREEN);
+        btnPayment.addActionListener(e -> {
+            UIHelper.showInfo(this, "◆ Payment Portal\n\nPayment feature coming soon!\nContact support for payment assistance.");
+        });
+        
+        JButton btnRequest = createActionButton("◈ Request Service", PRIMARY_BLUE);
+        btnRequest.addActionListener(e -> openServiceRequest());
+        
+        JButton btnInvoice = createActionButton("▣ Download Invoice", PRIMARY_PURPLE);
+        btnInvoice.addActionListener(e -> {
+            UIHelper.showInfo(this, "▣ Invoice Download\n\nInvoice download feature coming soon!\nContact office for physical copies.");
+        });
+        
+        buttonsPanel.add(btnPayment);
+        buttonsPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        buttonsPanel.add(btnRequest);
+        buttonsPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        buttonsPanel.add(btnInvoice);
+        
+        card.add(buttonsPanel, BorderLayout.CENTER);
         
         return card;
     }
     
+    private JButton createQuickActionBtn(String text, Color color) {
+        JButton btn = new JButton(text);
+        btn.setFont(new Font("Dialog", Font.BOLD, 12));
+        btn.setForeground(Color.WHITE);
+        btn.setBackground(color);
+        btn.setBorderPainted(false);
+        btn.setFocusPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        btn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btn.setBackground(color.darker());
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btn.setBackground(color);
+            }
+        });
+        
+        return btn;
+    }
+    
     private JButton createActionButton(String text, Color color) {
         JButton btn = new JButton(text);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btn.setFont(new Font("Dialog", Font.BOLD, 12));
         btn.setForeground(Color.WHITE);
         btn.setBackground(color);
         btn.setMaximumSize(new Dimension(280, 38));
@@ -635,8 +676,9 @@ public class CustomerDashboard extends JFrame {
         card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         card.setMaximumSize(new Dimension(320, 150));
         
-        JLabel lblIcon = new JLabel("📞");
-        lblIcon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 28));
+        JLabel lblIcon = new JLabel("☎");
+        lblIcon.setFont(new Font("Dialog", Font.BOLD, 28));
+        lblIcon.setForeground(Color.WHITE);
         lblIcon.setAlignmentX(Component.LEFT_ALIGNMENT);
         
         JLabel lblTitle = new JLabel("Need Help?");
@@ -741,7 +783,7 @@ public class CustomerDashboard extends JFrame {
     private void showSupport() {
         JOptionPane.showMessageDialog(this,
             "<html><div style='padding: 15px; font-family: Segoe UI;'>" +
-            "<h2>📞 Contact Support</h2>" +
+            "<h2>☎ Contact Support</h2>" +
             "<p><b>Phone:</b> +254 700 000 000</p>" +
             "<p><b>Email:</b> support@uzimaborehole.co.ke</p>" +
             "<p><b>Hours:</b> Mon-Fri, 8am - 6pm</p>" +
@@ -754,7 +796,7 @@ public class CustomerDashboard extends JFrame {
     private void showProfile() {
         JOptionPane.showMessageDialog(this,
             "<html><div style='padding: 15px; font-family: Segoe UI;'>" +
-            "<h2>👤 My Profile</h2>" +
+            "<h2>◉ My Profile</h2>" +
             "<p><b>Name:</b> " + currentClient.getFullName() + "</p>" +
             "<p><b>ID:</b> " + currentClient.getClientId() + "</p>" +
             "<p><b>Category:</b> " + currentClient.getClientCategory() + "</p>" +
@@ -763,6 +805,19 @@ public class CustomerDashboard extends JFrame {
             "<p><b>Address:</b> " + currentClient.getPhysicalAddress() + "</p>" +
             "</div></html>",
             "My Profile", JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    private void openReports() {
+        try {
+            CustomerReportsForm reportsForm = new CustomerReportsForm(currentClient);
+            reportsForm.setVisible(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, 
+                "Error opening reports: " + e.getMessage() + "\n\nPlease check console for details.",
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
     
     private void showMyServices() {
@@ -775,8 +830,8 @@ public class CustomerDashboard extends JFrame {
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createEmptyBorder(25, 25, 25, 25));
         
-        JLabel title = new JLabel("📋 My Borehole Services");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        JLabel title = new JLabel("▣ My Borehole Services");
+        title.setFont(new Font("Dialog", Font.BOLD, 22));
         title.setForeground(new Color(30, 41, 59));
         panel.add(title, BorderLayout.NORTH);
         
@@ -807,10 +862,12 @@ public class CustomerDashboard extends JFrame {
         
         JTable table = new JTable(model);
         table.setRowHeight(45);
-        table.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
-        table.getTableHeader().setBackground(PRIMARY_BLUE);
-        table.getTableHeader().setForeground(Color.WHITE);
+        table.getTableHeader().setBackground(new Color(245, 245, 245));
+        table.getTableHeader().setForeground(new Color(30, 41, 59));
+        table.getTableHeader().setPreferredSize(new Dimension(table.getTableHeader().getPreferredSize().width, 45));
+        table.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, PRIMARY_BLUE));
         
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
         
@@ -843,8 +900,8 @@ public class CustomerDashboard extends JFrame {
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createEmptyBorder(25, 25, 25, 25));
         
-        JLabel title = new JLabel("💳 Payment History");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        JLabel title = new JLabel("◆ Payment History");
+        title.setFont(new Font("Dialog", Font.BOLD, 22));
         title.setForeground(new Color(30, 41, 59));
         panel.add(title, BorderLayout.NORTH);
         
@@ -870,10 +927,12 @@ public class CustomerDashboard extends JFrame {
         
         JTable table = new JTable(model);
         table.setRowHeight(45);
-        table.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
-        table.getTableHeader().setBackground(PRIMARY_GREEN);
-        table.getTableHeader().setForeground(Color.WHITE);
+        table.getTableHeader().setBackground(new Color(245, 245, 245));
+        table.getTableHeader().setForeground(new Color(30, 41, 59));
+        table.getTableHeader().setPreferredSize(new Dimension(table.getTableHeader().getPreferredSize().width, 45));
+        table.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, PRIMARY_GREEN));
         
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
         
@@ -899,8 +958,8 @@ public class CustomerDashboard extends JFrame {
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createEmptyBorder(25, 25, 25, 25));
         
-        JLabel title = new JLabel("📄 Invoices & Quotations");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        JLabel title = new JLabel("▣ Invoices & Quotations");
+        title.setFont(new Font("Dialog", Font.BOLD, 22));
         title.setForeground(new Color(30, 41, 59));
         panel.add(title, BorderLayout.NORTH);
         
@@ -934,15 +993,17 @@ public class CustomerDashboard extends JFrame {
         
         JTable table = new JTable(model);
         table.setRowHeight(45);
-        table.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
-        table.getTableHeader().setBackground(PRIMARY_PURPLE);
-        table.getTableHeader().setForeground(Color.WHITE);
+        table.getTableHeader().setBackground(new Color(245, 245, 245));
+        table.getTableHeader().setForeground(new Color(30, 41, 59));
+        table.getTableHeader().setPreferredSize(new Dimension(table.getTableHeader().getPreferredSize().width, 45));
+        table.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, PRIMARY_PURPLE));
         
         // Download button renderer
         table.getColumnModel().getColumn(5).setCellRenderer((tbl, value, isSelected, hasFocus, row, column) -> {
-            JButton btn = new JButton("📥 Download");
-            btn.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            JButton btn = new JButton("▼ Download");
+            btn.setFont(new Font("Dialog", Font.BOLD, 11));
             btn.setBackground(PRIMARY_BLUE);
             btn.setForeground(Color.WHITE);
             return btn;

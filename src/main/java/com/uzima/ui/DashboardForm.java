@@ -90,8 +90,9 @@ public class DashboardForm extends JFrame {
         logoPanel.setBackground(new Color(15, 23, 42));
         logoPanel.setMaximumSize(new Dimension(260, 80));
         
-        JLabel lblLogo = new JLabel("💧");
-        lblLogo.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 32));
+        JLabel lblLogo = new JLabel("◉");
+        lblLogo.setFont(new Font("Dialog", Font.BOLD, 36));
+        lblLogo.setForeground(new Color(59, 130, 246));
         
         JLabel lblBrand = new JLabel("UZIMA");
         lblBrand.setFont(new Font("Segoe UI", Font.BOLD, 24));
@@ -123,9 +124,7 @@ public class DashboardForm extends JFrame {
         sidebar.add(Box.createVerticalStrut(20));
         
         // Admin Section
-        sidebar.add(createMenuItem("👤", "User Management", false, e -> openUserManagement()));
-        sidebar.add(createMenuItem("⚙️", "Settings", false, e -> openSettings()));
-        sidebar.add(createMenuItem("ℹ️", "About", false, e -> showAbout()));
+        sidebar.add(createMenuItem("●", "About", false, e -> showAbout()));
         
         sidebar.add(Box.createVerticalGlue());
         
@@ -134,8 +133,8 @@ public class DashboardForm extends JFrame {
         logoutPanel.setBackground(SIDEBAR_COLOR);
         logoutPanel.setMaximumSize(new Dimension(260, 60));
         
-        JButton btnLogout = new JButton("🚪 Logout");
-        btnLogout.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        JButton btnLogout = new JButton("⏻ Logout");
+        btnLogout.setFont(new Font("Dialog", Font.BOLD, 14));
         btnLogout.setForeground(Color.WHITE);
         btnLogout.setBackground(ACCENT_RED);
         btnLogout.setPreferredSize(new Dimension(200, 45));
@@ -162,7 +161,8 @@ public class DashboardForm extends JFrame {
         }
         
         JLabel lblIcon = new JLabel(icon);
-        lblIcon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 18));
+        lblIcon.setFont(new Font("Dialog", Font.BOLD, 20));
+        lblIcon.setForeground(new Color(148, 163, 184));
         
         JLabel lblText = new JLabel(text);
         lblText.setFont(new Font("Segoe UI", isActive ? Font.BOLD : Font.PLAIN, 14));
@@ -219,8 +219,8 @@ public class DashboardForm extends JFrame {
         rightPanel.setBackground(HEADER_BG);
         
         // Notifications Button
-        JButton btnNotifications = new JButton("🔔");
-        btnNotifications.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 18));
+        JButton btnNotifications = new JButton("◉");
+        btnNotifications.setFont(new Font("Dialog", Font.BOLD, 18));
         btnNotifications.setPreferredSize(new Dimension(45, 45));
         btnNotifications.setBackground(Color.WHITE);
         btnNotifications.setBorder(BorderFactory.createLineBorder(new Color(226, 232, 240)));
@@ -229,8 +229,8 @@ public class DashboardForm extends JFrame {
         btnNotifications.setToolTipText("Notifications");
         
         // Refresh Button
-        JButton btnRefresh = new JButton("🔄");
-        btnRefresh.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 18));
+        JButton btnRefresh = new JButton("↻");
+        btnRefresh.setFont(new Font("Dialog", Font.BOLD, 20));
         btnRefresh.setPreferredSize(new Dimension(45, 45));
         btnRefresh.setBackground(Color.WHITE);
         btnRefresh.setBorder(BorderFactory.createLineBorder(new Color(226, 232, 240)));
@@ -243,8 +243,9 @@ public class DashboardForm extends JFrame {
         JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         userPanel.setBackground(HEADER_BG);
         
-        JLabel userAvatar = new JLabel("👨‍💼");
-        userAvatar.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 28));
+        JLabel userAvatar = new JLabel("◉");
+        userAvatar.setFont(new Font("Dialog", Font.BOLD, 28));
+        userAvatar.setForeground(ACCENT_BLUE);
         
         JPanel userInfo = new JPanel(new GridLayout(2, 1, 0, 0));
         userInfo.setBackground(HEADER_BG);
@@ -309,7 +310,7 @@ public class DashboardForm extends JFrame {
     private JPanel createStatsCards() {
         JPanel panel = new JPanel(new GridLayout(1, 6, 15, 0));
         panel.setOpaque(false);
-        panel.setPreferredSize(new Dimension(getWidth(), 110));
+        panel.setPreferredSize(new Dimension(getWidth(), 130));
         
         lblTotalClients = new JLabel("0");
         lblActiveProjects = new JLabel("0");
@@ -318,12 +319,12 @@ public class DashboardForm extends JFrame {
         lblTodayTransactions = new JLabel("0");
         lblWeeklyGrowth = new JLabel("0%");
         
-        panel.add(createStatCard("👥", "Total Clients", lblTotalClients, ACCENT_BLUE, "+12%"));
-        panel.add(createStatCard("📋", "Active Projects", lblActiveProjects, ACCENT_GREEN, "Active"));
-        panel.add(createStatCard("💰", "Monthly Revenue", lblMonthlyRevenue, ACCENT_PURPLE, "This Month"));
-        panel.add(createStatCard("⏳", "Pending Payments", lblPendingPayments, ACCENT_ORANGE, "Outstanding"));
-        panel.add(createStatCard("📝", "Today's Orders", lblTodayTransactions, ACCENT_CYAN, "New"));
-        panel.add(createStatCard("📈", "Weekly Growth", lblWeeklyGrowth, ACCENT_GREEN, "↑ Trending"));
+        panel.add(createStatCard("◉", "Total Clients", lblTotalClients, ACCENT_BLUE, "+12%"));
+        panel.add(createStatCard("▣", "Active Projects", lblActiveProjects, ACCENT_GREEN, "Active"));
+        panel.add(createStatCard("◈", "Monthly Revenue", lblMonthlyRevenue, ACCENT_PURPLE, "This Month"));
+        panel.add(createStatCard("◆", "Pending Payments", lblPendingPayments, ACCENT_ORANGE, "Outstanding"));
+        panel.add(createStatCard("●", "Today's Orders", lblTodayTransactions, ACCENT_CYAN, "New"));
+        panel.add(createStatCard("▲", "Weekly Growth", lblWeeklyGrowth, ACCENT_GREEN, "↑ Trending"));
         
         return panel;
     }
@@ -340,7 +341,7 @@ public class DashboardForm extends JFrame {
         };
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setOpaque(false);
-        card.setBorder(BorderFactory.createEmptyBorder(15, 18, 15, 18));
+        card.setBorder(BorderFactory.createEmptyBorder(18, 18, 18, 18));
         
         // Top Row - Icon and Badge
         JPanel topRow = new JPanel(new BorderLayout());
@@ -348,7 +349,8 @@ public class DashboardForm extends JFrame {
         topRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         
         JLabel lblIcon = new JLabel(icon);
-        lblIcon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 24));
+        lblIcon.setFont(new Font("Dialog", Font.BOLD, 26));
+        lblIcon.setForeground(accentColor);
         
         JLabel lblBadge = new JLabel(badge);
         lblBadge.setFont(new Font("Segoe UI", Font.BOLD, 11));
@@ -389,9 +391,9 @@ public class DashboardForm extends JFrame {
         };
         panel.setOpaque(false);
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        panel.setPreferredSize(new Dimension(400, 220));
+        panel.setPreferredSize(new Dimension(400, 260));
         
-        JLabel lblTitle = new JLabel("⚡ Quick Actions");
+        JLabel lblTitle = new JLabel("✦ Quick Actions");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lblTitle.setForeground(new Color(30, 41, 59));
         panel.add(lblTitle, BorderLayout.NORTH);
@@ -399,10 +401,10 @@ public class DashboardForm extends JFrame {
         JPanel buttonsGrid = new JPanel(new GridLayout(2, 2, 12, 12));
         buttonsGrid.setOpaque(false);
         
-        buttonsGrid.add(createQuickActionButton("➕ New Client", ACCENT_BLUE, e -> openClientManagement()));
-        buttonsGrid.add(createQuickActionButton("� Service Requests", ACCENT_GREEN, e -> openServiceRequests()));
-        buttonsGrid.add(createQuickActionButton("💳 Record Payment", ACCENT_PURPLE, e -> openViewTransactions()));
-        buttonsGrid.add(createQuickActionButton("📊 View Reports", ACCENT_ORANGE, e -> openReports()));
+        buttonsGrid.add(createQuickActionButton("✚ New Client", ACCENT_BLUE, e -> openClientManagement()));
+        buttonsGrid.add(createQuickActionButton("◆ Service Requests", ACCENT_GREEN, e -> openServiceRequests()));
+        buttonsGrid.add(createQuickActionButton("◈ Record Payment", ACCENT_PURPLE, e -> openViewTransactions()));
+        buttonsGrid.add(createQuickActionButton("▤ View Reports", ACCENT_ORANGE, e -> openReports()));
         
         panel.add(buttonsGrid, BorderLayout.CENTER);
         
@@ -411,7 +413,7 @@ public class DashboardForm extends JFrame {
     
     private JButton createQuickActionButton(String text, Color color, ActionListener action) {
         JButton btn = new JButton(text);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btn.setForeground(Color.WHITE);
         btn.setBackground(color);
         btn.setBorderPainted(false);
@@ -456,13 +458,13 @@ public class DashboardForm extends JFrame {
         activityList.setLayout(new BoxLayout(activityList, BoxLayout.Y_AXIS));
         activityList.setOpaque(false);
         
-        activityList.add(createActivityItem("🆕", "New client registered", "John Doe - Industrial", "2 min ago", ACCENT_BLUE));
+        activityList.add(createActivityItem("●", "New client registered", "John Doe - Industrial", "2 min ago", ACCENT_BLUE));
         activityList.add(Box.createVerticalStrut(8));
-        activityList.add(createActivityItem("💳", "Payment received", "KSh 150,000", "15 min ago", ACCENT_GREEN));
+        activityList.add(createActivityItem("◈", "Payment received", "KSh 150,000", "15 min ago", ACCENT_GREEN));
         activityList.add(Box.createVerticalStrut(8));
-        activityList.add(createActivityItem("📝", "New order created", "TXN-2026-001", "1 hour ago", ACCENT_PURPLE));
+        activityList.add(createActivityItem("▣", "New order created", "TXN-2026-001", "1 hour ago", ACCENT_PURPLE));
         activityList.add(Box.createVerticalStrut(8));
-        activityList.add(createActivityItem("✅", "Service completed", "Drilling - Core", "3 hours ago", ACCENT_CYAN));
+        activityList.add(createActivityItem("✓", "Service completed", "Drilling - Core", "3 hours ago", ACCENT_CYAN));
         
         panel.add(activityList, BorderLayout.CENTER);
         
@@ -475,7 +477,8 @@ public class DashboardForm extends JFrame {
         item.setMaximumSize(new Dimension(500, 35));
         
         JLabel lblIcon = new JLabel(icon);
-        lblIcon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
+        lblIcon.setFont(new Font("Dialog", Font.BOLD, 18));
+        lblIcon.setForeground(color);
         
         JPanel textPanel = new JPanel(new GridLayout(1, 2));
         textPanel.setOpaque(false);
@@ -710,14 +713,7 @@ public class DashboardForm extends JFrame {
         mainPanel.add(headerPanel, BorderLayout.NORTH);
         
         // Table with request data
-        String[] columns = {"Request ID", "Client Name", "Category", "Services Requested", "Survey Fee", "Local Auth", "Total Est.", "Date", "Status"};
-        Object[][] data = {
-            {"REQ-45821", "John Kamau", "DOMESTIC", "Symmetric Drilling (50m), Submersible Pump, 2000L Tank", "KSh 7,000", "KSh 10,000", "KSh 385,720", "2026-01-20", "PENDING"},
-            {"REQ-45820", "Mary Wanjiku", "COMMERCIAL", "Core Drilling (80m), Solar Pump, Plumbing", "KSh 15,000", "KSh 30,000", "KSh 498,200", "2026-01-19", "PENDING"},
-            {"REQ-45819", "Peter Omondi", "INDUSTRIAL", "Geo-Technical (120m), Submersible, 10000L Tank, Plumbing", "KSh 20,000", "KSh 50,000", "KSh 892,500", "2026-01-18", "APPROVED"},
-            {"REQ-45818", "Grace Akinyi", "DOMESTIC", "Symmetric Drilling (40m), Hand Pump", "KSh 7,000", "KSh 10,000", "KSh 215,880", "2026-01-17", "IN PROGRESS"},
-            {"REQ-45817", "James Mwangi", "COMMERCIAL", "Core Drilling (100m), Solar Pump, 5000L Tank", "KSh 15,000", "KSh 30,000", "KSh 562,400", "2026-01-16", "COMPLETED"}
-        };
+        String[] columns = {"Transaction No", "Client Name", "Category", "Services Requested", "Survey Fee", "Local Auth", "Total Est.", "Date", "Status"};
         
         DefaultTableModel tableModel = new DefaultTableModel(columns, 0) {
             @Override
@@ -725,8 +721,57 @@ public class DashboardForm extends JFrame {
                 return false;
             }
         };
-        for (Object[] row : data) {
-            tableModel.addRow(row);
+        
+        // Load pending service requests from database
+        try {
+            List<Transaction> transactions = TransactionDAO.getAllTransactions();
+            for (Transaction t : transactions) {
+                // Only show PENDING_SURVEY requests in this view
+                if ("PENDING_SURVEY".equals(t.getJobStatus()) || "APPROVED".equals(t.getJobStatus()) || 
+                    "IN_PROGRESS".equals(t.getJobStatus())) {
+                    
+                    // Get client name
+                    ClientDAO clientDao = new ClientDAO();
+                    com.uzima.model.Client client = clientDao.getClientById(t.getClientId());
+                    String clientName = client != null ? client.getFullName() : "Unknown";
+                    String clientCategory = client != null ? client.getClientCategory() : "N/A";
+                    
+                    // Build services summary
+                    StringBuilder services = new StringBuilder();
+                    if (t.getDrillingCost() > 0) {
+                        services.append("Drilling (").append((int)t.getBoreholeDepth()).append("m), ");
+                    }
+                    if (t.getPumpCost() > 0) {
+                        services.append("Pump, ");
+                    }
+                    if (t.getTankCost() > 0) {
+                        services.append("Tank, ");
+                    }
+                    if (t.isHasPlumbing()) {
+                        services.append("Plumbing, ");
+                    }
+                    String serviceList = services.length() > 0 ? 
+                        services.substring(0, services.length() - 2) : "N/A";
+                    
+                    // Format status for display
+                    String displayStatus = t.getJobStatus().replace("_", " ");
+                    
+                    tableModel.addRow(new Object[]{
+                        t.getTransactionNo(),
+                        clientName,
+                        clientCategory,
+                        serviceList,
+                        String.format("KSh %,.0f", t.getSurveyFee()),
+                        String.format("KSh %,.0f", t.getAuthorityFee()),
+                        String.format("KSh %,.0f", t.getGrandTotal()),
+                        UIHelper.formatDate(t.getTransactionDate()),
+                        displayStatus
+                    });
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            UIHelper.showError(this, "Error loading service requests: " + e.getMessage());
         }
         
         JTable table = new JTable(tableModel);
@@ -918,19 +963,30 @@ public class DashboardForm extends JFrame {
         }
         
         String status = model.getValueAt(row, 8).toString();
-        if (!"PENDING".equals(status)) {
-            UIHelper.showWarning(this, "Only PENDING requests can be approved.");
+        if (!"PENDING SURVEY".equals(status)) {
+            UIHelper.showWarning(this, "Only PENDING SURVEY requests can be approved.");
             return;
         }
         
-        String requestId = model.getValueAt(row, 0).toString();
+        String transactionNo = model.getValueAt(row, 0).toString();
         int confirm = JOptionPane.showConfirmDialog(this,
-            "Approve service request " + requestId + "?\n\nThe customer will be notified to proceed with 30% down payment.",
+            "Approve service request " + transactionNo + "?\n\nThe customer will be notified to proceed with 30% down payment.",
             "Confirm Approval", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         
         if (confirm == JOptionPane.YES_OPTION) {
-            model.setValueAt("APPROVED", row, 8);
-            UIHelper.showInfo(this, "✅ Request " + requestId + " has been approved!\n\nCustomer will be notified.");
+            try {
+                // Update transaction status in database
+                TransactionDAO dao = new TransactionDAO();
+                if (dao.updateTransactionStatus(transactionNo, "APPROVED")) {
+                    model.setValueAt("APPROVED", row, 8);
+                    UIHelper.showInfo(this, "✅ Request " + transactionNo + " has been approved!\n\nCustomer will be notified.");
+                } else {
+                    UIHelper.showError(this, "Failed to approve request. Please try again.");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                UIHelper.showError(this, "Error approving request: " + e.getMessage());
+            }
         }
     }
     
@@ -1003,19 +1059,16 @@ public class DashboardForm extends JFrame {
     }
     
     private void openServicesManagement() {
-        new ServicesManagementForm().setVisible(true);
+        JFrame frame = new JFrame("Services Management");
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setSize(1200, 700);
+        frame.add(new ServicesManagementForm());
+        frame.setLocationRelativeTo(this);
+        frame.setVisible(true);
     }
     
     private void openPayments() {
-        UIHelper.showInfo(this, "Navigate to View Transactions to record payments.");
-    }
-    
-    private void openUserManagement() {
-        new UserManagementForm().setVisible(true);
-    }
-    
-    private void openSettings() {
-        UIHelper.showInfo(this, "⚙️ Settings\n\nSystem settings module coming soon!");
+        new ViewTransactionsForm().setVisible(true);
     }
     
     private void showAbout() {

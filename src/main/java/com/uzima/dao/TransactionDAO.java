@@ -109,7 +109,13 @@ public class TransactionDAO {
             stmt.setDouble(21, transaction.getBalance());
             stmt.setString(22, transaction.getJobStatus());
             stmt.setString(23, transaction.getNotes());
-            stmt.setInt(24, SessionManager.getInstance().getCurrentUser().getUserId());
+            
+            // Handle created_by - use current user ID if available (staff), otherwise null (customer)
+            if (SessionManager.getInstance().getCurrentUser() != null) {
+                stmt.setInt(24, SessionManager.getInstance().getCurrentUser().getUserId());
+            } else {
+                stmt.setNull(24, Types.INTEGER);
+            }
             
             int result = stmt.executeUpdate();
             
@@ -377,6 +383,32 @@ public class TransactionDAO {
             
             return stmt.executeUpdate() > 0;
         }
+    }
+    
+    /**
+     * Update transaction job status
+     */
+    public boolean updateTransactionStatus(String transactionNo, String newStatus) {
+        String sql = "UPDATE transactions SET job_status = ?, updated_at = NOW() WHERE transaction_no = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, newStatus);
+            stmt.setString(2, transactionNo);
+            
+            int result = stmt.executeUpdate();
+            if (result > 0) {
+                logger.info("Transaction {} status updated to {}", transactionNo, newStatus);
+                return true;
+            }
+            
+        } catch (SQLException e) {
+            logger.error("Error updating transaction status", e);
+            e.printStackTrace();
+        }
+        
+        return false;
     }
     
     /**

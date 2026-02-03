@@ -103,8 +103,9 @@ public class LoginForm extends JFrame {
         panel.setBorder(BorderFactory.createEmptyBorder(30, 40, 20, 40));
         
         // Logo icon
-        JLabel lblIcon = new JLabel("💧");
-        lblIcon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 48));
+        JLabel lblIcon = new JLabel("◉");
+        lblIcon.setFont(new Font("Dialog", Font.BOLD, 48));
+        lblIcon.setForeground(new Color(30, 60, 114));
         lblIcon.setAlignmentX(Component.CENTER_ALIGNMENT);
         
         // Title
@@ -133,8 +134,8 @@ public class LoginForm extends JFrame {
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(220, 220, 220)));
         
-        JButton btnStaffTab = createTabButton("👤 STAFF LOGIN", STAFF_COLOR, true);
-        JButton btnCustomerTab = createTabButton("🏠 CUSTOMER PORTAL", CUSTOMER_COLOR, false);
+        JButton btnStaffTab = createTabButton("◆ STAFF LOGIN", STAFF_COLOR, true);
+        JButton btnCustomerTab = createTabButton("◉ CUSTOMER PORTAL", CUSTOMER_COLOR, false);
         
         btnStaffTab.addActionListener(e -> {
             cardLayout.show(cardPanel, "STAFF");
@@ -401,7 +402,18 @@ public class LoginForm extends JFrame {
         }
         
         if (!DatabaseConnection.testConnection()) {
-            UIHelper.showError(this, "Cannot connect to database!");
+            String error = DatabaseConnection.getLastError();
+            String message = "Cannot connect to database!\n\n";
+            if (error != null && error.contains("Communications link failure")) {
+                message += "MySQL server is not running.\nPlease start MySQL service and try again.";
+            } else if (error != null && error.contains("Access denied")) {
+                message += "Database credentials are incorrect.";
+            } else if (error != null && error.contains("Unknown database")) {
+                message += "Database 'uzima_borehole_db' does not exist.\nPlease run the setup script first.";
+            } else {
+                message += (error != null ? error : "Unknown database error");
+            }
+            UIHelper.showError(this, message);
             return;
         }
         
@@ -442,7 +454,18 @@ public class LoginForm extends JFrame {
         }
         
         if (!DatabaseConnection.testConnection()) {
-            UIHelper.showError(this, "Cannot connect to database!");
+            String error = DatabaseConnection.getLastError();
+            String message = "Cannot connect to database!\n\n";
+            if (error != null && error.contains("Communications link failure")) {
+                message += "MySQL server is not running.\nPlease start MySQL service and try again.";
+            } else if (error != null && error.contains("Access denied")) {
+                message += "Database credentials are incorrect.";
+            } else if (error != null && error.contains("Unknown database")) {
+                message += "Database 'uzima_borehole_db' does not exist.\nPlease run the setup script first.";
+            } else {
+                message += (error != null ? error : "Unknown database error");
+            }
+            UIHelper.showError(this, message);
             return;
         }
         

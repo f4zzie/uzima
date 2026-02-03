@@ -1,6 +1,8 @@
 -- ===============================================
--- UZIMA BOREHOLE DRILLING SYSTEM DATABASE
+-- UZIMA BOREHOLE DRILLING SYSTEM - COMPLETE DATABASE SETUP
 -- ===============================================
+-- This script creates the database, tables, and adds test data
+-- Run with: mysql -u root -p < database/setup_database.sql
 
 DROP DATABASE IF EXISTS uzima_borehole_db;
 CREATE DATABASE uzima_borehole_db;
@@ -49,15 +51,6 @@ CREATE TABLE clients (
     FOREIGN KEY (created_by) REFERENCES users(user_id)
 );
 
--- Insert test customer for login testing
--- Customer ID: DOM-2025-0001, Password: test123
-INSERT INTO clients (client_id, full_name, physical_address, phone_number, email, 
-    client_category, borehole_location, county, registration_date, password, is_active) VALUES
-('DOM-2025-0001', 'John Kamau', '123 Kenyatta Avenue, Nairobi', '0722123456', 'john.kamau@email.com',
-    'DOMESTIC', 'Kiambu Road, Near Total Petrol Station', 'Nairobi', CURDATE(), 'test123', TRUE),
-('COM-2025-0001', 'Acme Industries Ltd', '45 Industrial Area, Mombasa', '0733456789', 'info@acme.co.ke',
-    'COMMERCIAL', 'Industrial Zone B, Plot 78', 'Mombasa', CURDATE(), 'test123', TRUE);
-
 -- ===============================================
 -- 3. DRILLING SERVICES
 -- ===============================================
@@ -68,11 +61,6 @@ CREATE TABLE drilling_types (
     description TEXT,
     is_active BOOLEAN DEFAULT TRUE
 );
-
-INSERT INTO drilling_types (drilling_name, down_payment, description) VALUES
-('SYMMETRIC', 130000.00, 'Symmetric drilling service'),
-('CORE', 225000.00, 'Core drilling service'),
-('GEO_TECHNICAL', 335000.00, 'Geo-technical drilling service');
 
 -- ===============================================
 -- 4. PUMP TYPES
@@ -85,11 +73,6 @@ CREATE TABLE pump_types (
     is_active BOOLEAN DEFAULT TRUE
 );
 
-INSERT INTO pump_types (pump_name, base_cost, description) VALUES
-('SUBMERSIBLE_ELECTRIC', 90000.00, 'Submersible electric pump'),
-('SOLAR', 65000.00, 'Solar powered pump'),
-('HAND', 30000.00, 'Hand pump');
-
 -- ===============================================
 -- 5. DEPTH AND HEIGHT CHARGES
 -- ===============================================
@@ -101,12 +84,6 @@ CREATE TABLE depth_height_charges (
     description VARCHAR(100)
 );
 
-INSERT INTO depth_height_charges (range_start, range_end, cost_per_meter, description) VALUES
-(1, 100, 1000.00, '1-100 meters'),
-(101, 200, 1500.00, '101-200 meters'),
-(201, 300, 2000.00, '201-300 meters'),
-(301, NULL, 2500.00, 'Over 300 meters');
-
 -- ===============================================
 -- 6. SURVEY AND AUTHORITY FEES
 -- ===============================================
@@ -116,11 +93,6 @@ CREATE TABLE survey_authority_fees (
     survey_fee DECIMAL(10,2) NOT NULL,
     authority_fee DECIMAL(10,2) NOT NULL
 );
-
-INSERT INTO survey_authority_fees (client_category, survey_fee, authority_fee) VALUES
-('INDUSTRIAL', 20000.00, 50000.00),
-('COMMERCIAL', 15000.00, 30000.00),
-('DOMESTIC', 7000.00, 10000.00);
 
 -- ===============================================
 -- 7. TANK TYPES
@@ -133,12 +105,6 @@ CREATE TABLE tank_types (
     is_active BOOLEAN DEFAULT TRUE
 );
 
-INSERT INTO tank_types (capacity_liters, base_cost, description) VALUES
-(1000, 15000.00, '1000 liters tank'),
-(2000, 28000.00, '2000 liters tank'),
-(5000, 65000.00, '5000 liters tank'),
-(10000, 125000.00, '10000 liters tank');
-
 -- ===============================================
 -- 8. PLUMBING PIPE TYPES
 -- ===============================================
@@ -149,11 +115,6 @@ CREATE TABLE pipe_types (
     description TEXT,
     is_active BOOLEAN DEFAULT TRUE
 );
-
-INSERT INTO pipe_types (pipe_name, cost_per_meter, description) VALUES
-('PVC', 500.00, 'PVC pipes'),
-('HDPE', 800.00, 'High-Density Polyethylene pipes'),
-('GALVANIZED', 1200.00, 'Galvanized steel pipes');
 
 -- ===============================================
 -- 9. MAIN TRANSACTIONS/ORDERS TABLE
@@ -282,6 +243,53 @@ CREATE TABLE system_settings (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- ===============================================
+-- INSERT DEFAULT DATA
+-- ===============================================
+
+-- Default Admin User (username: user1, password: user1234)
+INSERT INTO users (username, password, full_name, role, email, phone, is_active) VALUES
+('user1', 'user1234', 'System Administrator', 'ADMIN', 'admin@uzima.co.ke', '0700000000', TRUE);
+
+-- Drilling Types (Table 2)
+INSERT INTO drilling_types (drilling_name, down_payment, description) VALUES
+('SYMMETRIC', 130000.00, 'Symmetric drilling service'),
+('CORE', 225000.00, 'Core drilling service'),
+('GEO_TECHNICAL', 335000.00, 'Geo-technical drilling service');
+
+-- Pump Types (Table 3)
+INSERT INTO pump_types (pump_name, base_cost, description) VALUES
+('SUBMERSIBLE_ELECTRIC', 90000.00, 'Submersible electric pump'),
+('SOLAR', 65000.00, 'Solar powered pump'),
+('HAND', 30000.00, 'Hand pump');
+
+-- Depth and Height Charges (Table 4)
+INSERT INTO depth_height_charges (range_start, range_end, cost_per_meter, description) VALUES
+(1, 100, 1000.00, '1-100 meters'),
+(101, 200, 1500.00, '101-200 meters'),
+(201, 300, 2000.00, '201-300 meters'),
+(301, NULL, 2500.00, 'Over 300 meters');
+
+-- Survey and Authority Fees (Table 1)
+INSERT INTO survey_authority_fees (client_category, survey_fee, authority_fee) VALUES
+('INDUSTRIAL', 20000.00, 50000.00),
+('COMMERCIAL', 15000.00, 30000.00),
+('DOMESTIC', 7000.00, 10000.00);
+
+-- Tank Types
+INSERT INTO tank_types (capacity_liters, base_cost, description) VALUES
+(1000, 15000.00, '1000 liters tank'),
+(2000, 28000.00, '2000 liters tank'),
+(5000, 65000.00, '5000 liters tank'),
+(10000, 125000.00, '10000 liters tank');
+
+-- Pipe Types
+INSERT INTO pipe_types (pipe_name, cost_per_meter, description) VALUES
+('PVC', 500.00, 'PVC pipes'),
+('HDPE', 800.00, 'High-Density Polyethylene pipes'),
+('GALVANIZED', 1200.00, 'Galvanized steel pipes');
+
+-- System Settings
 INSERT INTO system_settings (setting_key, setting_value, description) VALUES
 ('TAX_RATE', '0.16', 'Tax rate (16%)'),
 ('COMPANY_NAME', 'Uzima Borehole Drilling Company', 'Company name'),
@@ -289,21 +297,15 @@ INSERT INTO system_settings (setting_key, setting_value, description) VALUES
 ('COMPANY_PHONE', '+254 700 000 000', 'Company phone'),
 ('COMPANY_EMAIL', 'info@uzimaborehole.co.ke', 'Company email');
 
--- ===============================================
--- INSERT DEFAULT ADMIN USER
--- Password: admin123 (use proper hashing in production)
--- Note: All users now share the same dashboard
--- ===============================================
-INSERT INTO users (username, password, full_name, role, email, phone) VALUES
-('admin', 'admin123', 'System Administrator', 'ADMIN', 'admin@uzimaborehole.co.ke', '+254700000000');
-
--- ===============================================
--- SAMPLE CLIENT DATA
--- ===============================================
-INSERT INTO clients (client_id, full_name, physical_address, phone_number, email, client_category, borehole_location, county, registration_date, created_by) VALUES
-('UZM-IND-001', 'ABC Manufacturing Ltd', 'Industrial Area, Nairobi', '+254712345678', 'info@abc.co.ke', 'INDUSTRIAL', 'Plot 45, Industrial Area', 'Nairobi', '2026-01-15', 1),
-('UZM-COM-001', 'Green Valley Hotel', 'Thika Road, Nairobi', '+254722345678', 'info@greenvalley.co.ke', 'COMMERCIAL', 'Along Thika Road, Km 20', 'Kiambu', '2026-01-16', 1),
-('UZM-DOM-001', 'John Kamau', 'Karen, Nairobi', '+254732345678', 'jkamau@gmail.com', 'DOMESTIC', 'Karen Estate, House No. 25', 'Nairobi', '2026-01-17', 2);
+-- Test Customers
+INSERT INTO clients (client_id, full_name, physical_address, phone_number, email, 
+    client_category, borehole_location, county, registration_date, password, is_active, created_by) VALUES
+('DOM-2025-0001', 'John Kamau', '123 Kenyatta Avenue, Nairobi', '0722123456', 'john.kamau@email.com',
+    'DOMESTIC', 'Kiambu Road, Near Total Petrol Station', 'Nairobi', CURDATE(), 'test123', TRUE, 1),
+('COM-2025-0001', 'Jane Wanjiku', '456 Moi Avenue, Mombasa', '0733987654', 'jane.wanjiku@company.co.ke',
+    'COMMERCIAL', 'Industrial Area, Plot 789', 'Mombasa', CURDATE(), 'test123', TRUE, 1),
+('UZM-IND-001', 'ABC Manufacturing Ltd', 'Industrial Area, Nairobi', '+254712345678', 'info@abc.co.ke', 
+    'INDUSTRIAL', 'Plot 45, Industrial Area', 'Nairobi', '2026-01-15', NULL, TRUE, 1);
 
 -- ===============================================
 -- VIEWS FOR REPORTING
@@ -372,7 +374,6 @@ RETURNS DECIMAL(10,2)
 DETERMINISTIC
 BEGIN
     DECLARE total_cost DECIMAL(10,2) DEFAULT 0;
-    DECLARE remaining DECIMAL(10,2) DEFAULT depth;
     
     IF depth <= 100 THEN
         SET total_cost = depth * 1000;
@@ -396,5 +397,9 @@ CREATE INDEX idx_transaction_client_date ON transactions(client_id, transaction_
 CREATE INDEX idx_payment_transaction_date ON payments(transaction_id, payment_date);
 
 -- ===============================================
--- DATABASE SETUP COMPLETE
+-- COMPLETION MESSAGE
 -- ===============================================
+SELECT 'Database setup completed successfully!' AS Status;
+SELECT 'Login credentials:' AS Info;
+SELECT 'Staff: username=user1, password=user1234' AS Staff_Login;
+SELECT 'Test Customer: client_id=DOM-2025-0001, password=test123' AS Customer_Login;

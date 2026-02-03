@@ -192,20 +192,23 @@ public class UIHelper {
         table.setSelectionBackground(SECONDARY_COLOR);
         table.setSelectionForeground(Color.WHITE);
         table.setIntercellSpacing(new Dimension(10, 5));
+        table.setForeground(TEXT_COLOR); // Ensure text color is set
+        table.setBackground(Color.WHITE);
         
         // Style header
         JTableHeader header = table.getTableHeader();
         header.setFont(LABEL_FONT);
-        header.setBackground(HEADER_COLOR);
-        header.setForeground(Color.WHITE);
+        header.setBackground(new Color(245, 245, 245)); // Light gray background
+        header.setForeground(TEXT_COLOR); // Dark text for visibility
         header.setReorderingAllowed(false);
         header.setPreferredSize(new Dimension(header.getPreferredSize().width, 40));
+        header.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, SECONDARY_COLOR));
         
-        // Center align cells
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        // Left align cells for better readability
+        DefaultTableCellRenderer leftRenderer = new DefaultTableCellRenderer();
+        leftRenderer.setHorizontalAlignment(JLabel.LEFT);
         for (int i = 0; i < table.getColumnCount(); i++) {
-            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+            table.getColumnModel().getColumn(i).setCellRenderer(leftRenderer);
         }
     }
     
