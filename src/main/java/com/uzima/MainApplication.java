@@ -1,14 +1,13 @@
 package com.uzima;
 
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import com.uzima.ui.LoginForm;
-import com.uzima.util.DatabaseConnection;
 
 /**
- * Alternative Main Application Entry Point
+ * Main Application Entry Point
+ * Shows login form immediately - database check happens on login attempt
  */
 public class MainApplication {
     public static void main(String[] args) {
@@ -19,18 +18,10 @@ public class MainApplication {
             e.printStackTrace();
         }
         
-        // Test database connection
-        if (DatabaseConnection.testConnection()) {
-            SwingUtilities.invokeLater(() -> {
-                LoginForm loginForm = new LoginForm();
-                loginForm.setVisible(true);
-            });
-        } else {
-            JOptionPane.showMessageDialog(null, 
-                "Cannot connect to database!\n\n" +
-                "Please ensure MySQL is running and database is set up.",
-                "Database Error",
-                JOptionPane.ERROR_MESSAGE);
-        }
+        // Show login form immediately - database check happens when user tries to login
+        SwingUtilities.invokeLater(() -> {
+            LoginForm loginForm = new LoginForm();
+            loginForm.setVisible(true);
+        });
     }
 }

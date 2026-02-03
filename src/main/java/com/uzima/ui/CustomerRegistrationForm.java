@@ -87,8 +87,9 @@ public class CustomerRegistrationForm extends JDialog {
         header.setPreferredSize(new Dimension(550, 70));
         header.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 15));
         
-        JLabel lblIcon = new JLabel("📝");
-        lblIcon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 24));
+        JLabel lblIcon = new JLabel("✎");
+        lblIcon.setFont(new Font("Dialog", Font.BOLD, 26));
+        lblIcon.setForeground(Color.WHITE);
         
         JLabel lblTitle = new JLabel("CUSTOMER REGISTRATION");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 20));

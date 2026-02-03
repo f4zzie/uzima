@@ -17,35 +17,38 @@ public class ClientDAO {
     private static final Logger logger = LoggerFactory.getLogger(ClientDAO.class);
     
     /**
-     * Generate unique client ID based on category
+     * Generate unique client ID in simple incremental format (uzm1, uzm2, uzm3...)
      */
     public String generateClientId(String category) {
-        String prefix = "";
-        switch (category) {
-            case "INDUSTRIAL": prefix = "UZM-IND-"; break;
-            case "COMMERCIAL": prefix = "UZM-COM-"; break;
-            case "DOMESTIC": prefix = "UZM-DOM-"; break;
-        }
-        
-        String sql = "SELECT MAX(CAST(SUBSTRING(client_id, 9) AS UNSIGNED)) as max_num " +
-                    "FROM clients WHERE client_id LIKE ?";
+        String sql = "SELECT MAX(CAST(SUBSTRING(client_id, 4) AS UNSIGNED)) as max_num " +
+                    "FROM clients WHERE client_id LIKE 'uzm%'";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setString(1, prefix + "%");
             ResultSet rs = stmt.executeQuery();
             
             if (rs.next()) {
                 int maxNum = rs.getInt("max_num");
-                return prefix + String.format("%03d", maxNum + 1);
+                return "uzm" + (maxNum + 1);
             }
             
-            return prefix + "001";
+            return "uzm1";
             
         } catch (SQLException e) {
             logger.error("Error generating client ID", e);
-            return prefix + "001";
+            // Fallback: try to count total clients and add 1
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement countStmt = conn.prepareStatement("SELECT COUNT(*) as total FROM clients")) {
+                ResultSet countRs = countStmt.executeQuery();
+                if (countRs.next()) {
+                    int total = countRs.getInt("total");
+                    return "uzm" + (total + 1);
+                }
+            } catch (SQLException ex) {
+                logger.error("Error in fallback client ID generation", ex);
+            }
+            return "uzm1";
         }
     }
     

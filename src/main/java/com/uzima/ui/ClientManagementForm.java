@@ -33,6 +33,7 @@ public class ClientManagementForm extends JFrame {
     private JTextField txtIdNumber;
     private JDateChooser dateRegistration;
     private JTextField txtSearch;
+    private JComboBox<String> cmbFilterCategory;
     
     // Buttons
     private JButton btnNew, btnSave, btnUpdate, btnDelete, btnClear, btnClose;
@@ -151,6 +152,14 @@ public class ClientManagementForm extends JFrame {
         gbc.gridx = 1;
         gbc.gridwidth = 2;
         cmbCategory = new JComboBox<>(new String[]{"INDUSTRIAL", "COMMERCIAL", "DOMESTIC"});
+        // Add listener to regenerate client ID when category changes (only in NEW mode)
+        cmbCategory.addActionListener(e -> {
+            if (txtClientId.getText().isEmpty() || txtClientId.getText().startsWith("uzm")) {
+                String category = (String) cmbCategory.getSelectedItem();
+                String newId = clientDAO.generateClientId(category);
+                txtClientId.setText(newId);
+            }
+        });
         fieldsPanel.add(cmbCategory, gbc);
         row++;
         
@@ -260,31 +269,71 @@ public class ClientManagementForm extends JFrame {
             BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
         
-        // Search Panel
-        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        // Search & Filter Panel
+        JPanel searchPanel = new JPanel(new BorderLayout());
         searchPanel.setBackground(Color.WHITE);
+        searchPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
-        searchPanel.add(new JLabel("Search:"));
+        // Search section
+        JPanel searchInputPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        searchInputPanel.setBackground(Color.WHITE);
+        
+        searchInputPanel.add(new JLabel("⊙ Search:"));
         txtSearch = new JTextField(25);
-        searchPanel.add(txtSearch);
+        txtSearch.setToolTipText("Search by name, phone, email, ID number, or client ID");
+        // Add real-time search
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                handleSearch();
+            }
+        });
+        searchInputPanel.add(txtSearch);
         
-        JButton btnSearch = new JButton("SEARCH");
-        UIHelper.stylePrimaryButton(btnSearch);
-        btnSearch.setPreferredSize(new Dimension(100, 30));
-        btnSearch.addActionListener(e -> handleSearch());
-        searchPanel.add(btnSearch);
+        searchInputPanel.add(new JLabel("Category:"));
+        cmbFilterCategory = new JComboBox<>(new String[]{"ALL", "INDUSTRIAL", "COMMERCIAL", "DOMESTIC"});
+        cmbFilterCategory.setPreferredSize(new Dimension(140, 30));
+        cmbFilterCategory.addActionListener(e -> handleSearch());
+        searchInputPanel.add(cmbFilterCategory);
+        
+        JButton btnClearFilter = new JButton("CLEAR");
+        UIHelper.styleSecondaryButton(btnClearFilter);
+        btnClearFilter.setPreferredSize(new Dimension(90, 30));
+        btnClearFilter.addActionListener(e -> {
+            txtSearch.setText("");
+            cmbFilterCategory.setSelectedIndex(0);
+            loadClients();
+        });
+        searchInputPanel.add(btnClearFilter);
         
         JButton btnRefresh = new JButton("REFRESH");
-        UIHelper.styleSecondaryButton(btnRefresh);
+        UIHelper.stylePrimaryButton(btnRefresh);
         btnRefresh.setPreferredSize(new Dimension(100, 30));
         btnRefresh.addActionListener(e -> loadClients());
-        searchPanel.add(btnRefresh);
+        searchInputPanel.add(btnRefresh);
+        
+        searchPanel.add(searchInputPanel, BorderLayout.CENTER);
         
         // Table
-        String[] columns = {"Client ID", "Name", "Phone", "Category", "County", "Reg. Date"};
+        String[] columns = {"Client ID", "Full Name", "Phone 1", "Phone 2", "Email", 
+                           "Category", "County", "ID Number", "GPS", "Reg. Date"};
         tableModel = UIHelper.createTableModel(columns, 0);
         tblClients = new JTable(tableModel);
         UIHelper.styleTable(tblClients);
+        
+        // Set column widths for better visibility
+        tblClients.getColumnModel().getColumn(0).setPreferredWidth(80);  // Client ID
+        tblClients.getColumnModel().getColumn(1).setPreferredWidth(150); // Full Name
+        tblClients.getColumnModel().getColumn(2).setPreferredWidth(100); // Phone 1
+        tblClients.getColumnModel().getColumn(3).setPreferredWidth(100); // Phone 2
+        tblClients.getColumnModel().getColumn(4).setPreferredWidth(150); // Email
+        tblClients.getColumnModel().getColumn(5).setPreferredWidth(100); // Category
+        tblClients.getColumnModel().getColumn(6).setPreferredWidth(100); // County
+        tblClients.getColumnModel().getColumn(7).setPreferredWidth(100); // ID Number
+        tblClients.getColumnModel().getColumn(8).setPreferredWidth(120); // GPS
+        tblClients.getColumnModel().getColumn(9).setPreferredWidth(100); // Reg. Date
+        
+        // Enable horizontal scrolling
+        tblClients.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         
         tblClients.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && tblClients.getSelectedRow() != -1) {
@@ -391,13 +440,24 @@ public class ClientManagementForm extends JFrame {
     
     private void handleSearch() {
         String searchTerm = txtSearch.getText().trim();
+        String category = (String) cmbFilterCategory.getSelectedItem();
+        
+        // Get all clients first
+        List<Client> clients;
         
         if (searchTerm.isEmpty()) {
-            loadClients();
-            return;
+            clients = clientDAO.getAllClients();
+        } else {
+            clients = clientDAO.searchClients(searchTerm);
         }
         
-        List<Client> clients = clientDAO.searchClients(searchTerm);
+        // Apply category filter if not "ALL"
+        if (category != null && !category.equals("ALL")) {
+            clients = clients.stream()
+                .filter(c -> c.getClientCategory().equals(category))
+                .collect(java.util.stream.Collectors.toList());
+        }
+        
         displayClients(clients);
     }
     
@@ -414,8 +474,12 @@ public class ClientManagementForm extends JFrame {
                 client.getClientId(),
                 client.getFullName(),
                 client.getPhoneNumber(),
+                client.getPhoneNumber2() != null ? client.getPhoneNumber2() : "",
+                client.getEmail() != null ? client.getEmail() : "",
                 client.getClientCategory(),
-                client.getCounty(),
+                client.getCounty() != null ? client.getCounty() : "",
+                client.getIdNumber() != null ? client.getIdNumber() : "",
+                client.getGpsCoordinates() != null ? client.getGpsCoordinates() : "",
                 UIHelper.formatDate(client.getRegistrationDate())
             };
             tableModel.addRow(row);
