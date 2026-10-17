@@ -1,0 +1,43 @@
+/* Uzima theme. Colour tokens are looked-up colours on .root so a dark variant can override them. */
+.root {
+  -uz-primary: #0b4f6c;
+  -uz-primary-dark: #083a50;
+  -uz-accent: #f2a541;
+  -uz-surface: #ffffff;
+  -uz-background: #f4f7f9;
+  -uz-text: #1d2a33;
+  -uz-text-muted: #5b6b77;
+  -uz-border: #dde4e9;
+
+  -fx-font-family: "Inter", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+  -fx-font-size: 14px;
+  -fx-text-fill: -uz-text;
+  -fx-background-color: -uz-background;
+}
+
+.top-bar {
+  -fx-background-color: -uz-primary;
+  -fx-padding: 12 20;
+  -fx-alignment: center-left;
+}
+
+.brand {
+  -fx-text-fill: white;
+  -fx-font-size: 18px;
+  -fx-font-weight: bold;
+}
+
+.content {
+  -fx-padding: 24;
+}
+
+.status-bar {
+  -fx-background-color: -uz-surface;
+  -fx-border-color: -uz-border transparent transparent transparent;
+  -fx-padding: 6 20;
+}
+
+.status-text {
+  -fx-text-fill: -uz-text-muted;
+  -fx-font-size: 12px;
+}

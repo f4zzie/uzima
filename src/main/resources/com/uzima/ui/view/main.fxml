@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            styleClass="app-root">
+  <top>
+    <HBox styleClass="top-bar">
+      <Label text="Uzima" styleClass="brand"/>
+    </HBox>
+  </top>
+  <center>
+    <StackPane styleClass="content"/>
+  </center>
+  <bottom>
+    <HBox styleClass="status-bar">
+      <Label fx:id="statusLabel" styleClass="status-text"/>
+    </HBox>
+  </bottom>
+</BorderPane>
