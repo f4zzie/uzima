@@ -9,8 +9,9 @@ import java.util.Objects;
  */
 public record Metres(BigDecimal value) implements Comparable<Metres> {
 
-  public static final Metres ZERO = new Metres(BigDecimal.ZERO);
+  // Must be initialised before ZERO: the constructor reads it.
   private static final BigDecimal MAX = new BigDecimal("999999.99");
+  public static final Metres ZERO = new Metres(BigDecimal.ZERO);
 
   public Metres {
     Objects.requireNonNull(value, "value");
