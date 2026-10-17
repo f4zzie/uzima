@@ -285,52 +285,52 @@ Superseded by D-027.
 **Why.** Staff type usernames inconsistently; two accounts that differ only by case would be confusing.
 **Rejected.** Case-sensitive usernames.
 
-### D-060 No hard delete for clients
+### D-056 No hard delete for clients
 **Decision.** `ClientService` has deactivate and reactivate but no delete. The foreign keys from `jobs` also stop a client with jobs from being removed by hand.
 **Why.** A client's history (jobs, invoices, payments) must stay readable, and a deactivated client drops out of pickers anyway.
 **Rejected.** A "delete if unused" action; it adds a second removal path for little benefit.
 
-### D-061 Category changes are a separate operation
+### D-057 Category changes are a separate operation
 **Decision.** `ClientService.update` refuses to change the category; `changeCategory` does it, needs `CHANGE_CLIENT_CATEGORY` and writes its own audit entry ("category: Domestic → Commercial"). The client code is untouched.
 **Why.** Category drives fees, so it deserves its own permission and a clearly labelled audit trail.
 **Rejected.** Allowing it through the general edit form, which would bury it among cosmetic edits.
 
-### D-062 Audit entries list only fields that changed
+### D-058 Audit entries list only fields that changed
 **Decision.** Updates audit "field: old → new" for changed fields only, and a save that changes nothing writes no entry. Coordinates are compared by value, so 36.80 and the stored 36.800000 are equal.
 **Why.** Keeps the audit log readable and free of noise from re-saving a form.
 **Rejected.** Logging the full before and after records.
 
-### D-063 Catalog SQL identifiers come from a whitelist enum
+### D-059 Catalog SQL identifiers come from a whitelist enum
 **Decision.** The four catalog tables share one repository. Table, name, price and referencing-column names come from a private enum keyed by `CatalogKind`; values are always bound parameters.
 **Why.** One implementation for four near-identical tables without ever building SQL from input.
 **Rejected.** Four copy-pasted repositories, or string-built identifiers.
 
-### D-064 Duplicate catalog names are validation errors
+### D-060 Duplicate catalog names are validation errors
 **Decision.** The repository turns unique-key violations into a `ValidationException` on `name` (or `capacityLitres` for tanks).
 **Why.** The UI shows it next to the field like any other validation message; the database stays the single source of uniqueness.
 **Rejected.** Checking for duplicates with a SELECT first, which races.
 
-### D-065 Catalog edits keep the active flag; retire and reactivate are separate
+### D-061 Catalog edits keep the active flag; retire and reactivate are separate
 **Decision.** `changeItem` changes name or capacity and price only; `retire` and `reactivate` change availability. Each is its own audit action.
 **Why.** "Price changed" and "no longer offered" are different events for anyone reading the log.
 **Rejected.** One save that can change everything at once.
 
-### D-066 Current catalog prices include retired items
+### D-062 Current catalog prices include retired items
 **Decision.** `CatalogRepository.catalogPrices()` looks items up by id regardless of the active flag.
 **Why.** A pending job may hold an item that has since been retired; re-pricing it needs that item's current row.
 **Rejected.** Active items only, which would make re-pricing fail for such jobs.
 
-### D-067 Tax rate is passed into `currentBasis`
+### D-063 Tax rate is passed into `currentBasis`
 **Decision.** `CatalogService.currentBasis(category, taxRate)` takes the tax rate as a parameter instead of reading settings itself.
 **Why.** Settings belong to `SettingsService`; keeping the catalog service independent of it avoids a dependency cycle and keeps tests simple.
 **Rejected.** Reading the tax rate from the settings table inside the catalog service.
 
-### D-068 Sequence counters are created outside the caller's transaction
+### D-064 Sequence counters are created outside the caller's transaction
 **Decision.** When a counter row (e.g. `JOB-2027`) doesn't exist yet, it is inserted on a separate auto-commit connection; the caller then locks the existing row with `SELECT … FOR UPDATE`.
 **Why.** On MySQL a locking read of a missing row takes a gap lock, and two first-time callers that both insert then deadlock (seen in the concurrent registration test as SQLState 40001). Creating a counter never uses up a number, so numbers stay gap-free.
 **Rejected.** Creating the row inside the caller's transaction (deadlocks on MySQL), and seeding all counters in a migration (job and receipt counters are per year).
 
-### D-069 Client search also matches local phone formats
+### D-065 Client search also matches local phone formats
 **Decision.** A search like "0712 345" is matched against the stored `+254712345…` by dropping the leading zero.
 **Why.** Staff type numbers the way clients say them.
 **Rejected.** Requiring the international format in the search box.
@@ -423,3 +423,37 @@ Superseded by D-027.
 **Why.** Every role works with jobs and needs to see what's been paid; only changes are restricted.
 **Rejected.** A separate view permission, which nobody would ever be denied.
 
+### D-084 Transactions are bound to the thread
+**Decision.** `JdbcTransactions` keeps the transaction's connection in a ThreadLocal. Repositories ask it for "the current connection", so services wrap work in `Transactions.inTransaction(...)` without ever seeing a JDBC type, and nested calls join the outer transaction.
+**Why.** Services own the boundary (job + lines + audit commit together) while SQL stays in `persistence`.
+**Rejected.** Passing a `Connection` through every service and repository method; adding Spring just for `@Transactional`.
+
+### D-085 A thin JDBC helper instead of an ORM
+**Decision.** `Jdbc` offers query, queryOne, update and insert with positional parameters and a row mapper, plus shared conversions for Money, Metres, instants and enums.
+**Why.** The SQL stays visible and portable between H2 and MySQL, with no mapping layer to learn or debug.
+**Rejected.** JPA/Hibernate (the spec rules out an ORM) and a third-party JDBC template library (not in the approved dependency list).
+
+### D-086 Instants are stored as UTC DATETIME(3)
+**Decision.** Timestamps are written and read as `LocalDateTime` in UTC in `DATETIME(3)` columns; calendar logic converts to Africa/Nairobi in the service layer.
+**Why.** The stored value never depends on the JVM or database session time zone, and millisecond precision is enough.
+**Rejected.** MySQL `TIMESTAMP`, which converts through the session time zone and ends in 2038.
+
+### D-087 Payments are append-only in code, signed by a CHECK
+**Decision.** `PaymentRepository` has no update or delete. A database CHECK requires received payments to be positive and reversals (rows with `reversal_of`) to be negative.
+**Why.** The rule is enforced in two places that cover each other, using SQL both databases accept.
+**Rejected.** Triggers that block UPDATE/DELETE, because H2 triggers are Java classes and MySQL triggers are SQL; one migration can't hold both.
+
+### D-088 One counter row per sequence and year
+**Decision.** The `sequences` table holds rows named `CLIENT-DOM`, `JOB-2026`, `RCP-2026` and so on. Job and receipt numbers restart each year.
+**Why.** It matches the `JOB-{yyyy}-{NNNNN}` and `RCP-{yyyy}-{NNNNN}` formats, and a missing row is simply created on first use.
+**Rejected.** A single global counter per document type, which would make the year part of the number misleading.
+
+### D-089 Integration tests run on H2 and on real MySQL
+**Decision.** Repository, concurrency and selected service tests are parameterised over H2 and MySQL 8.4. MySQL runs in one shared Testcontainers container with a fresh schema per test, and those cases skip when Docker isn't available.
+**Why.** The app supports both databases; this is how the MySQL gap-lock deadlock in the first sequence generator was found.
+**Rejected.** H2-only tests, and a separate Maven profile that would usually be skipped.
+
+### D-090 The composition root exposes a `Services` record
+**Decision.** `CompositionRoot.wire(database, clock)` builds every repository and service once and returns them as a `Services` record for the UI. The clock is `Clock.system(Africa/Nairobi)`.
+**Why.** One readable place shows the whole object graph, and tests can wire the same graph against any database and clock.
+**Rejected.** A DI container, and service locators or static singletons.
