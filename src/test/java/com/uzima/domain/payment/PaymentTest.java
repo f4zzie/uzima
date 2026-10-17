@@ -10,6 +10,8 @@ import com.uzima.domain.common.ValidationException;
 import com.uzima.domain.money.Money;
 import java.time.Year;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 class PaymentTest {
 
@@ -20,8 +22,13 @@ class PaymentTest {
   }
 
   private static Payment.Reversal reversal(Money amount, String reason) {
+    return reversal(amount, reason, PaymentMethod.CASH, null);
+  }
+
+  private static Payment.Reversal reversal(
+      Money amount, String reason, PaymentMethod method, String reference) {
     return new Payment.Reversal(
-        0, RCP, JOB, amount, DAY, PaymentMethod.MPESA, null, CLERK, null, 5, reason);
+        0, RCP, JOB, amount, DAY, method, reference, CLERK, null, 5, reason);
   }
 
   @Test
@@ -69,12 +76,38 @@ class PaymentTest {
   }
 
   @Test
-  void reversalIsNegativeWithReasonAndOptionalReference() {
+  void cashReversalIsNegativeWithReasonAndOptionalReference() {
     Payment.Reversal r = reversal(Money.of(-500), " duplicate ");
     assertThat(r.amount()).isEqualTo(Money.of(-500));
     assertThat(r.reason()).isEqualTo("duplicate");
     assertThat(r.reference()).isEmpty();
     assertThat(r.reversedPaymentId()).isEqualTo(5);
+  }
+
+  @ParameterizedTest
+  @EnumSource(
+      value = PaymentMethod.class,
+      names = {"MPESA", "BANK_TRANSFER", "CHEQUE"})
+  void nonCashRefundRequiresReference(PaymentMethod method) {
+    assertThatThrownBy(() -> reversal(Money.of(-500), "refund", method, " "))
+        .isInstanceOfSatisfying(
+            ValidationException.class, e -> assertThat(e.messageFor("reference")).isPresent());
+  }
+
+  @Test
+  void mpesaRefundReferenceFollowsReceiptFormat() {
+    assertThat(reversal(Money.of(-500), "refund", PaymentMethod.MPESA, "rfd3h5l7pz").reference())
+        .isEqualTo("RFD3H5L7PZ");
+    assertThatThrownBy(() -> reversal(Money.of(-500), "refund", PaymentMethod.MPESA, "SHORT"))
+        .isInstanceOf(ValidationException.class);
+  }
+
+  @Test
+  void bankRefundKeepsItsReference() {
+    assertThat(
+            reversal(Money.of(-500), "refund", PaymentMethod.BANK_TRANSFER, " TRX-991 ")
+                .reference())
+        .isEqualTo("TRX-991");
   }
 
   @Test

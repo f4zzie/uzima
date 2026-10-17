@@ -93,12 +93,9 @@ public sealed interface Payment permits Payment.Received, Payment.Reversal {
       if (reason.length() > MAX_NOTES) {
         throw new ValidationException("reason", "Reason is too long");
       }
-      reference = reference == null ? "" : reference.strip();
-      if (reference.length() > PaymentMethod.MAX_REFERENCE) {
-        throw new ValidationException(
-            PaymentMethod.FIELD,
-            "Reference can be at most " + PaymentMethod.MAX_REFERENCE + " characters");
-      }
+      // A refund leaves a trail just like a payment: M-Pesa, bank and cheque refunds need a
+      // reference in the same format; cash refunds don't.
+      reference = method.normaliseReference(reference);
       notes = cleanNotes(notes);
     }
   }
