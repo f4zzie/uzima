@@ -1,0 +1,14 @@
+# Copy to <app data>/uzima.properties to override application defaults.
+#   Linux:   ~/.local/share/uzima/uzima.properties
+#   Windows: %APPDATA%\Uzima\uzima.properties
+#   macOS:   ~/Library/Application Support/Uzima/uzima.properties
+#
+# Environment variables UZIMA_DB_URL, UZIMA_DB_USER and UZIMA_DB_PASSWORD take precedence
+# over this file. Prefer the environment variable for the password.
+
+# --- MySQL 8 ---
+# uzima.db.url=jdbc:mysql://localhost:3306/uzima?useSSL=true&serverTimezone=Africa/Nairobi
+# uzima.db.user=uzima
+# uzima.db.password=
+
+# uzima.db.pool.max-size=5
