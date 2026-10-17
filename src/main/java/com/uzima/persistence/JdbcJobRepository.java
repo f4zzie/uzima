@@ -190,6 +190,13 @@ public final class JdbcJobRepository implements JobRepository {
   }
 
   @Override
+  public void lock(long jobId) {
+    requireTransaction();
+    jdbc.queryOne("SELECT id FROM jobs WHERE id = ? FOR UPDATE", rs -> rs.getLong(1), jobId)
+        .orElseThrow(() -> new IllegalArgumentException("No job with id " + jobId));
+  }
+
+  @Override
   public void updateNotes(long jobId, String notes, Instant at) {
     int updated =
         jdbc.update(

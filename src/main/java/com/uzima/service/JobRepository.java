@@ -31,6 +31,12 @@ public interface JobRepository {
 
   void updateNotes(long jobId, String notes, Instant at);
 
+  /**
+   * Locks the job row until the current transaction ends, so concurrent payments against the same
+   * job are checked one after another. Throws if the job doesn't exist.
+   */
+  void lock(long jobId);
+
   Optional<Job> findById(long id);
 
   Optional<Job> findByNumber(JobNumber number);
