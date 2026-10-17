@@ -379,3 +379,23 @@ Superseded by D-027.
 **Why.** Staff think in local days; a job created at 00:30 Nairobi time belongs to that day even though it is the previous day in UTC.
 **Rejected.** Filtering on UTC dates.
 
+### D-100 Payments lock the job row
+**Decision.** Recording or reversing a payment first runs `SELECT ... FOR UPDATE` on the job (`JobRepository.lock`), then reads the ledger and checks the rules inside the same transaction.
+**Why.** Two people recording payments on one job at the same time would otherwise both see the old balance and could overpay it together. A test with eight concurrent payers of 30% each shows exactly three succeed on H2 and MySQL.
+**Rejected.** A database constraint on the sum of payments (not expressible portably), or optimistic retries (more code for a desktop app with few users).
+
+### D-101 Receipt numbers use the recording date's year
+**Decision.** `RCP-yyyy-NNNNN` takes its year from today's date in Nairobi when the payment is recorded, not from the payment date the user enters. Reversals get their own receipt number from the same sequence.
+**Why.** Numbers are issued in the order receipts are written, so a back-dated payment entered in January still continues that year's sequence without gaps.
+**Rejected.** The payment date's year, which would reopen a closed year's sequence when someone back-dates.
+
+### D-102 The refund method is chosen at reversal time
+**Decision.** A reversal records its own method and reference (e.g. a cash payment refunded by M-Pesa) instead of copying the original's.
+**Why.** Refunds often go back by a different channel than the money came in, and the refund reference must match how it was actually paid.
+**Rejected.** Always refunding by the original method.
+
+### D-103 Reads need a signed-in user, writes need a permission
+**Decision.** Listing payments and reading a job's derived account need only a signed-in user; recording needs RECORD_PAYMENTS and reversing REVERSE_PAYMENTS.
+**Why.** Every role works with jobs and needs to see what's been paid; only changes are restricted.
+**Rejected.** A separate view permission, which nobody would ever be denied.
+
