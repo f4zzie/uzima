@@ -379,3 +379,28 @@ Superseded by D-027.
 **Why.** Staff think in local days; a job created at 00:30 Nairobi time belongs to that day even though it is the previous day in UTC.
 **Rejected.** Filtering on UTC dates.
 
+
+### D-090 Job numbers use the Nairobi calendar year
+**Decision.** `JobService` takes the year for `JOB-yyyy-NNNNN` from the creation instant in Africa/Nairobi, so a job saved at 00:30 on 1 January local time is numbered in the new year.
+**Why.** Staff read the number against the local date printed on the quote.
+**Rejected.** The UTC year, which would number the first three hours of each year in the previous year.
+
+### D-091 Applying a re-price checks the total the user saw
+**Decision.** `applyReprice(jobId, expectedGrandTotal)` recomputes inside the transaction and refuses if the new grand total differs from the one shown in `previewReprice`. Re-pricing with nothing changed saves and audits nothing.
+**Why.** The user confirms a specific number; if someone edited the catalog in between, silently saving a different total would defeat the confirmation.
+**Rejected.** Saving the preview object sent back by the UI (it could be stale or tampered with), or re-pricing without a check.
+
+### D-092 Cancelling only through `cancel`
+**Decision.** `advance(jobId, CANCELLED)` is refused with a message pointing to Cancel job, even for roles that may cancel.
+**Why.** Cancelling needs its own permission and a reason; one entry point keeps both rules in one place.
+**Rejected.** Letting `advance` cancel when a reason happens to be supplied.
+
+### D-093 Unchanged edits are not saved or audited
+**Decision.** `editQuote` and `updateNotes` compare the job before and after and write nothing (no row update, no audit entry) when nothing changed. A notes change on a locked job goes through `updateNotes`, audited as `JOB_QUOTE_EDITED` with "notes: old → new".
+**Why.** Saving a form without changes shouldn't fill the audit log with noise.
+**Rejected.** A separate audit action for notes; it would add an enum constant for a minor field.
+
+### D-094 Service timestamps are truncated to milliseconds
+**Decision.** `JobService` truncates `clock.instant()` to milliseconds before building jobs and status changes.
+**Why.** Columns are `DATETIME(3)`; without truncation a reloaded job would not equal the job returned by `create`.
+**Rejected.** Comparing jobs field by field with a tolerance in callers.
