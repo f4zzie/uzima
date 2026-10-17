@@ -217,3 +217,70 @@ Superseded by D-027.
 **Decision.** A test scans `domain` and `pricing` sources and fails on imports of JavaFX, JDBC, persistence, UI, service or app packages, and on `double` or `float` in money and pricing code.
 **Why.** The layering rules are only real if the build enforces them.
 **Rejected.** Adding ArchUnit, which would be a new dependency.
+
+## Phase 2 — Persistence and services
+
+### D-043 BCrypt with SHA-512 pre-hash for long passwords
+**Decision.** Passwords are hashed with BCrypt `$2a$` at cost 12 (`BcryptPasswordHasher`). Passwords longer than BCrypt's 72-byte limit are pre-hashed with SHA-512 so every character counts. Tests use cost 4 for speed.
+**Why.** Cost 12 is a sensible desktop default; the pre-hash avoids silently ignoring characters past byte 72.
+**Rejected.** Truncation (ignores part of the password) and rejecting long passwords (punishes passphrases).
+
+### D-044 Passwords travel as char[]
+**Decision.** `PasswordHasher`, `AuthService` and the login API take passwords as `char[]`, never `String`.
+**Why.** Callers can clear the array after use, and it's harder to log a password by accident.
+**Rejected.** `String` parameters, which linger in memory and print easily.
+
+### D-045 One failure message for every failed sign-in
+**Decision.** Unknown username, wrong password, deactivated account and locked account all return the same `LoginResult.FAILURE_MESSAGE`. The real reason goes to the audit log. For unknown usernames a BCrypt check still runs against a dummy hash.
+**Why.** The screen must not confirm which usernames exist or which accounts are locked, and response time shouldn't either.
+**Rejected.** Specific messages such as "account locked", which are friendlier but leak account state.
+
+### D-046 Attempts on locked or deactivated accounts don't count
+**Decision.** A sign-in attempt on a deactivated or currently locked account is audited but doesn't change the failure counter or extend the lock.
+**Why.** An attacker hammering a locked account shouldn't be able to keep its owner locked out indefinitely.
+**Rejected.** Extending the lock on every attempt.
+
+### D-047 Lock-screen failures count toward lockout
+**Decision.** Wrong passwords on the idle lock screen use the same 5-failure / 15-minute lockout as sign-in. Once the account is locked or deactivated, `verifyPassword` returns false and the UI signs the user out.
+**Why.** An unattended, idle-locked machine must not offer unlimited guesses.
+**Rejected.** A separate, unlimited lock-screen check.
+
+### D-048 Change-password checks the current password but doesn't count failures
+**Decision.** Changing your own password requires the current password, the new one must meet the policy, differ from the username and differ from the current password. A wrong current password here is a field error, not a lockout failure.
+**Why.** The user is already signed in; locking them out over a typo in a settings form would be heavy-handed.
+**Rejected.** Counting these toward lockout.
+
+### D-049 Temporary passwords
+**Decision.** Admin-created and admin-reset accounts get a 12-character password from an alphabet without look-alikes (no 0/O/1/l/I), generated with `SecureRandom`. It's returned once to show the admin, never stored in plain text, never audited, and hidden from `CreatedUser.toString()`. The user must change it at first sign-in. A reset also clears any lockout.
+**Why.** Admins read these aloud or write them down; ambiguous characters cause support calls.
+**Rejected.** Emailing passwords (no mail integration) and admin-chosen passwords (weak and known to the admin).
+
+### D-050 There is always an active administrator
+**Decision.** The last active ADMIN cannot be demoted or deactivated, and nobody can deactivate their own account. An admin may demote themselves while another active admin exists.
+**Why.** Losing the last admin would lock everyone out of user management and settings with no recovery path in the app.
+**Rejected.** A hidden "superuser" recovery account, which would be a default credential.
+
+### D-051 Theme is a personal preference
+**Decision.** Each user's light/dark theme is stored on their `users` row. Changing it needs no permission and isn't audited.
+**Why.** It affects only the user's own screen, not business data.
+**Rejected.** Auditing it, which would bury meaningful entries.
+
+### D-052 Settings keys are a whitelist; missing keys use defaults
+**Decision.** Settings are key/value rows whose keys come only from the `SettingKey` enum. A key with no row reads as its default (empty text, 16% VAT, 15 idle minutes), and saving inserts it. The logo is stored as a file path (`company.logo_path`), not as bytes.
+**Why.** New settings don't need a migration, and no key name can come from user input.
+**Rejected.** A V3 migration just to add the logo key; storing the image in the database.
+
+### D-053 Settings validation and auditing
+**Decision.** Company name is required. Email is optional but validated. KRA PIN is optional; if given it must be a letter, nine digits and a letter (upper-cased). Idle lock is 1–240 minutes. Company phone is free text (it may be a landline). Only fields that changed are saved and audited as `field: old → new`; an update that changes nothing writes no audit entry.
+**Why.** Reviewers of the audit log want to see exactly what changed; Kenyan company phones are often landlines that the mobile-number rule would reject.
+**Rejected.** Auditing a full before/after dump of every setting.
+
+### D-054 Some settings are readable before sign-in
+**Decision.** `SettingsService.currentTaxRate()` and `idleLockMinutes()` don't require a session; `current()` does.
+**Why.** The idle timer is configured before anyone signs in, and quoting services enforce their own permissions.
+**Rejected.** Requiring a session everywhere and threading special cases through the UI.
+
+### D-055 Usernames are unique case-insensitively
+**Decision.** Usernames are normalised to lower case, so "Otieno" and "otieno" are the same account. The service checks for a taken username before inserting; the unique index is the backstop.
+**Why.** Staff type usernames inconsistently; two accounts that differ only by case would be confusing.
+**Rejected.** Case-sensitive usernames.
