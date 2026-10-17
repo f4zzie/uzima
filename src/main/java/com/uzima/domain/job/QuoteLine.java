@@ -29,5 +29,8 @@ public record QuoteLine(
     if (quantity.signum() <= 0) {
       throw new IllegalArgumentException("Quote line quantity must be positive: " + quantity);
     }
+    // Quantities are stored as DECIMAL(10,2); one canonical scale keeps saved and fresh lines
+    // equal. Metres never have more than two decimals, so this never rounds.
+    quantity = quantity.setScale(2);
   }
 }
