@@ -60,4 +60,9 @@ class DelegatingJobRepository implements JobRepository {
   public Optional<JobSummary> summary(long jobId) {
     return delegate.summary(jobId);
   }
+
+  @Override
+  public void lock(long jobId) {
+    delegate.lock(jobId);
+  }
 }
