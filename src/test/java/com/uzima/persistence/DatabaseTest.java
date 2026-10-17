@@ -33,8 +33,8 @@ class DatabaseTest {
   @Test
   void migrateIsIdempotent() {
     try (Database db = Database.open(inMemory())) {
-      String first = db.migrate();
-      assertThat(db.migrate()).isEqualTo(first);
+      assertThat(db.migrate()).isEqualTo("2");
+      assertThat(db.migrate()).isEqualTo("2");
     }
   }
 }

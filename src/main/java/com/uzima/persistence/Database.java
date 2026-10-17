@@ -7,6 +7,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.MigrationInfo;
 import org.flywaydb.core.api.output.MigrateResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,16 +36,13 @@ public final class Database implements AutoCloseable {
     return new Database(new HikariDataSource(hikari));
   }
 
-  /** Applies pending migrations and returns the resulting schema version, or "none". */
+  /** Applies pending migrations and returns the current schema version, or "none". */
   public String migrate() {
-    MigrateResult result =
-        Flyway.configure()
-            .dataSource(dataSource)
-            .locations(MIGRATIONS)
-            .cleanDisabled(true)
-            .load()
-            .migrate();
-    String version = result.targetSchemaVersion == null ? "none" : result.targetSchemaVersion;
+    Flyway flyway =
+        Flyway.configure().dataSource(dataSource).locations(MIGRATIONS).cleanDisabled(true).load();
+    MigrateResult result = flyway.migrate();
+    MigrationInfo current = flyway.info().current();
+    String version = current == null ? "none" : current.getVersion().getVersion();
     log.info("Migrations applied: {}, schema version: {}", result.migrationsExecuted, version);
     return version;
   }
