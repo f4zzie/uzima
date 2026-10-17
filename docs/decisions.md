@@ -284,3 +284,53 @@ Superseded by D-027.
 **Decision.** Usernames are normalised to lower case, so "Otieno" and "otieno" are the same account. The service checks for a taken username before inserting; the unique index is the backstop.
 **Why.** Staff type usernames inconsistently; two accounts that differ only by case would be confusing.
 **Rejected.** Case-sensitive usernames.
+
+### D-060 No hard delete for clients
+**Decision.** `ClientService` has deactivate and reactivate but no delete. The foreign keys from `jobs` also stop a client with jobs from being removed by hand.
+**Why.** A client's history (jobs, invoices, payments) must stay readable, and a deactivated client drops out of pickers anyway.
+**Rejected.** A "delete if unused" action; it adds a second removal path for little benefit.
+
+### D-061 Category changes are a separate operation
+**Decision.** `ClientService.update` refuses to change the category; `changeCategory` does it, needs `CHANGE_CLIENT_CATEGORY` and writes its own audit entry ("category: Domestic → Commercial"). The client code is untouched.
+**Why.** Category drives fees, so it deserves its own permission and a clearly labelled audit trail.
+**Rejected.** Allowing it through the general edit form, which would bury it among cosmetic edits.
+
+### D-062 Audit entries list only fields that changed
+**Decision.** Updates audit "field: old → new" for changed fields only, and a save that changes nothing writes no entry. Coordinates are compared by value, so 36.80 and the stored 36.800000 are equal.
+**Why.** Keeps the audit log readable and free of noise from re-saving a form.
+**Rejected.** Logging the full before and after records.
+
+### D-063 Catalog SQL identifiers come from a whitelist enum
+**Decision.** The four catalog tables share one repository. Table, name, price and referencing-column names come from a private enum keyed by `CatalogKind`; values are always bound parameters.
+**Why.** One implementation for four near-identical tables without ever building SQL from input.
+**Rejected.** Four copy-pasted repositories, or string-built identifiers.
+
+### D-064 Duplicate catalog names are validation errors
+**Decision.** The repository turns unique-key violations into a `ValidationException` on `name` (or `capacityLitres` for tanks).
+**Why.** The UI shows it next to the field like any other validation message; the database stays the single source of uniqueness.
+**Rejected.** Checking for duplicates with a SELECT first, which races.
+
+### D-065 Catalog edits keep the active flag; retire and reactivate are separate
+**Decision.** `changeItem` changes name or capacity and price only; `retire` and `reactivate` change availability. Each is its own audit action.
+**Why.** "Price changed" and "no longer offered" are different events for anyone reading the log.
+**Rejected.** One save that can change everything at once.
+
+### D-066 Current catalog prices include retired items
+**Decision.** `CatalogRepository.catalogPrices()` looks items up by id regardless of the active flag.
+**Why.** A pending job may hold an item that has since been retired; re-pricing it needs that item's current row.
+**Rejected.** Active items only, which would make re-pricing fail for such jobs.
+
+### D-067 Tax rate is passed into `currentBasis`
+**Decision.** `CatalogService.currentBasis(category, taxRate)` takes the tax rate as a parameter instead of reading settings itself.
+**Why.** Settings belong to `SettingsService`; keeping the catalog service independent of it avoids a dependency cycle and keeps tests simple.
+**Rejected.** Reading the tax rate from the settings table inside the catalog service.
+
+### D-068 Sequence counters are created outside the caller's transaction
+**Decision.** When a counter row (e.g. `JOB-2027`) doesn't exist yet, it is inserted on a separate auto-commit connection; the caller then locks the existing row with `SELECT … FOR UPDATE`.
+**Why.** On MySQL a locking read of a missing row takes a gap lock, and two first-time callers that both insert then deadlock (seen in the concurrent registration test as SQLState 40001). Creating a counter never uses up a number, so numbers stay gap-free.
+**Rejected.** Creating the row inside the caller's transaction (deadlocks on MySQL), and seeding all counters in a migration (job and receipt counters are per year).
+
+### D-069 Client search also matches local phone formats
+**Decision.** A search like "0712 345" is matched against the stored `+254712345…` by dropping the leading zero.
+**Why.** Staff type numbers the way clients say them.
+**Rejected.** Requiring the international format in the search box.
