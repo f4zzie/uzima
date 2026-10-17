@@ -8,6 +8,7 @@ import com.uzima.domain.catalog.RateTable;
 import com.uzima.domain.catalog.RateTier;
 import com.uzima.domain.catalog.TankType;
 import com.uzima.domain.client.ClientCategory;
+import com.uzima.domain.job.PriceBasis;
 import com.uzima.domain.money.Money;
 import com.uzima.domain.money.TaxRate;
 import java.util.List;
@@ -54,11 +55,11 @@ final class PricingFixtures {
     };
   }
 
-  static PricingContext context(ClientCategory category) {
-    return new PricingContext(fees(category), STANDARD_RATES, VAT_16);
+  static PriceBasis context(ClientCategory category) {
+    return new PriceBasis(fees(category), STANDARD_RATES, VAT_16);
   }
 
-  static PricingContext context(ClientCategory category, TaxRate rate) {
-    return new PricingContext(fees(category), STANDARD_RATES, rate);
+  static PriceBasis context(ClientCategory category, TaxRate rate) {
+    return new PriceBasis(fees(category), STANDARD_RATES, rate);
   }
 }

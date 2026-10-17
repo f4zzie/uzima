@@ -1,12 +1,15 @@
 package com.uzima.pricing;
 
+import com.uzima.domain.catalog.CatalogPrices;
 import com.uzima.domain.catalog.RateTable;
 import com.uzima.domain.catalog.RateTier;
 import com.uzima.domain.catalog.TankType;
 import com.uzima.domain.common.Metres;
 import com.uzima.domain.job.DrillingSpec;
+import com.uzima.domain.job.Job;
 import com.uzima.domain.job.LineCategory;
 import com.uzima.domain.job.Plumbing;
+import com.uzima.domain.job.PriceBasis;
 import com.uzima.domain.job.PumpSpec;
 import com.uzima.domain.job.QuantityUnit;
 import com.uzima.domain.job.Quote;
@@ -22,7 +25,7 @@ import java.util.Objects;
 
 /**
  * The only place prices are calculated. Stateless and thread-safe: catalog prices, rate tiers and
- * the tax rate arrive in a {@link PricingContext} for each call.
+ * the tax rate arrive in a {@link PriceBasis} for each call.
  */
 public final class PricingEngine {
 
@@ -54,25 +57,50 @@ public final class PricingEngine {
   }
 
   /** Prices a job specification against the given live prices. */
-  public Quote quote(QuoteSpec spec, PricingContext ctx) {
+  public Quote quote(QuoteSpec spec, PriceBasis basis) {
     List<QuoteLine> lines = new ArrayList<>();
-    spec.drilling().ifPresent(d -> lines.addAll(drillingLines(d, ctx.rates())));
-    spec.pump().ifPresent(p -> lines.addAll(pumpLines(p, ctx.rates())));
+    spec.drilling().ifPresent(d -> lines.addAll(drillingLines(d, basis.rates())));
+    spec.pump().ifPresent(p -> lines.addAll(pumpLines(p, basis.rates())));
     spec.tank().ifPresent(t -> lines.add(tankLine(t)));
     spec.plumbing().ifPresent(p -> lines.addAll(plumbingLines(p)));
 
-    String category = ctx.fees().category().label();
+    String category = basis.fees().category().label();
     lines.add(
-        each(LineCategory.SURVEY_FEE, "Survey fee (" + category + ")", ctx.fees().surveyFee()));
+        each(LineCategory.SURVEY_FEE, "Survey fee (" + category + ")", basis.fees().surveyFee()));
     lines.add(
         each(
             LineCategory.AUTHORITY_FEE,
             "Authority fee (" + category + ")",
-            ctx.fees().authorityFee()));
+            basis.fees().authorityFee()));
 
     Money subtotal = Money.sum(lines.stream().map(QuoteLine::lineTotal));
-    Money tax = vat(subtotal, ctx.taxRate());
-    return new Quote(lines, subtotal, ctx.taxRate(), tax, subtotal.plus(tax));
+    Money tax = vat(subtotal, basis.taxRate());
+    return new Quote(lines, subtotal, basis.taxRate(), tax, subtotal.plus(tax));
+  }
+
+  /**
+   * Prices an edit to a pending job against the job's own snapshot: catalog items already on the
+   * job keep the price they were quoted at, and the job's fees, rate tiers and tax rate are reused.
+   * Items the edit adds that were not on the job before carry whatever price {@code edited} gives
+   * them, normally the current catalog price.
+   *
+   * @throws com.uzima.domain.job.QuoteLockedException if the job has left PENDING_SURVEY
+   */
+  public Job requote(Job job, QuoteSpec edited) {
+    QuoteSpec spec = edited.withPricesFrom(job.spec().catalogPrices());
+    return job.withQuote(spec, quote(spec, job.priceBasis()));
+  }
+
+  /**
+   * Proposes moving a pending job to current prices: each catalog item at its current price, and
+   * the current fees for the client's current category, rate tiers and tax rate. The job itself is
+   * not changed; the caller saves {@link Job.Repricing#after()} only if the user confirms.
+   *
+   * @throws com.uzima.domain.job.QuoteLockedException if the job has left PENDING_SURVEY
+   */
+  public Job.Repricing reprice(Job job, CatalogPrices current, PriceBasis currentBasis) {
+    QuoteSpec spec = job.spec().withPricesFrom(current);
+    return job.repriceTo(spec, currentBasis, quote(spec, currentBasis));
   }
 
   /** VAT on a VAT-exclusive amount: {@code round_half_up(subtotal × rate, 2)}. */

@@ -3,6 +3,10 @@ package com.uzima.domain.job;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.uzima.domain.catalog.CategoryFees;
+import com.uzima.domain.catalog.RateTable;
+import com.uzima.domain.catalog.RateTier;
+import com.uzima.domain.client.ClientCategory;
 import com.uzima.domain.common.DomainException;
 import com.uzima.domain.common.ValidationException;
 import com.uzima.domain.money.Money;
@@ -26,13 +30,23 @@ class JobTest {
   private static final long MANAGER = 2;
 
   /** A quote of one manual plumbing line, priced by hand so this test needs no PricingEngine. */
+  private static final PriceBasis BASIS =
+      new PriceBasis(
+          new CategoryFees(ClientCategory.DOMESTIC, Money.of(7_000), Money.of(10_000)),
+          new RateTable(List.of(RateTier.openEnded(0, 1_000))),
+          TaxRate.KENYA_STANDARD);
+
   private static Quote quote(long net) {
+    return quote(net, "0.16");
+  }
+
+  private static Quote quote(long net, String rate) {
     Money amount = Money.of(net);
     QuoteLine line =
         new QuoteLine(
             LineCategory.PLUMBING, "Plumbing", BigDecimal.ONE, QuantityUnit.EACH, amount, amount);
-    Money tax = amount.times(new BigDecimal("0.16"));
-    return new Quote(List.of(line), amount, TaxRate.KENYA_STANDARD, tax, amount.plus(tax));
+    Money tax = amount.times(new BigDecimal(rate));
+    return new Quote(List.of(line), amount, TaxRate.of(rate), tax, amount.plus(tax));
   }
 
   private static QuoteSpec spec(long net) {
@@ -45,7 +59,7 @@ class JobTest {
 
   private static Job newJob() {
     return Job.create(
-        new JobNumber(Year.of(2026), 1), 7, spec(100_000), quote(100_000), "", T0, CLERK);
+        new JobNumber(Year.of(2026), 1), 7, spec(100_000), quote(100_000), BASIS, "", T0, CLERK);
   }
 
   private static Payment.Received paid(long id, long shillings) {
@@ -73,6 +87,13 @@ class JobTest {
   void quoteCanBeReplacedWhileAwaitingSurvey() {
     Job edited = newJob().withQuote(spec(200_000), quote(200_000));
     assertThat(edited.quote().grandTotal()).isEqualTo(Money.of(232_000));
+  }
+
+  @Test
+  void quotePricedAtAnotherTaxRateIsRejected() {
+    assertThatThrownBy(() -> newJob().withQuote(spec(100_000), quote(100_000, "0.14")))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("price basis");
   }
 
   @Test

@@ -41,6 +41,7 @@ class PriceSnapshotTest {
         1,
         spec,
         engine.quote(spec, context(ClientCategory.DOMESTIC)),
+        context(ClientCategory.DOMESTIC),
         "",
         Instant.EPOCH,
         1);
