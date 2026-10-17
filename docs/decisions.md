@@ -139,7 +139,7 @@ Superseded by D-025.
 Superseded by D-027.
 
 ### D-027 Edits keep snapshotted prices; re-pricing is explicit
-**Decision.** A job stores its price basis (catalog item prices, category fees, rate tiers and tax rate). Edits to a PENDING_SURVEY job are priced against that basis; items newly added during an edit use the current catalog price. "Re-price at current catalog" is a separate operation that returns a before/after comparison, and the service applies it only when asked.
+**Decision.** A job stores its price basis (catalog item prices, category fees, rate tiers and tax rate). Edits to a PENDING_SURVEY job are priced against that basis; items newly added during an edit use the current catalog price. "Re-price at current catalog" is a separate operation that returns a before/after comparison, and the service applies it only when asked. In code: `Job.priceBasis()` (`PriceBasis`: fees, tiers, tax rate) plus the catalog items held in `QuoteSpec`; edits go through `PricingEngine.requote(job, editedSpec)`, re-pricing through `PricingEngine.reprice(job, currentCatalog, currentBasis)`, which returns a `Job.Repricing`. A `Job` rejects a quote whose tax rate differs from its price basis.
 **Why.** A quote sent to a client must not change just because someone fixed a typo; price changes should be deliberate and visible.
 **Rejected.** Silently re-pricing on every edit.
 
