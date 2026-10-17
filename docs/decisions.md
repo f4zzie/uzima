@@ -217,3 +217,55 @@ Superseded by D-027.
 **Decision.** A test scans `domain` and `pricing` sources and fails on imports of JavaFX, JDBC, persistence, UI, service or app packages, and on `double` or `float` in money and pricing code.
 **Why.** The layering rules are only real if the build enforces them.
 **Rejected.** Adding ArchUnit, which would be a new dependency.
+
+## Phase 2 — Persistence and services
+
+### D-080 Job rows carry their whole price snapshot
+**Decision.** `jobs` stores the catalog items a job was quoted with (id, name and price of the drilling type, pump and tank), the measurements, the plumbing mode, the priced category with its fees, the tax rate and the totals. `job_rate_tiers` holds the tier table it was priced with, `job_lines` the priced lines and `plumbing_lines` each pipe run with its pipe price. A loaded job is rebuilt from these alone, never from the live catalog.
+**Why.** Invoices and later edits must reproduce the original quote exactly even after prices, fees, tiers or VAT change.
+**Rejected.** Joining to the live catalog tables, which would rewrite old quotes whenever a price changes.
+
+### D-081 Snapshot catalog items load as active
+**Decision.** Catalog items rebuilt from a job's snapshot are always marked active.
+**Why.** Whether the live item was retired later says nothing about what the job was quoted at, and it keeps a saved job equal to the job that was saved.
+**Rejected.** Reading the live `active` flag, which would make a job's value depend on later catalog edits.
+
+### D-082 Quote line quantities have a fixed scale of two
+**Decision.** `QuoteLine` stores its quantity at scale 2 (`1.00`, `150.00`).
+**Why.** `job_lines.quantity` is `DECIMAL(10,2)`; one canonical scale makes a reloaded job equal to the saved one, and metres never have more than two decimals.
+**Rejected.** Comparing quantities with `compareTo` only in persistence tests, which would hide real mismatches in record equality.
+
+### D-083 The first history row is written on insert
+**Decision.** `JobRepository.insert` also writes the first `job_status_history` row (no previous status → the job's status, at its creation time). `history()` returns `StatusHistoryEntry` with an optional `from`, because `StatusChange` requires a previous status.
+**Why.** The job detail timeline then starts at creation without the service having to remember a second call.
+**Rejected.** A separate `recordCreated` method, and a fake "from" status for the first entry.
+
+### D-084 Writes check the state they expect
+**Decision.** `replaceQuote` only updates a job that is still `PENDING_SURVEY`, and `recordStatusChange` only updates a job whose current status is the change's `from`. Otherwise they throw `IllegalStateException` and nothing is written.
+**Why.** The domain checks the job object in memory; these checks stop a stale screen from overwriting a job another user has already moved on, and stop duplicate history rows.
+**Rejected.** Version columns for optimistic locking, which add a column and plumbing for the same protection here.
+
+### D-085 Job and payment writes require a transaction
+**Decision.** `JobRepository` writes that touch several tables, and `PaymentRepository.insert`, throw if called outside `Transactions.inTransaction`. `replaceQuote` takes the update time as a parameter.
+**Why.** A job and its lines, or a payment and its receipt number and audit entry, must commit together; failing fast catches a service that forgot its boundary.
+**Rejected.** Opening a transaction inside the repository, which would hide the boundary from the service that owns it.
+
+### D-086 Payment state comes from the job_accounts view
+**Decision.** The jobs list reads amount paid, balance, payment status and refund due from the `job_accounts` view. Tests check the view agrees with the domain `JobAccount` for unpaid, partly paid, paid, reversed, cancelled-with-money and cancelled-and-refunded jobs, on H2 and MySQL.
+**Why.** The list needs these values for hundreds of jobs in one query, and they must never drift from the domain rules.
+**Rejected.** Loading every payment and computing in Java for the list, and storing the values on `jobs`.
+
+### D-087 Payments keep their own created_at
+**Decision.** `JdbcPaymentRepository` takes a `Clock` and stamps `created_at` on insert; the domain `Payment` only has the business date.
+**Why.** The payment date is what the client paid on; the entry time is an audit fact the domain doesn't need.
+**Rejected.** Adding a timestamp to the `Payment` records.
+
+### D-088 Date filters use Nairobi calendar days
+**Decision.** Job search dates are calendar days in Africa/Nairobi, inclusive at both ends, converted to UTC bounds (`>= start of from-day`, `< start of the day after to-day`).
+**Why.** Staff think in local days; a job created at 00:30 Nairobi time belongs to that day even though it is the previous day in UTC.
+**Rejected.** Filtering on UTC dates.
+
+### D-089 Sequence counters are created outside the locking transaction
+**Decision.** When a counter row (e.g. `JOB-2027`) doesn't exist yet, `JdbcSequenceGenerator` inserts it at 1 on a separate auto-commit connection, ignoring a duplicate-key race, and only then takes `SELECT ... FOR UPDATE` on it in the caller's transaction.
+**Why.** On MySQL, locking a missing row takes a gap lock; two transactions that then insert into the same gap deadlock, and MySQL rolls back the whole transaction. The concurrency test caught this once it ran against MySQL. Creating the counter early can't create a gap in the numbers, because a number is only issued under the row lock.
+**Rejected.** Retrying after the deadlock (the caller's transaction is already gone), and pre-creating counters for future years (names aren't all known in advance).
