@@ -6,6 +6,8 @@ import com.uzima.domain.job.JobNumber;
 import com.uzima.domain.payment.ReceiptNumber;
 import com.uzima.persistence.PersistenceException.DuplicateKeyException;
 import com.uzima.service.SequenceGenerator;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.Year;
 
 /**
@@ -43,24 +45,42 @@ public final class JdbcSequenceGenerator implements SequenceGenerator {
     if (!tx.inTransaction()) {
       throw new IllegalStateException("Sequence numbers must be taken inside a transaction");
     }
-    for (int attempt = 0; attempt < 3; attempt++) {
-      var current =
-          jdbc.queryOne(
-              "SELECT next_value FROM sequences WHERE name = ? FOR UPDATE",
-              rs -> rs.getLong(1),
-              name);
-      if (current.isPresent()) {
-        long value = current.get();
-        jdbc.update("UPDATE sequences SET next_value = ? WHERE name = ?", value + 1, name);
-        return value;
-      }
-      try {
-        jdbc.update("INSERT INTO sequences (name, next_value) VALUES (?, ?)", name, 2L);
-        return 1;
-      } catch (DuplicateKeyException raced) {
-        // Another transaction created the counter first; loop and lock its row instead.
-      }
+    ensureCounterExists(name);
+    long value =
+        jdbc.queryOne(
+                "SELECT next_value FROM sequences WHERE name = ? FOR UPDATE",
+                rs -> rs.getLong(1),
+                name)
+            .orElseThrow(() -> new IllegalStateException("Sequence " + name + " is missing"));
+    jdbc.update("UPDATE sequences SET next_value = ? WHERE name = ?", value + 1, name);
+    return value;
+  }
+
+  /**
+   * Creates the counter row in its own short transaction if it doesn't exist yet. Locking a row
+   * that doesn't exist makes MySQL (REPEATABLE READ) take a gap lock, and two callers inserting
+   * into the same gap deadlock; creating the row first means FOR UPDATE always locks a real row.
+   * Creating it doesn't use up a number, so gap-free numbering is unaffected.
+   */
+  private void ensureCounterExists(String name) {
+    boolean exists =
+        jdbc.queryOne("SELECT 1 FROM sequences WHERE name = ?", rs -> true, name).isPresent();
+    if (exists) {
+      return;
     }
-    throw new IllegalStateException("Could not allocate a number from sequence " + name);
+    tx.outsideTransaction(
+        c -> {
+          try (PreparedStatement ps =
+              c.prepareStatement("INSERT INTO sequences (name, next_value) VALUES (?, 1)")) {
+            ps.setString(1, name);
+            ps.executeUpdate();
+          } catch (SQLException e) {
+            if (!(PersistenceException.from(e) instanceof DuplicateKeyException)) {
+              throw e;
+            }
+            // Another caller created it first; that's fine.
+          }
+          return null;
+        });
   }
 }
