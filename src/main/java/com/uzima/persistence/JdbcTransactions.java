@@ -65,6 +65,20 @@ public final class JdbcTransactions implements Transactions {
     }
   }
 
+  /**
+   * Runs {@code user} on a separate auto-commit connection, independent of any transaction bound to
+   * this thread. Its work is committed immediately and holds no locks afterwards. Use sparingly:
+   * the calling thread briefly holds two pooled connections.
+   */
+  public <T> T withNewConnection(ConnectionUser<T> user) {
+    try (Connection c = dataSource.getConnection()) {
+      c.setAutoCommit(true);
+      return user.apply(c);
+    } catch (SQLException e) {
+      throw PersistenceException.from(e);
+    }
+  }
+
   /** True when called inside {@link #inTransaction}. */
   public boolean inTransaction() {
     return current.get() != null;
