@@ -14,11 +14,12 @@ import java.util.stream.Stream;
  */
 public record Money(BigDecimal amount) implements Comparable<Money> {
 
-  public static final String CURRENCY = "KES";
-  public static final Money ZERO = new Money(BigDecimal.ZERO);
-
+  // Declared before ZERO: static initialisers run in source order and the constructor needs these.
   static final RoundingMode ROUNDING = RoundingMode.HALF_UP;
   private static final int SCALE = 2;
+
+  public static final String CURRENCY = "KES";
+  public static final Money ZERO = new Money(BigDecimal.ZERO);
 
   public Money {
     Objects.requireNonNull(amount, "amount");
