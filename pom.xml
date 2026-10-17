@@ -41,6 +41,7 @@
     <spotless.version>3.0.0</spotless.version>
     <google-java-format.version>1.28.0</google-java-format.version>
     <jacoco.version>0.8.13</jacoco.version>
+    <coverage.core.minimum>0.80</coverage.core.minimum>
   </properties>
 
   <dependencies>
@@ -216,6 +217,34 @@
             <goals>
               <goal>report</goal>
             </goals>
+          </execution>
+          <!-- Coverage gate on the business core only; the HTML report above still covers
+               everything. -->
+          <execution>
+            <id>check-core-coverage</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <includes>
+                <include>com/uzima/domain/**</include>
+                <include>com/uzima/pricing/**</include>
+                <include>com/uzima/service/**</include>
+              </includes>
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>LINE</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>${coverage.core.minimum}</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+            </configuration>
           </execution>
         </executions>
       </plugin>
