@@ -185,31 +185,39 @@ class ClientTest {
     assertThat(inactive.reactivated().active()).isTrue();
   }
 
+  private static Client domesticClient() {
+    return new Client(
+        1,
+        new ClientCode(ClientCategory.DOMESTIC, 1),
+        valid(ClientCategory.DOMESTIC),
+        true,
+        CREATED);
+  }
+
   @Test
-  void categoryCannotChangeAfterRegistration() {
-    Client client =
-        new Client(
-            1,
-            new ClientCode(ClientCategory.DOMESTIC, 1),
-            valid(ClientCategory.DOMESTIC),
-            true,
-            CREATED);
-    assertThatThrownBy(() -> client.withDetails(valid(ClientCategory.INDUSTRIAL)))
+  void editingDetailsCannotChangeCategory() {
+    assertThatThrownBy(() -> domesticClient().withDetails(valid(ClientCategory.INDUSTRIAL)))
         .isInstanceOfSatisfying(
             ValidationException.class, e -> assertThat(e.messageFor("category")).isPresent());
   }
 
   @Test
-  void codeCategoryMustMatchDetails() {
-    assertThatThrownBy(
-            () ->
-                new Client(
-                    1,
-                    new ClientCode(ClientCategory.INDUSTRIAL, 1),
-                    valid(ClientCategory.DOMESTIC),
-                    true,
-                    CREATED))
-        .isInstanceOf(IllegalArgumentException.class);
+  void categoryChangeKeepsThePermanentClientId() {
+    Client changed = domesticClient().withCategory(ClientCategory.COMMERCIAL);
+
+    assertThat(changed.category()).isEqualTo(ClientCategory.COMMERCIAL);
+    assertThat(changed.code().value()).isEqualTo("UZM-DOM-0001");
+    assertThat(changed.name()).isEqualTo(domesticClient().name());
+  }
+
+  @Test
+  void categoryChangeToSameCategoryIsRejected() {
+    assertThatThrownBy(() -> domesticClient().withCategory(ClientCategory.DOMESTIC))
+        .isInstanceOf(ValidationException.class);
+  }
+
+  @Test
+  void codeIsRequired() {
     assertThatThrownBy(() -> new Client(1, null, valid(ClientCategory.DOMESTIC), true, CREATED))
         .isInstanceOf(NullPointerException.class);
   }

@@ -2,6 +2,7 @@ package com.uzima.domain.user;
 
 import static com.uzima.domain.user.Permission.ADVANCE_JOB_STATUS;
 import static com.uzima.domain.user.Permission.CANCEL_JOB;
+import static com.uzima.domain.user.Permission.CHANGE_CLIENT_CATEGORY;
 import static com.uzima.domain.user.Permission.CREATE_JOBS;
 import static com.uzima.domain.user.Permission.DEACTIVATE_CLIENTS;
 import static com.uzima.domain.user.Permission.EDIT_CATALOG;
@@ -36,6 +37,7 @@ public enum Role {
                 EDIT_CATALOG,
                 EDIT_CLIENTS,
                 DEACTIVATE_CLIENTS,
+                CHANGE_CLIENT_CATEGORY,
                 CREATE_JOBS,
                 ADVANCE_JOB_STATUS,
                 CANCEL_JOB,

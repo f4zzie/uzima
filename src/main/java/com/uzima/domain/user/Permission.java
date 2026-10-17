@@ -7,6 +7,7 @@ public enum Permission {
   EDIT_CATALOG("edit catalog prices"),
   EDIT_CLIENTS("create or edit clients"),
   DEACTIVATE_CLIENTS("deactivate clients"),
+  CHANGE_CLIENT_CATEGORY("change a client's category"),
   CREATE_JOBS("create quotes and jobs"),
   ADVANCE_JOB_STATUS("advance job status"),
   CANCEL_JOB("cancel jobs"),

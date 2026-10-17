@@ -22,6 +22,7 @@ class RoleTest {
           Permission.EDIT_CATALOG,
           Permission.EDIT_CLIENTS,
           Permission.DEACTIVATE_CLIENTS,
+          Permission.CHANGE_CLIENT_CATEGORY,
           Permission.CREATE_JOBS,
           Permission.ADVANCE_JOB_STATUS,
           Permission.CANCEL_JOB,

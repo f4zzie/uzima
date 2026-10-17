@@ -15,9 +15,6 @@ public record Client(
     Objects.requireNonNull(code, "code");
     Objects.requireNonNull(details, "details");
     Objects.requireNonNull(createdAt, "createdAt");
-    if (code.category() != details.category()) {
-      throw new IllegalArgumentException("Client code category does not match client category");
-    }
   }
 
   public ClientCategory category() {
@@ -28,13 +25,33 @@ public record Client(
     return details.name();
   }
 
-  /** Applies edited details. The category cannot change. */
+  /**
+   * Applies edited details. The category is changed only through {@link #withCategory}, which needs
+   * its own permission and audit entry.
+   */
   public Client withDetails(ClientDetails updated) {
     if (updated.category() != category()) {
-      throw new ValidationException(
-          "category", "A client's category cannot change after registration");
+      throw new ValidationException("category", "Use \"Change category\" to change the category");
     }
     return new Client(id, code, updated, active, createdAt);
+  }
+
+  /**
+   * Moves the client to another category. The client ID does not change, and saved jobs keep the
+   * fees they were quoted with; only new quotes use the new category's fees.
+   */
+  public Client withCategory(ClientCategory newCategory) {
+    if (newCategory == category()) {
+      throw new ValidationException("category", "The client is already " + newCategory.label());
+    }
+    ClientDetails d = details;
+    return new Client(
+        id,
+        code,
+        new ClientDetails(
+            d.name(), newCategory, d.phone(), d.email(), d.county(), d.address(), d.location()),
+        active,
+        createdAt);
   }
 
   public Client deactivated() {
