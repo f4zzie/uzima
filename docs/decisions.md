@@ -285,71 +285,71 @@ Superseded by D-027.
 **Why.** Staff type usernames inconsistently; two accounts that differ only by case would be confusing.
 **Rejected.** Case-sensitive usernames.
 
-### D-056 No hard delete for clients
+### D-060 No hard delete for clients
 **Decision.** `ClientService` has deactivate and reactivate but no delete. The foreign keys from `jobs` also stop a client with jobs from being removed by hand.
 **Why.** A client's history (jobs, invoices, payments) must stay readable, and a deactivated client drops out of pickers anyway.
 **Rejected.** A "delete if unused" action; it adds a second removal path for little benefit.
 
-### D-057 Category changes are a separate operation
+### D-061 Category changes are a separate operation
 **Decision.** `ClientService.update` refuses to change the category; `changeCategory` does it, needs `CHANGE_CLIENT_CATEGORY` and writes its own audit entry ("category: Domestic → Commercial"). The client code is untouched.
 **Why.** Category drives fees, so it deserves its own permission and a clearly labelled audit trail.
 **Rejected.** Allowing it through the general edit form, which would bury it among cosmetic edits.
 
-### D-058 Audit entries list only fields that changed
+### D-062 Audit entries list only fields that changed
 **Decision.** Updates audit "field: old → new" for changed fields only, and a save that changes nothing writes no entry. Coordinates are compared by value, so 36.80 and the stored 36.800000 are equal.
 **Why.** Keeps the audit log readable and free of noise from re-saving a form.
 **Rejected.** Logging the full before and after records.
 
-### D-059 Catalog SQL identifiers come from a whitelist enum
+### D-063 Catalog SQL identifiers come from a whitelist enum
 **Decision.** The four catalog tables share one repository. Table, name, price and referencing-column names come from a private enum keyed by `CatalogKind`; values are always bound parameters.
 **Why.** One implementation for four near-identical tables without ever building SQL from input.
 **Rejected.** Four copy-pasted repositories, or string-built identifiers.
 
-### D-056 Duplicate catalog names are validation errors
+### D-064 Duplicate catalog names are validation errors
 **Decision.** The repository turns unique-key violations into a `ValidationException` on `name` (or `capacityLitres` for tanks).
 **Why.** The UI shows it next to the field like any other validation message; the database stays the single source of uniqueness.
 **Rejected.** Checking for duplicates with a SELECT first, which races.
 
-### D-057 Catalog edits keep the active flag; retire and reactivate are separate
+### D-065 Catalog edits keep the active flag; retire and reactivate are separate
 **Decision.** `changeItem` changes name or capacity and price only; `retire` and `reactivate` change availability. Each is its own audit action.
 **Why.** "Price changed" and "no longer offered" are different events for anyone reading the log.
 **Rejected.** One save that can change everything at once.
 
-### D-058 Current catalog prices include retired items
+### D-066 Current catalog prices include retired items
 **Decision.** `CatalogRepository.catalogPrices()` looks items up by id regardless of the active flag.
 **Why.** A pending job may hold an item that has since been retired; re-pricing it needs that item's current row.
 **Rejected.** Active items only, which would make re-pricing fail for such jobs.
 
-### D-059 Tax rate is passed into `currentBasis`
+### D-067 Tax rate is passed into `currentBasis`
 **Decision.** `CatalogService.currentBasis(category, taxRate)` takes the tax rate as a parameter instead of reading settings itself.
 **Why.** Settings belong to `SettingsService`; keeping the catalog service independent of it avoids a dependency cycle and keeps tests simple.
 **Rejected.** Reading the tax rate from the settings table inside the catalog service.
 
-### D-060 Sequence counters are created outside the caller's transaction
+### D-068 Sequence counters are created outside the caller's transaction
 **Decision.** When a counter row (e.g. `JOB-2027`) doesn't exist yet, it is inserted on a separate auto-commit connection; the caller then locks the existing row with `SELECT … FOR UPDATE`.
 **Why.** On MySQL a locking read of a missing row takes a gap lock, and two first-time callers that both insert then deadlock (seen in the concurrent registration test as SQLState 40001). Creating a counter never uses up a number, so numbers stay gap-free.
 **Rejected.** Creating the row inside the caller's transaction (deadlocks on MySQL), and seeding all counters in a migration (job and receipt counters are per year).
 
-### D-061 Client search also matches local phone formats
+### D-069 Client search also matches local phone formats
 **Decision.** A search like "0712 345" is matched against the stored `+254712345…` by dropping the leading zero.
 **Why.** Staff type numbers the way clients say them.
 **Rejected.** Requiring the international format in the search box.
-### D-062 Job rows carry their whole price snapshot
+### D-066 Job rows carry their whole price snapshot
 **Decision.** `jobs` stores the catalog items a job was quoted with (id, name and price of the drilling type, pump and tank), the measurements, the plumbing mode, the priced category with its fees, the tax rate and the totals. `job_rate_tiers` holds the tier table it was priced with, `job_lines` the priced lines and `plumbing_lines` each pipe run with its pipe price. A loaded job is rebuilt from these alone, never from the live catalog.
 **Why.** Invoices and later edits must reproduce the original quote exactly even after prices, fees, tiers or VAT change.
 **Rejected.** Joining to the live catalog tables, which would rewrite old quotes whenever a price changes.
 
-### D-063 Snapshot catalog items load as active
+### D-067 Snapshot catalog items load as active
 **Decision.** Catalog items rebuilt from a job's snapshot are always marked active.
 **Why.** Whether the live item was retired later says nothing about what the job was quoted at, and it keeps a saved job equal to the job that was saved.
 **Rejected.** Reading the live `active` flag, which would make a job's value depend on later catalog edits.
 
-### D-064 Quote line quantities have a fixed scale of two
+### D-068 Quote line quantities have a fixed scale of two
 **Decision.** `QuoteLine` stores its quantity at scale 2 (`1.00`, `150.00`).
 **Why.** `job_lines.quantity` is `DECIMAL(10,2)`; one canonical scale makes a reloaded job equal to the saved one, and metres never have more than two decimals.
 **Rejected.** Comparing quantities with `compareTo` only in persistence tests, which would hide real mismatches in record equality.
 
-### D-065 The first history row is written on insert
+### D-069 The first history row is written on insert
 **Decision.** `JobRepository.insert` also writes the first `job_status_history` row (no previous status → the job's status, at its creation time). `history()` returns `StatusHistoryEntry` with an optional `from`, because `StatusChange` requires a previous status.
 **Why.** The job detail timeline then starts at creation without the service having to remember a second call.
 **Rejected.** A separate `recordCreated` method, and a fake "from" status for the first entry.
@@ -379,28 +379,47 @@ Superseded by D-027.
 **Why.** Staff think in local days; a job created at 00:30 Nairobi time belongs to that day even though it is the previous day in UTC.
 **Rejected.** Filtering on UTC dates.
 
-
-### D-090 Job numbers use the Nairobi calendar year
+### D-075 Job numbers use the Nairobi calendar year
 **Decision.** `JobService` takes the year for `JOB-yyyy-NNNNN` from the creation instant in Africa/Nairobi, so a job saved at 00:30 on 1 January local time is numbered in the new year.
 **Why.** Staff read the number against the local date printed on the quote.
 **Rejected.** The UTC year, which would number the first three hours of each year in the previous year.
 
-### D-091 Applying a re-price checks the total the user saw
+### D-076 Applying a re-price checks the total the user saw
 **Decision.** `applyReprice(jobId, expectedGrandTotal)` recomputes inside the transaction and refuses if the new grand total differs from the one shown in `previewReprice`. Re-pricing with nothing changed saves and audits nothing.
 **Why.** The user confirms a specific number; if someone edited the catalog in between, silently saving a different total would defeat the confirmation.
 **Rejected.** Saving the preview object sent back by the UI (it could be stale or tampered with), or re-pricing without a check.
 
-### D-092 Cancelling only through `cancel`
+### D-077 Cancelling only through `cancel`
 **Decision.** `advance(jobId, CANCELLED)` is refused with a message pointing to Cancel job, even for roles that may cancel.
 **Why.** Cancelling needs its own permission and a reason; one entry point keeps both rules in one place.
 **Rejected.** Letting `advance` cancel when a reason happens to be supplied.
 
-### D-093 Unchanged edits are not saved or audited
+### D-078 Unchanged edits are not saved or audited
 **Decision.** `editQuote` and `updateNotes` compare the job before and after and write nothing (no row update, no audit entry) when nothing changed. A notes change on a locked job goes through `updateNotes`, audited as `JOB_QUOTE_EDITED` with "notes: old → new".
 **Why.** Saving a form without changes shouldn't fill the audit log with noise.
 **Rejected.** A separate audit action for notes; it would add an enum constant for a minor field.
 
-### D-094 Service timestamps are truncated to milliseconds
+### D-079 Service timestamps are truncated to milliseconds
 **Decision.** `JobService` truncates `clock.instant()` to milliseconds before building jobs and status changes.
 **Why.** Columns are `DATETIME(3)`; without truncation a reloaded job would not equal the job returned by `create`.
 **Rejected.** Comparing jobs field by field with a tolerance in callers.
+### D-080 Payments lock the job row
+**Decision.** Recording or reversing a payment first runs `SELECT ... FOR UPDATE` on the job (`JobRepository.lock`), then reads the ledger and checks the rules inside the same transaction.
+**Why.** Two people recording payments on one job at the same time would otherwise both see the old balance and could overpay it together. A test with eight concurrent payers of 30% each shows exactly three succeed on H2 and MySQL.
+**Rejected.** A database constraint on the sum of payments (not expressible portably), or optimistic retries (more code for a desktop app with few users).
+
+### D-081 Receipt numbers use the recording date's year
+**Decision.** `RCP-yyyy-NNNNN` takes its year from today's date in Nairobi when the payment is recorded, not from the payment date the user enters. Reversals get their own receipt number from the same sequence.
+**Why.** Numbers are issued in the order receipts are written, so a back-dated payment entered in January still continues that year's sequence without gaps.
+**Rejected.** The payment date's year, which would reopen a closed year's sequence when someone back-dates.
+
+### D-082 The refund method is chosen at reversal time
+**Decision.** A reversal records its own method and reference (e.g. a cash payment refunded by M-Pesa) instead of copying the original's.
+**Why.** Refunds often go back by a different channel than the money came in, and the refund reference must match how it was actually paid.
+**Rejected.** Always refunding by the original method.
+
+### D-083 Reads need a signed-in user, writes need a permission
+**Decision.** Listing payments and reading a job's derived account need only a signed-in user; recording needs RECORD_PAYMENTS and reversing REVERSE_PAYMENTS.
+**Why.** Every role works with jobs and needs to see what's been paid; only changes are restricted.
+**Rejected.** A separate view permission, which nobody would ever be denied.
+
