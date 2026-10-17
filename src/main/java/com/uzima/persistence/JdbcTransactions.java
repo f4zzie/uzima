@@ -65,6 +65,18 @@ public final class JdbcTransactions implements Transactions {
     }
   }
 
+  /**
+   * Runs {@code user} on its own auto-commit connection, even inside a transaction. Its work is
+   * committed immediately and is not rolled back with the surrounding transaction.
+   */
+  public <T> T independently(ConnectionUser<T> user) {
+    try (Connection c = dataSource.getConnection()) {
+      return user.apply(c);
+    } catch (SQLException e) {
+      throw PersistenceException.from(e);
+    }
+  }
+
   /** True when called inside {@link #inTransaction}. */
   public boolean inTransaction() {
     return current.get() != null;
