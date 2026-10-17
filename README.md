@@ -45,3 +45,7 @@ The repository contains no credentials.
 ```
 
 The coverage report is written to `target/site/jacoco/index.html`.
+
+## Further reading
+
+- [Design decisions](docs/decisions.md): what was decided beyond the specification, why, and what was rejected.
