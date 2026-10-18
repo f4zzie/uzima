@@ -557,6 +557,195 @@
 /* ===================================================================== components: overlays
    Dialog shell, toasts, loading overlay, state pane. */
 
+/* Dialogs: an in-window card on a scrim. */
+.dialog-scrim {
+  -fx-background-color: -uz-scrim;
+  -fx-padding: 32;
+}
+
+.dialog {
+  -fx-background-color: -uz-surface;
+  -fx-background-radius: 12;
+  -fx-border-color: -uz-border;
+  -fx-border-radius: 12;
+  -fx-effect: dropshadow(gaussian, -uz-shadow-strong, 32, 0, 0, 8);
+}
+
+.dialog-small {
+  -fx-pref-width: 440;
+  -fx-max-width: 440;
+}
+
+.dialog-medium {
+  -fx-pref-width: 560;
+  -fx-max-width: 560;
+}
+
+.dialog-large {
+  -fx-pref-width: 760;
+  -fx-max-width: 760;
+}
+
+.dialog-top {
+  -fx-padding: 20 24 0 24;
+  -fx-spacing: 12;
+}
+
+.dialog-header {
+  -fx-spacing: 12;
+  -fx-alignment: top-left;
+}
+
+.dialog-headings {
+  -fx-spacing: 4;
+}
+
+.button.ghost.dialog-close,
+.button.ghost.toast-dismiss {
+  -fx-font-family: "Inter";
+  -fx-font-size: 20px;
+  -fx-padding: 0 8 2 8;
+  -fx-text-fill: -uz-text-muted;
+}
+
+.button.ghost.dialog-close:hover,
+.button.ghost.toast-dismiss:hover {
+  -fx-text-fill: -uz-text;
+}
+
+.dialog-body {
+  -fx-padding: 16 24 20 24;
+}
+
+.dialog-body > .viewport > * {
+  -fx-spacing: 16;
+}
+
+.dialog-footer {
+  -fx-padding: 12 24;
+  -fx-spacing: 8;
+  -fx-alignment: center-right;
+  -fx-background-color: -uz-surface-alt;
+  -fx-background-radius: 0 0 12 12;
+  -fx-border-color: -uz-border transparent transparent transparent;
+}
+
+.dialog-busy {
+  -fx-pref-width: 20;
+  -fx-pref-height: 20;
+  -fx-max-width: 20;
+  -fx-max-height: 20;
+}
+
+.confirm-content {
+  -fx-spacing: 16;
+}
+
+.confirm-message {
+  -fx-text-fill: -uz-text;
+}
+
+/* Toasts: bottom-right, a coloured edge says what kind. */
+.toast-layer {
+  -fx-padding: 24;
+  -fx-spacing: 8;
+}
+
+.toast {
+  -fx-background-color: -uz-surface;
+  -fx-background-radius: 8;
+  -fx-border-color: -uz-border;
+  -fx-border-radius: 8;
+  -fx-border-width: 1 1 1 4;
+  -fx-padding: 12 8 12 16;
+  -fx-spacing: 8;
+  -fx-pref-width: 380;
+  -fx-max-width: 380;
+  -fx-alignment: top-left;
+  -fx-effect: dropshadow(gaussian, -uz-shadow-strong, 16, 0, 0, 4);
+}
+
+.toast-success {
+  -fx-border-color: -uz-border -uz-border -uz-border -uz-success;
+}
+
+.toast-info {
+  -fx-border-color: -uz-border -uz-border -uz-border -uz-info;
+}
+
+.toast-error {
+  -fx-border-color: -uz-border -uz-border -uz-border -uz-danger;
+}
+
+.toast-text {
+  -fx-spacing: 2;
+}
+
+.toast-title {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 14px;
+}
+
+.toast-error .toast-title {
+  -fx-text-fill: -uz-danger;
+}
+
+.toast-message {
+  -fx-font-size: 13px;
+  -fx-text-fill: -uz-text-muted;
+}
+
+/* Loading overlay: blocks input at once, shows itself after a short delay. */
+.loading-overlay {
+  -fx-background-color: transparent;
+}
+
+.loading-overlay > .loading-panel {
+  -fx-opacity: 0;
+}
+
+.loading-overlay.revealed {
+  -fx-background-color: -uz-overlay;
+}
+
+.loading-overlay.revealed > .loading-panel {
+  -fx-opacity: 1;
+}
+
+.loading-panel {
+  -fx-alignment: center;
+  -fx-spacing: 12;
+}
+
+.loading-spinner {
+  -fx-progress-color: -uz-primary;
+  -fx-pref-width: 40;
+  -fx-pref-height: 40;
+  -fx-max-width: 40;
+  -fx-max-height: 40;
+}
+
+.loading-message {
+  -fx-font-family: "Inter Medium";
+  -fx-text-fill: -uz-text-muted;
+}
+
+.dialog-busy {
+  -fx-progress-color: -uz-primary;
+}
+
+/* State pane: loading, empty and error states for a screen area. */
+.state-panel {
+  -fx-spacing: 12;
+  -fx-padding: 32 24;
+}
+
+.state-message {
+  -fx-text-fill: -uz-text-muted;
+  -fx-text-alignment: center;
+  -fx-max-width: 440;
+}
+
 /* ===================================================================== app shell */
 
 /* ===================================================================== auth screens */
