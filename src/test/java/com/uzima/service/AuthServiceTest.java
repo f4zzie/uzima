@@ -212,31 +212,45 @@ class AuthServiceTest {
   @Test
   void lockScreenFailuresCountTowardLockout() {
     f.admin();
-    assertThat(f.auth.verifyPassword(ADMIN_PASSWORD.toCharArray())).isTrue();
+    assertThat(f.auth.unlock(ADMIN_PASSWORD.toCharArray())).isEqualTo(UnlockResult.UNLOCKED);
     for (int i = 0; i < 4; i++) {
-      assertThat(f.auth.verifyPassword("wrong-password".toCharArray())).isFalse();
+      assertThat(f.auth.unlock("wrong-password".toCharArray()))
+          .isEqualTo(UnlockResult.WRONG_PASSWORD);
     }
-    assertThat(f.auth.verifyPassword(ADMIN_PASSWORD.toCharArray())).isTrue();
+    assertThat(f.auth.unlock(ADMIN_PASSWORD.toCharArray())).isEqualTo(UnlockResult.UNLOCKED);
     assertThat(
             f.users.findById(f.ctx.session.requireUser().id()).orElseThrow().failedLoginAttempts())
         .isZero();
-
-    for (int i = 0; i < 5; i++) {
-      f.auth.verifyPassword("wrong-password".toCharArray());
-    }
-    assertThat(f.count(AuditAction.ACCOUNT_LOCKED)).isEqualTo(1);
-    assertThat(f.auth.verifyPassword(ADMIN_PASSWORD.toCharArray())).isFalse();
   }
 
   @Test
-  void lockScreenRejectsADeactivatedAccount() {
+  void lockoutFromTheLockScreenEndsTheSession() {
+    User admin = f.admin();
+    for (int i = 0; i < 4; i++) {
+      assertThat(f.auth.unlock("wrong-password".toCharArray()))
+          .isEqualTo(UnlockResult.WRONG_PASSWORD);
+    }
+    assertThat(f.auth.unlock("wrong-password".toCharArray())).isEqualTo(UnlockResult.SESSION_ENDED);
+
+    assertThat(f.ctx.session.currentUser()).isEmpty();
+    assertThat(f.count(AuditAction.ACCOUNT_LOCKED)).isEqualTo(1);
+    assertThat(f.count(AuditAction.SIGNED_OUT)).isEqualTo(1);
+    // The right password doesn't get them back in while the lock lasts; sign-in fails generically.
+    assertThat(login(admin.username().value(), ADMIN_PASSWORD))
+        .isEqualTo(new LoginResult.Failure(LoginResult.FAILURE_MESSAGE));
+  }
+
+  @Test
+  void lockScreenEndsTheSessionOfADeactivatedAccount() {
     f.admin();
     User clerk = f.user("clerk", Role.CLERK, "clerk-password-1");
     f.userService.deactivate(clerk.id());
     f.auth.signOut();
     // Simulate a clerk who was signed in before an admin deactivated them.
     f.ctx.session.signIn(clerk);
-    assertThat(f.auth.verifyPassword("clerk-password-1".toCharArray())).isFalse();
+    assertThat(f.auth.unlock("clerk-password-1".toCharArray()))
+        .isEqualTo(UnlockResult.SESSION_ENDED);
+    assertThat(f.ctx.session.currentUser()).isEmpty();
   }
 
   @Test

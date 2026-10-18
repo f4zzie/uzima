@@ -241,7 +241,7 @@ Superseded by D-027.
 **Rejected.** Extending the lock on every attempt.
 
 ### D-047 Lock-screen failures count toward lockout
-**Decision.** Wrong passwords on the idle lock screen use the same 5-failure / 15-minute lockout as sign-in. Once the account is locked or deactivated, `verifyPassword` returns false and the UI signs the user out.
+**Decision.** Wrong passwords on the idle lock screen use the same 5-failure / 15-minute lockout as sign-in. The fifth failure locks the account; `AuthService.unlock` then ends the session itself and returns `SESSION_ENDED`, and the UI goes back to the sign-in screen with the generic failure message (Phase 2 follow-up).
 **Why.** An unattended, idle-locked machine must not offer unlimited guesses.
 **Rejected.** A separate, unlimited lock-screen check.
 
