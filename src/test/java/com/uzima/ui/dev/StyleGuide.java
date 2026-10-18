@@ -19,6 +19,7 @@ public final class StyleGuide {
           new TypographySection(),
           new ButtonsSection(),
           new FieldsSection(),
+          new DataComponentsSection(),
           new OverlaysSection());
 
   private StyleGuide() {}
