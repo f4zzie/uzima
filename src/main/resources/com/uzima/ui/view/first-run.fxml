@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.uzima.ui.component.Banner?>
+<?import com.uzima.ui.component.FormField?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      styleClass="auth-card" maxHeight="-Infinity">
+  <VBox styleClass="auth-heading">
+    <Label text="SET UP UZIMA" styleClass="text-overline"/>
+    <Label text="Create the administrator account" styleClass="text-headline" wrapText="true"/>
+    <Label text="This account manages users, prices and settings. You can add other staff after signing in."
+           styleClass="text-muted" wrapText="true"/>
+  </VBox>
+  <Banner fx:id="banner"/>
+  <FormField fx:id="displayNameField" label="Your name" name="displayName" required="true"
+             help="Shown on receipts and in the activity log.">
+    <TextField fx:id="displayName" promptText="e.g. Amina Odhiambo"/>
+  </FormField>
+  <FormField fx:id="usernameField" label="Username" name="username" required="true"
+             help="3–32 letters, digits, dots, dashes or underscores.">
+    <TextField fx:id="username" promptText="e.g. amina"/>
+  </FormField>
+  <FormField fx:id="passwordField" label="Password" name="password" required="true">
+    <PasswordField fx:id="password"/>
+  </FormField>
+  <FormField fx:id="confirmField" label="Confirm password" name="confirm" required="true">
+    <PasswordField fx:id="confirm"/>
+  </FormField>
+  <Button fx:id="create" text="Create account and sign in" defaultButton="true"
+          onAction="#create" styleClass="primary,large,auth-submit" maxWidth="Infinity"/>
+</VBox>

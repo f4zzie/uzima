@@ -558,8 +558,273 @@
    Dialog shell, toasts, loading overlay, state pane. */
 
 /* ===================================================================== app shell */
+.app-host {
+  -fx-background-color: -uz-bg;
+}
+
+.app-loading {
+  -fx-alignment: center;
+  -fx-max-width: 480;
+  -fx-padding: 24;
+}
+
+.app-loading-spinner {
+  -fx-progress-color: -uz-primary;
+  -fx-pref-width: 40;
+  -fx-pref-height: 40;
+}
+
+.sidebar {
+  -fx-background-color: -uz-sidebar-bg;
+  -fx-pref-width: 232;
+  -fx-min-width: 232;
+  -fx-padding: 20 12 16 12;
+  -fx-spacing: 16;
+}
+
+.sidebar-brand {
+  -fx-padding: 0 12 8 12;
+  -fx-spacing: 2;
+}
+
+.brand-wordmark {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 24px;
+  -fx-text-fill: -uz-sidebar-text-strong;
+}
+
+.brand-subtitle {
+  -fx-font-size: 12px;
+  -fx-text-fill: -uz-sidebar-text;
+}
+
+.sidebar-scroll,
+.sidebar-scroll > .viewport {
+  -fx-background-color: transparent;
+}
+
+.nav-list {
+  -fx-spacing: 2;
+  -fx-padding: 2;
+}
+
+.toggle-button.nav-item {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+  -fx-text-fill: -uz-sidebar-text;
+  -fx-font-family: "Inter Medium";
+  -fx-font-size: 14px;
+  -fx-alignment: center-left;
+  -fx-graphic-text-gap: 12;
+  -fx-padding: 10 12;
+  -fx-background-radius: 6;
+  -fx-border-radius: 6;
+}
+
+.toggle-button.nav-item:hover {
+  -fx-background-color: -uz-sidebar-hover;
+  -fx-text-fill: -uz-sidebar-text-strong;
+}
+
+.toggle-button.nav-item:selected {
+  -fx-background-color: -uz-sidebar-active;
+  -fx-text-fill: -uz-sidebar-text-strong;
+}
+
+.toggle-button.nav-item:focused {
+  -fx-border-color: -uz-focus;
+  -fx-border-width: 2;
+  -fx-border-insets: 0;
+}
+
+.nav-icon {
+  -fx-fill: -uz-sidebar-text;
+  -fx-scale-x: 0.9;
+  -fx-scale-y: 0.9;
+}
+
+.toggle-button.nav-item:selected .nav-icon,
+.toggle-button.nav-item:hover .nav-icon {
+  -fx-fill: -uz-accent;
+}
+
+.sidebar-hint {
+  -fx-font-size: 12px;
+  -fx-text-fill: -uz-sidebar-text;
+  -fx-padding: 8 12 0 12;
+  -fx-border-color: -uz-sidebar-divider transparent transparent transparent;
+  -fx-border-width: 1 0 0 0;
+  -fx-max-width: Infinity;
+}
+
+.top-bar {
+  -fx-background-color: -uz-surface;
+  -fx-border-color: transparent transparent -uz-border transparent;
+  -fx-border-width: 0 0 1 0;
+  -fx-padding: 12 32;
+  -fx-alignment: center-left;
+  -fx-min-height: 64;
+}
+
+.top-bar-title {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 20px;
+}
+
+.menu-button.user-menu {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+  -fx-background-radius: 8;
+  -fx-border-radius: 8;
+  -fx-padding: 4 8;
+}
+
+.menu-button.user-menu:hover,
+.menu-button.user-menu:showing {
+  -fx-background-color: -uz-hover;
+}
+
+.menu-button.user-menu:focused {
+  -fx-border-color: -uz-focus;
+  -fx-border-width: 2;
+}
+
+.menu-button.user-menu > .arrow-button > .arrow {
+  -fx-background-color: -uz-text-muted;
+}
+
+.user-chip {
+  -fx-spacing: 10;
+  -fx-alignment: center-left;
+}
+
+.avatar {
+  -fx-background-color: -uz-primary-soft;
+  -fx-background-radius: 999;
+  -fx-min-width: 36;
+  -fx-min-height: 36;
+  -fx-max-width: 36;
+  -fx-max-height: 36;
+}
+
+.avatar-text {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 13px;
+  -fx-text-fill: -uz-primary;
+}
+
+.user-chip-text {
+  -fx-spacing: 0;
+}
+
+.user-name {
+  -fx-font-family: "Inter Medium";
+  -fx-font-size: 14px;
+}
+
+.user-role {
+  -fx-font-size: 12px;
+  -fx-text-fill: -uz-text-muted;
+}
+
+.content-area {
+  -fx-background-color: -uz-bg;
+  -fx-alignment: top-left;
+}
 
 /* ===================================================================== auth screens */
+.auth-screen {
+  -fx-background-color: -uz-bg;
+}
+
+.auth-brand-panel {
+  -fx-background-color: -uz-sidebar-bg;
+  -fx-pref-width: 440;
+  -fx-min-width: 360;
+  -fx-padding: 48 48 32 48;
+  -fx-spacing: 24;
+}
+
+.auth-brand {
+  -fx-spacing: 12;
+  -fx-alignment: center-left;
+}
+
+.auth-brand-mark {
+  -fx-fill: -uz-accent;
+}
+
+.auth-wordmark {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 30px;
+  -fx-text-fill: -uz-sidebar-text-strong;
+}
+
+.auth-tagline {
+  -fx-font-family: "Inter Medium";
+  -fx-font-size: 18px;
+  -fx-text-fill: -uz-sidebar-text-strong;
+}
+
+.auth-points {
+  -fx-spacing: 16;
+  -fx-padding: 16 0 0 0;
+}
+
+.auth-point-row {
+  -fx-spacing: 12;
+  -fx-alignment: top-left;
+}
+
+.auth-point-mark {
+  -fx-background-color: -uz-accent;
+  -fx-background-radius: 999;
+  -fx-min-width: 8;
+  -fx-min-height: 8;
+  -fx-max-width: 8;
+  -fx-max-height: 8;
+  -fx-translate-y: 6;
+}
+
+.auth-point {
+  -fx-font-size: 14px;
+  -fx-text-fill: -uz-sidebar-text;
+}
+
+.auth-footer {
+  -fx-font-size: 12px;
+  -fx-text-fill: -uz-sidebar-text;
+}
+
+.auth-scroll,
+.auth-scroll > .viewport {
+  -fx-background-color: -uz-bg;
+}
+
+.auth-form-side {
+  -fx-padding: 32;
+  -fx-alignment: center;
+}
+
+.auth-card {
+  -fx-background-color: -uz-surface;
+  -fx-background-radius: 12;
+  -fx-border-color: -uz-border;
+  -fx-border-radius: 12;
+  -fx-padding: 40;
+  -fx-spacing: 20;
+  -fx-pref-width: 440;
+  -fx-max-width: 440;
+  -fx-effect: dropshadow(gaussian, -uz-shadow, 24, 0, 0, 4);
+}
+
+.auth-heading {
+  -fx-spacing: 6;
+}
+
+.button.auth-submit {
+  -fx-padding: 12 20;
+}
 
 /* ===================================================================== style guide (dev only) */
 .style-guide-swatch {
