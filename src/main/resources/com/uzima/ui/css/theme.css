@@ -1337,6 +1337,91 @@
   -fx-padding: 12 20;
 }
 
+/* ===================================================================== screens: clients */
+.client-form-grid {
+  -fx-hgap: 16;
+  -fx-vgap: 16;
+}
+
+/* Pickers match the height of the text fields beside them. */
+.client-form-grid .combo-box-base,
+.client-category-row {
+  -fx-min-height: 36;
+  -fx-pref-height: 36;
+}
+
+.client-form-section {
+  -fx-padding: 16 0 0 0;
+  -fx-border-color: -uz-border transparent transparent transparent;
+  -fx-border-width: 1 0 0 0;
+}
+
+/* A non-blocking warning under a field (e.g. GPS outside Kenya): warning tone, never red. */
+.form-warning {
+  -fx-background-color: -uz-warning-soft;
+  -fx-background-radius: 6;
+  -fx-text-fill: -uz-warning;
+  -fx-font-size: 12px;
+  -fx-padding: 6 10;
+}
+
+.client-category-row {
+  -fx-spacing: 12;
+  -fx-alignment: center-left;
+}
+
+.client-category-value {
+  -fx-font-family: "Inter Medium";
+}
+
+.client-audit-note {
+  -fx-background-color: -uz-info-soft;
+  -fx-background-radius: 6;
+  -fx-text-fill: -uz-info;
+  -fx-font-size: 13px;
+  -fx-padding: 10 12;
+}
+
+.client-stats {
+  -fx-spacing: 16;
+}
+
+.client-stat {
+  -fx-padding: 16 20;
+}
+
+.client-stat-value {
+  -fx-font-size: 20px;
+}
+
+.client-stat-refund {
+  -fx-background-color: -uz-warning-soft;
+  -fx-border-color: -uz-warning;
+}
+
+.client-stat-refund .client-stat-value,
+.client-stat-refund .text-overline {
+  -fx-text-fill: -uz-warning;
+}
+
+.client-detail-body {
+  -fx-spacing: 24;
+}
+
+.client-facts {
+  -fx-hgap: 24;
+  -fx-vgap: 10;
+}
+
+.client-fact-term {
+  -fx-font-size: 13px;
+  -fx-text-fill: -uz-text-muted;
+}
+
+.client-fact-value {
+  -fx-font-size: 14px;
+}
+
 /* ===================================================================== style guide (dev only) */
 .style-guide-swatch {
   -fx-min-width: 120;
