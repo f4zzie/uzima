@@ -457,3 +457,30 @@ Superseded by D-027.
 **Decision.** `CompositionRoot.wire(database, clock)` builds every repository and service once and returns them as a `Services` record for the UI. The clock is `Clock.system(Africa/Nairobi)`.
 **Why.** One readable place shows the whole object graph, and tests can wire the same graph against any database and clock.
 **Rejected.** A DI container, and service locators or static singletons.
+
+## Phase 3: user interface
+
+### D-091 One stylesheet; colours are tokens, lengths come from fixed scales
+**Decision.** `theme.css` is the only stylesheet. Every colour is a looked-up colour declared once on `.root`; every other rule refers to those names. JavaFX CSS can only look up paints, not lengths, so font sizes, spacing and radii come from scales documented at the top of the file. `ThemeTokensTest` fails on a literal colour outside the token block, a length outside the scales, `style=` in FXML or `setStyle` in UI code.
+**Why.** Dark mode in Phase 5 becomes a second token block, and the design can't drift one hard-coded value at a time.
+**Rejected.** Per-screen stylesheets; generating CSS from Java constants (adds a build step for little gain).
+
+### D-092 Inter is bundled as four static weights
+**Decision.** Inter 4.1 Regular, Medium, SemiBold and Bold (TTF, OFL licence alongside) are loaded from the classpath at startup. Medium and SemiBold register as their own families in JavaFX, so CSS selects them by family name (`"Inter SemiBold"`) rather than by `-fx-font-weight`.
+**Why.** The app looks the same on every machine, with no font installation step. JavaFX handles static fonts reliably; it doesn't support variable-font weights.
+**Rejected.** The variable font (JavaFX ignores its weight axis) and relying on system fonts.
+
+### D-093 All service calls go through `Backend`
+**Decision.** Screens never hold `Services`. `Backend.run(work, onSuccess, onFailure)` runs work on a two-thread daemon pool and calls back on the FX thread, unwrapping exceptions. Every call passes `Backend.requireOffFxThread()`, which throws if it is on the FX thread; `BackendTest` checks this. The session can still be read on the FX thread because it's an in-memory value.
+**Why.** A slow query or a BCrypt check (≈250 ms at cost 12) never freezes the window, and the mistake fails loudly in tests instead of producing an occasional stutter.
+**Rejected.** `javafx.concurrent.Task` at every call site (repetitive and easy to forget), and an unbounded thread pool.
+
+### D-094 Visual checks are snapshots of the app's own scenes
+**Decision.** Tests run on headless Monocle with software rendering, set through Surefire system properties. `UiSnapshots` lays out a themed scene at 1366×768 and 1920×1080 (plus full-length for long pages), renders it with `Scene.snapshot` and writes PNGs to `target/ui-snapshots/`.
+**Why.** Layout can be reviewed and later shown in the README without ever capturing the desktop, and the same images come out of CI.
+**Rejected.** Screen capture through the TestFX robot, and pixel-diff assertions (fragile across fonts and platforms; the images are for review).
+
+### D-095 The style guide lives in test sources
+**Decision.** The style guide (tokens, typography and every component, with realistic Kenyan sample data) is built from `StyleGuideSection`s in `src/test`, and rendered by `StyleGuideSnapshotTest`.
+**Why.** It is dev-only by construction: it can't ship in the installer or show up in the app's menu.
+**Rejected.** A hidden menu item or a debug flag in the production app.
