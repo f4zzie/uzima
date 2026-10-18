@@ -13,6 +13,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javafx.application.Platform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The UI's only way to reach the services. Work runs on a background thread and results come back
@@ -22,6 +24,8 @@ import javafx.application.Platform;
  * fails immediately instead of quietly blocking the UI.
  */
 public final class Backend implements AutoCloseable {
+
+  private static final Logger log = LoggerFactory.getLogger(Backend.class);
 
   private final Services services;
   private final ExecutorService worker;
@@ -48,10 +52,18 @@ public final class Backend implements AutoCloseable {
     CompletableFuture<T> future = CompletableFuture.supplyAsync(() -> call(work), worker);
     future.whenCompleteAsync(
         (value, error) -> {
-          if (error == null) {
-            onSuccess.accept(value);
-          } else {
-            onFailure.accept(unwrap(error));
+          try {
+            if (error == null) {
+              onSuccess.accept(value);
+            } else {
+              onFailure.accept(unwrap(error));
+            }
+          } catch (RuntimeException | Error callbackFailure) {
+            // A bug in a UI callback must not vanish inside the future; log it and let the FX
+            // thread's uncaught-exception handler see it too.
+            log.error("UI callback failed", callbackFailure);
+            Thread t = Thread.currentThread();
+            t.getUncaughtExceptionHandler().uncaughtException(t, callbackFailure);
           }
         },
         fx);
