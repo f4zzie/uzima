@@ -166,12 +166,16 @@ public final class AuthService {
     session.signOut();
   }
 
+  /** Signs out. The session is cleared even if writing the audit entry fails. */
   public void signOut() {
-    session
-        .currentUser()
-        .ifPresent(
-            u -> tx.run(() -> audit.recordFor(u, AuditAction.SIGNED_OUT, "user", u.id(), "")));
-    session.signOut();
+    try {
+      session
+          .currentUser()
+          .ifPresent(
+              u -> tx.run(() -> audit.recordFor(u, AuditAction.SIGNED_OUT, "user", u.id(), "")));
+    } finally {
+      session.signOut();
+    }
   }
 
   /** Builds a validated, hashed, unsaved user; reports every invalid field at once. */

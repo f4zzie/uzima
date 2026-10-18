@@ -7,6 +7,7 @@ import com.uzima.ui.auth.FirstRunViewModel;
 import com.uzima.ui.auth.LoginView;
 import com.uzima.ui.auth.LoginViewModel;
 import com.uzima.ui.component.Banner;
+import com.uzima.ui.component.OverlayHost;
 import com.uzima.ui.shell.AppShell;
 import com.uzima.ui.shell.Destination;
 import com.uzima.ui.shell.ShellViewModel;
@@ -32,6 +33,7 @@ public final class AppFlow {
   private final Backend backend;
   private final List<Destination> destinations;
   private final StackPane host = new StackPane();
+  private final OverlayHost overlays = new OverlayHost(host);
 
   public AppFlow(Backend backend, List<Destination> destinations) {
     this.backend = backend;
@@ -39,9 +41,12 @@ public final class AppFlow {
     host.getStyleClass().add("app-host");
   }
 
-  /** The node to put in the scene. */
+  /**
+   * The node to put in the scene: the current screen inside an {@link OverlayHost}, so every screen
+   * can open dialogs, toasts and the window-wide loading overlay.
+   */
   public Parent root() {
-    return host;
+    return overlays;
   }
 
   /** Checks whether this is a first run, then shows setup or sign-in. */

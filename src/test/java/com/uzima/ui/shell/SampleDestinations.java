@@ -1,13 +1,11 @@
 package com.uzima.ui.shell;
 
 import com.uzima.domain.user.Permission;
+import com.uzima.ui.component.DataTable;
 import java.util.List;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -61,18 +59,17 @@ public final class SampleDestinations {
   }
 
   private static Node clients() {
-    TableView<String[]> table = new TableView<>();
+    DataTable<String[]> table = new DataTable<>();
+    table.setItemNouns("client", "clients");
+    table.setSearchPrompt("Search by name, ID, county or phone");
+    table.setSearchMatcher(DataTable.containsIn(r -> String.join(" ", r)));
     String[] headings = {"Client ID", "Name", "Category", "County", "Phone"};
     for (int i = 0; i < headings.length; i++) {
       int column = i;
-      TableColumn<String[], String> c = new TableColumn<>(headings[i]);
-      c.setCellValueFactory(row -> new SimpleStringProperty(row.getValue()[column]));
-      c.setPrefWidth(i == 1 ? 260 : 150);
-      table.getColumns().add(c);
+      table.addTextColumn(headings[i], row -> row[column]).setPrefWidth(i == 1 ? 260 : 160);
     }
-    table
-        .getItems()
-        .addAll(
+    table.setItems(
+        List.of(
             new String[] {
               "UZM-DOM-0007", "Wanjiru Kamau", "Domestic", "Kiambu", "+254 712 345 678"
             },
@@ -87,11 +84,11 @@ public final class SampleDestinations {
             },
             new String[] {
               "UZM-COM-0002", "St. Mary's School", "Commercial", "Nyeri", "+254 720 555 010"
-            });
+            }));
     VBox.setVgrow(table, Priority.ALWAYS);
     Button add = new Button("New client");
     add.getStyleClass().add("primary");
-    return page("All clients", "5 clients", table, add);
+    return page("All clients", "Everyone you have quoted or drilled for", table, add);
   }
 
   private static Node simple(String title) {
@@ -127,6 +124,7 @@ public final class SampleDestinations {
     VBox card = new VBox(l, v, n);
     card.getStyleClass().addAll("card", "stack-8");
     card.setMaxWidth(Double.MAX_VALUE);
+    card.setPrefWidth(1); // equal widths: the row shares its space evenly
     return card;
   }
 }
