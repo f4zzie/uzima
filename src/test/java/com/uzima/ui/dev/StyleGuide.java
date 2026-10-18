@@ -15,7 +15,11 @@ public final class StyleGuide {
   /** Sections in display order. Add new components' sections here. */
   static final List<StyleGuideSection> SECTIONS =
       List.of(
-          new ColoursSection(), new TypographySection(), new ButtonsSection(), new FieldsSection());
+          new ColoursSection(),
+          new TypographySection(),
+          new ButtonsSection(),
+          new FieldsSection(),
+          new DataComponentsSection());
 
   private StyleGuide() {}
 
