@@ -554,6 +554,191 @@
 /* ===================================================================== components: data
    Money and metres fields, status badges, data table. */
 
+/* Money and metres fields: the group turns red as a whole when the FormField marks it invalid. */
+.input-group:invalid > .text-field,
+.input-group:invalid > .input-adornment {
+  -fx-border-color: -uz-danger;
+}
+
+.input-group > .text-field:focused {
+  -fx-border-insets: 0;
+  -fx-border-radius: 0 6 6 0;
+}
+
+.input-group > .text-field.has-trailing:focused {
+  -fx-border-radius: 6 0 0 6;
+}
+
+/* Status badges: a rounded pill, tinted background with strong text of the same hue. */
+.badge {
+  -fx-background-radius: 999;
+  -fx-padding: 2 10;
+  -fx-font-family: "Inter Medium";
+  -fx-font-size: 12px;
+}
+
+.badge-neutral {
+  -fx-background-color: -uz-neutral-soft;
+  -fx-text-fill: -uz-text-muted;
+}
+
+.badge-info {
+  -fx-background-color: -uz-info-soft;
+  -fx-text-fill: -uz-info;
+}
+
+.badge-success {
+  -fx-background-color: -uz-success-soft;
+  -fx-text-fill: -uz-success;
+}
+
+.badge-warning {
+  -fx-background-color: -uz-warning-soft;
+  -fx-text-fill: -uz-warning;
+}
+
+.badge-danger {
+  -fx-background-color: -uz-danger-soft;
+  -fx-text-fill: -uz-danger;
+}
+
+.badge-accent {
+  -fx-background-color: -uz-primary-soft;
+  -fx-text-fill: -uz-primary;
+}
+
+/* Data table: toolbar above a bordered table. */
+.data-table {
+  -fx-spacing: 12;
+}
+
+.data-table-toolbar {
+  -fx-spacing: 8;
+  -fx-alignment: center-left;
+}
+
+.data-table-search {
+  -fx-pref-width: 300;
+}
+
+.data-table-count {
+  -fx-font-size: 13px;
+  -fx-text-fill: -uz-text-muted;
+  -fx-padding: 0 0 0 8;
+}
+
+.data-table-actions {
+  -fx-spacing: 8;
+  -fx-alignment: center-right;
+}
+
+.data-table .table-view {
+  -fx-background-color: -uz-surface;
+  -fx-background-radius: 8;
+  -fx-border-color: -uz-border;
+  -fx-border-radius: 8;
+  -fx-border-width: 1;
+  -fx-border-insets: 0;
+  -fx-padding: 0;
+}
+
+.data-table .table-view:focused {
+  -fx-border-color: -uz-focus;
+  -fx-border-width: 2;
+}
+
+.table-view .column-header-background {
+  -fx-background-color: -uz-surface-alt;
+  -fx-background-radius: 8 8 0 0;
+  -fx-border-color: transparent transparent -uz-border transparent;
+}
+
+.table-view .column-header,
+.table-view .filler {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+  -fx-padding: 10 12;
+}
+
+.table-view .column-header .label {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 12px;
+  -fx-text-fill: -uz-text-muted;
+  -fx-alignment: center-left;
+}
+
+.table-view .column-header.numeric .label {
+  -fx-alignment: center-right;
+}
+
+.table-view .column-header .arrow {
+  -fx-background-color: -uz-text-muted;
+}
+
+.table-row-cell {
+  -fx-background-color: -uz-surface;
+  -fx-border-color: transparent transparent -uz-border transparent;
+  -fx-cell-size: 44;
+  -fx-text-fill: -uz-text;
+}
+
+.table-row-cell:filled:hover {
+  -fx-background-color: -uz-surface-alt;
+}
+
+.table-row-cell:filled:selected {
+  -fx-background-color: -uz-selection;
+}
+
+.table-row-cell:filled:selected .table-cell {
+  -fx-text-fill: -uz-text;
+}
+
+.table-cell {
+  -fx-padding: 0 12;
+  -fx-alignment: center-left;
+  -fx-text-fill: -uz-text;
+  -fx-border-color: transparent;
+}
+
+.table-cell.numeric {
+  -fx-alignment: center-right;
+}
+
+.table-view .placeholder {
+  -fx-background-color: transparent;
+}
+
+/* Empty, no-results, loading and error states. */
+.empty-state {
+  -fx-spacing: 8;
+  -fx-padding: 48 24;
+}
+
+.empty-state-title {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 16px;
+  -fx-text-fill: -uz-text;
+}
+
+.empty-state-text {
+  -fx-font-size: 13px;
+  -fx-text-fill: -uz-text-muted;
+  -fx-text-alignment: center;
+}
+
+.empty-state-kind-error .empty-state-title {
+  -fx-text-fill: -uz-danger;
+}
+
+.empty-state-spinner {
+  -fx-progress-color: -uz-primary;
+  -fx-min-width: 40;
+  -fx-min-height: 40;
+  -fx-pref-width: 40;
+  -fx-pref-height: 40;
+}
+
 /* ===================================================================== components: overlays
    Dialog shell, toasts, loading overlay, state pane. */
 
