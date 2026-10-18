@@ -484,3 +484,72 @@ Superseded by D-027.
 **Decision.** The style guide (tokens, typography and every component, with realistic Kenyan sample data) is built from `StyleGuideSection`s in `src/test`, and rendered by `StyleGuideSnapshotTest`.
 **Why.** It is dev-only by construction: it can't ship in the installer or show up in the app's menu.
 **Rejected.** A hidden menu item or a debug flag in the production app.
+
+### D-096 Dialogs are in-window overlays
+**Decision.** `OverlayHost` is the scene root and owns a dialog layer (on a scrim), a toast layer and a window-wide loading layer. While a dialog is open, the content underneath ignores mouse and key events; it isn't disabled, so it doesn't restyle. Dialogs can stack, and only the top one takes input.
+**Why.** Dialogs share the theme, appear in scene snapshots and are easy to drive in TestFX. Stacking allows "Discard changes?" over an editor.
+**Rejected.** Separate modal `Stage`s, and `setDisable(true)` on the content (it greys every control behind the scrim).
+
+### D-097 The primary handler decides when a dialog closes
+**Decision.** A dialog's primary action calls `setBusy(true)` and the service; on success it closes the dialog, and on failure it puts the errors inline and stays open. Esc cancels. Enter confirms unless focus is on a button (which fires that button) or in a text area (new line). Tab is trapped inside the dialog, and focus goes back where it was when the dialog closes.
+**Why.** Service validation errors land next to the field the user is still looking at, and the keyboard behaviour is predictable.
+**Rejected.** Closing on click and reporting errors afterwards; Enter always meaning confirm.
+
+### D-098 Loading feedback waits 150 ms; error toasts wait for the user
+**Decision.** The loading overlay blocks input at once but only shows itself after 150 ms. Success and info toasts hide after 4 s; error toasts stay until dismissed. At most three toasts show, and the oldest is dropped.
+**Why.** Fast calls don't flicker and can't be double-submitted, and errors can't be missed.
+**Rejected.** Showing the spinner immediately; auto-hiding errors.
+
+### D-099 One empty/loading/error look everywhere
+**Decision.** `EmptyState` draws the "nothing yet", "no results for 'x'", loading and error-with-retry states. `DataTable` uses it as its placeholder, and `StatePane` uses it to switch a whole screen area between its content and those states.
+**Why.** Two forks each built one; merging them keeps every screen's states identical.
+**Rejected.** Separate panels for tables and screens.
+
+### D-100 Money and metres inputs parse through the domain types
+**Decision.** `MoneyField` and `MetresField` share a `NumericField<V>` base. It limits typing to digits, commas and one decimal point (2 dp), reformats when focus leaves, and parses with `Money.parse` / `Metres.of`. A blank or invalid entry gives a null value plus a problem message that the form shows when it validates. Money must be positive unless `allowZero` is set, and negatives are never accepted; reversals have their own flow.
+**Why.** No number logic lives in the UI, and errors don't appear while the user is still typing.
+**Rejected.** `Spinner`s, BigDecimal parsing in the UI, and showing errors on every keystroke.
+
+### D-101 Status badge tones
+**Decision.** The badge tones are:
+- Pending survey: neutral
+- Approved: info
+- In progress: primary-soft background with primary text
+- Completed: success
+- Cancelled: danger
+- Not paid: danger
+- Partially paid: warning
+- Paid: success
+
+**Why.** Amber text on a soft amber background fails contrast and would look the same as the warning tone.
+**Rejected.** A separate accent-text token.
+
+### D-102 `DataTable` filters, then sorts
+**Decision.** `DataTable` runs `FilteredList` → `SortedList` and binds the sorted list's comparator to the table's. The caller supplies a case-insensitive search predicate. Enter or a double-click opens a row, Ctrl+F focuses the search box and Esc clears it.
+**Why.** Sorting by a column header keeps working while a search is active.
+**Rejected.** Re-sorting by hand after each filter.
+
+### D-103 The shell is given its pages
+**Decision.** The app passes `AppShell` a list of `Destination`s: id, title, icon, required permission and view factory. The shell filters them with `Role.has` and knows no screen by name. Ctrl+1…9 jump to the pages, and the sidebar also works with Tab and the arrow keys.
+**Why.** The permission matrix stays the single source of truth, and a new screen is one list entry.
+**Rejected.** A hard-coded menu inside the shell.
+
+### D-104 Icons are drawn in-house as SVG paths
+**Decision.** The `Icon` enum holds the app's own 20×20 `SVGPath` glyphs, coloured by the theme tokens.
+**Why.** No new dependency and no third-party path data to license.
+**Rejected.** Ikonli and Font Awesome.
+
+### D-105 Forms check blanks locally; the service owns every other rule
+**Decision.** Sign-in flags blank fields, and first-run flags a mismatched confirmation, before calling a service. Every other rule comes back from the service as `FieldError`s, which are shown under the matching field; focus moves to the first one in error. View models set their errors before clearing `busy`, so the view can focus the right field.
+**Why.** An empty submit doesn't write a LOGIN_FAILED audit entry, and the password and username rules live in one place.
+**Rejected.** Copying the domain rules into the UI.
+
+### D-106 `Backend` surfaces callback exceptions
+**Decision.** If an FX-thread callback passed to `Backend.run` throws, the exception is logged and handed to the thread's uncaught-exception handler.
+**Why.** `whenCompleteAsync` silently swallowed them, so a broken screen failed without a trace.
+**Rejected.** Making every callback catch its own exceptions.
+
+### D-107 Sign-out always clears the session
+**Decision.** `AuthService.signOut` clears the session in a `finally` block, even if writing the SIGNED_OUT audit entry fails.
+**Why.** The UI returns to the sign-in screen either way, and a stale session must not outlive it.
+**Rejected.** Letting the UI clear the session (`Session.signOut` is package-private to the service layer on purpose).
