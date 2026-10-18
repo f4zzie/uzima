@@ -553,3 +553,63 @@ Superseded by D-027.
 **Decision.** `AuthService.signOut` clears the session in a `finally` block, even if writing the SIGNED_OUT audit entry fails.
 **Why.** The UI returns to the sign-in screen either way, and a stale session must not outlive it.
 **Rejected.** Letting the UI clear the session (`Session.signOut` is package-private to the service layer on purpose).
+
+### D-108 The focus ring shows only for keyboard focus
+**Decision.** A `:keyboard-focus` pseudo-class, set by `KeyboardFocus` on every themed scene, marks the focus owner when focus arrived by key press and clears it on any mouse press. The sidebar shows its blue ring only in that state. The selected page has a filled background with a 3px amber bar on the left.
+**Why.** A click shouldn't leave a ring on the item you just picked, but keyboard users must always see where they are. JavaFX's own `:focus-visible` is set only by Tab traversal, so it disappears when the sidebar moves focus itself on arrow keys.
+**Rejected.** `:focus-visible` alone; an outline on the selected item.
+
+### D-109 Table columns declare a width policy
+**Decision.** Every `DataTable` column is `fixed`, `range(min, max)` or `flex(min)`, under the all-columns constrained resize policy. IDs, categories, counties, phones, statuses, dates and amounts are fixed or bounded; names and descriptions flex. Amount headers are right-aligned like their cells. Ctrl+C copies the selected row, tab-separated, as shown.
+**Why.** Short values keep a stable width, and the extra space goes to the text that needs it.
+**Rejected.** Equal-width columns, and letting the last column take all spare space.
+
+### D-110 "Inter Num": Inter with tabular figures frozen in
+**Decision.** `tools/fonts/freeze_tnum.py` (fontTools) maps the digit characters of Inter Regular, Medium and SemiBold to Inter's own tabular glyphs (`zero.tf` … `nine.tf`). It renames the family to "Inter Num", as the OFL requires for modified versions, and leaves the licence file alongside with a notice. `.figures`, `.text-numeric` and `.figures-strong` use it for amounts, lengths, IDs and dates. `TabularFiguresTest` checks the digits have equal widths and renders a column of amounts to look at.
+**Why.** Inter's default digits are proportional ("1" is 850 units wide, "0" 1322), so amounts in a column don't line up, and JavaFX can't switch on the OpenType `tnum` feature.
+**Rejected.** A monospaced font for numbers, which clashes with Inter; leaving the digits ragged.
+
+### D-111 Status colours
+**Decision.** Badge tones:
+- Pending survey: neutral
+- Approved: info blue
+- In progress: amber accent
+- Completed: success
+- Cancelled: danger
+- Not paid: neutral
+- Partially paid: olive-yellow warning
+- Paid: success
+
+Red is reserved for errors, cancellation and, later, overdue balances. `BadgeContrastTest` reads the colour tokens from `theme.css` and requires at least 4.5:1 for every badge.
+**Why.** An unpaid fresh quote isn't an error, and Approved and In progress must be told apart at a glance.
+**Rejected.** Red for Not paid; one blue for every active state.
+
+### D-112 Banners only for errors with no field
+**Decision.** A form shows a banner only for an error that doesn't belong to a field: a conflict, a connection failure or the generic sign-in message. When every error maps to a field, there is no banner.
+**Why.** A "check the highlighted fields" banner repeats what the inline errors already say, and pulls the eye away from them.
+**Rejected.** An always-on summary banner.
+
+### D-113 The page name lives in the top bar only
+**Decision.** The top bar shows the page name, with a "Clients › Wanjiru Kamau" trail and a Back button on detail pages (Alt+Left also goes back). The page's own `PageHeader` shows only the subtitle, the count (taken from the table) and the actions.
+**Why.** The same title twice in one view wastes the most valuable space on the screen.
+**Rejected.** A large in-page heading under the top bar.
+
+### D-114 Screens link through `Navigator` and `Pages`
+**Decision.** The shell gives each page a `Navigator`: open another sidebar page, or push, replace and go back through a stack of detail pages. `Pages` opens screens by what they show (a client, a job, the quote editor), so the clients, jobs and editor screens link to each other without depending on each other's classes. A page that implements `Refreshable` reloads when the user comes back to it.
+**Why.** The screens could be built in parallel and stay decoupled, and Back always returns to the page the user came from.
+**Rejected.** Screens constructing each other directly; a URL-style router.
+
+### D-115 One sample story for all screenshots
+**Decision.** The test fixture `SampleData` seeds six clients, six jobs and four payments through the real services, with a controlled clock: "today" is Friday 16 October 2026. Every snapshot, dialog, toast and style-guide specimen refers to these same records. `Services` now exposes the app clock, so screens take "today" from it too.
+**Why.** The snapshots become the README screenshots, and figures that disagree between images look careless. Seeding through the services means every amount comes from the pricing engine.
+**Rejected.** Hand-written sample rows in each test.
+
+### D-116 The password strength hint
+**Decision.** `PasswordStrengthHint` shows three bars and a word (weak, fair, strong) from `PasswordPolicy.strengthOf`, under the new-password field on first run, the forced change and the voluntary change. Weak is olive, fair amber and strong green; red stays reserved for errors. It is a hint and never blocks a password the policy accepts.
+**Why.** Administrators reset accounts to a generated temporary password, so the only places a person types a new password are these three screens.
+**Rejected.** An admin "set password" field, which would show the admin the user's password.
+
+### D-117 Client GPS is shown as the borehole location
+**Decision.** The client dialog labels the optional latitude/longitude pair "Borehole location (GPS)", next to the postal address. A valid point outside Kenya's bounding box shows a warning under the fields and still saves.
+**Why.** The spec's client record has an address and one optional GPS pair, and that pair is where the borehole is drilled. A cross-border site is legitimate, so the check warns rather than blocks.
+**Rejected.** A separate free-text location field that the spec doesn't define.
