@@ -87,6 +87,7 @@ final class OverlaysSection implements StyleGuideSection {
     StackPane scrim = new StackPane(dialog);
     scrim.getStyleClass().add("dialog-scrim");
     dialog.setMaxHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+    dialog.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
     return scrim;
   }
 

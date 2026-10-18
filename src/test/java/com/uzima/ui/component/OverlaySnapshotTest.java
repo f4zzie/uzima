@@ -50,6 +50,7 @@ class OverlaySnapshotTest {
     DialogShell dialog = new DialogShell("Edit client");
     dialog.setSubtitle("UZM-DOM-0007 · Domestic");
     dialog.setContent(form);
+    dialog.showError("Check the highlighted field.");
     host.showDialog(dialog);
     host.success("Client saved", "UZM-DOM-0006 · Achieng Otieno");
     return host;

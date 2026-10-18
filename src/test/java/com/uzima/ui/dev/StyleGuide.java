@@ -4,6 +4,7 @@ import java.util.List;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 /**
@@ -53,6 +54,7 @@ public final class StyleGuide {
     Label description = new Label(section.description());
     description.getStyleClass().add("text-muted");
     description.setWrapText(true);
+    description.setMinHeight(Region.USE_PREF_SIZE);
     VBox card = new VBox(new VBox(4, title, description), section.build());
     card.getStyleClass().addAll("card", "stack-16");
     return card;

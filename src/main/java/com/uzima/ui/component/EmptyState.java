@@ -6,6 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 /**
@@ -25,6 +26,8 @@ public class EmptyState extends VBox {
     text.getStyleClass().add("empty-state-text");
     text.setWrapText(true);
     text.setMaxWidth(420);
+    text.setMinHeight(Region.USE_PREF_SIZE);
+    title.setMinHeight(Region.USE_PREF_SIZE);
   }
 
   /** Title, explanation and an optional action such as a "New client" button. */
