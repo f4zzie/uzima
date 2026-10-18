@@ -2,7 +2,6 @@ package com.uzima.ui;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.Objects;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -12,7 +11,6 @@ import javafx.stage.Stage;
 public final class MainWindow {
 
   private static final String VIEW = "view/main.fxml";
-  private static final String THEME = "css/theme.css";
 
   private final String databaseDescription;
 
@@ -29,10 +27,7 @@ public final class MainWindow {
     } catch (IOException e) {
       throw new UncheckedIOException("Cannot load " + VIEW, e);
     }
-    Scene scene = new Scene(root, 1200, 760);
-    scene
-        .getStylesheets()
-        .add(Objects.requireNonNull(MainWindow.class.getResource(THEME)).toExternalForm());
+    Scene scene = UiTheme.apply(new Scene(root, 1200, 760));
     stage.setTitle("Uzima");
     stage.setMinWidth(960);
     stage.setMinHeight(600);

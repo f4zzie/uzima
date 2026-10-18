@@ -49,7 +49,7 @@ public final class CompositionRoot implements AutoCloseable {
   }
 
   /** Builds repositories and services. Package-private so tests can wire against any database. */
-  static Services wire(Database database, Clock clock) {
+  public static Services wire(Database database, Clock clock) {
     JdbcTransactions tx = new JdbcTransactions(database.dataSource());
     Jdbc jdbc = new Jdbc(tx);
 

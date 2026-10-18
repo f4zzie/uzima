@@ -1,43 +1,687 @@
-/* Uzima theme. Colour tokens are looked-up colours on .root so a dark variant can override them. */
-.root {
-  -uz-primary: #0b4f6c;
-  -uz-primary-dark: #083a50;
-  -uz-accent: #f2a541;
-  -uz-surface: #ffffff;
-  -uz-background: #f4f7f9;
-  -uz-text: #1d2a33;
-  -uz-text-muted: #5b6b77;
-  -uz-border: #dde4e9;
+/*
+ * Uzima design system. This is the only stylesheet; every colour, spacing step, radius and font
+ * size used by the app is defined or listed here.
+ *
+ * COLOURS are looked-up colours declared once on .root (the token block below). Rules further down
+ * may only reference them (-uz-...), never a literal colour; ThemeTokensTest enforces this. Dark
+ * mode (Phase 5) is a second token block that redefines the same names.
+ *
+ * SIZES: JavaFX CSS can only look up paints, not lengths, so sizes can't be variables. Every
+ * length must come from these scales instead (also enforced by ThemeTokensTest):
+ *   font size  11 12 13 14 16 18 20 24 30          (14 = body)
+ *   spacing    0 1 2 4 6 8 10 12 16 20 24 32 40 48
+ *   radius     0 4 6 8 12 999                      (6 = controls, 8 = cards, 12 = dialogs)
+ *
+ * FONTS: Inter is bundled (see fonts/Inter-LICENSE.txt). Regular and Bold share the "Inter"
+ * family; Medium and SemiBold register as their own families, so headings name them directly.
+ */
 
-  -fx-font-family: "Inter", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+/* ===================================================================== tokens */
+.root {
+  /* brand */
+  -uz-primary: #0b4f6c;
+  -uz-primary-hover: #0a4561;
+  -uz-primary-pressed: #083a52;
+  -uz-primary-soft: #e4eff4;
+  -uz-on-primary: #ffffff;
+  -uz-accent: #f2a541;
+  -uz-accent-soft: #fdf1de;
+
+  /* neutrals */
+  -uz-bg: #f3f5f7;
+  -uz-surface: #ffffff;
+  -uz-surface-alt: #f8fafb;
+  -uz-surface-sunken: #eef1f4;
+  -uz-border: #dde3e8;
+  -uz-border-strong: #c3ccd4;
+  -uz-text: #17232d;
+  -uz-text-muted: #556370;
+  -uz-text-subtle: #7d8b97;
+  -uz-text-disabled: #a7b1ba;
+
+  /* semantic */
+  -uz-success: #1d7a4b;
+  -uz-success-soft: #e2f3e9;
+  -uz-warning: #8f5b00;
+  -uz-warning-soft: #fcefd6;
+  -uz-danger: #b42318;
+  -uz-danger-hover: #9b1d14;
+  -uz-danger-pressed: #811810;
+  -uz-danger-soft: #fdeae8;
+  -uz-info: #1d5fa8;
+  -uz-info-soft: #e3edf9;
+  -uz-neutral-soft: #eceff2;
+
+  /* interaction */
+  -uz-focus: #2b7fd9;
+  -uz-focus-halo: rgba(43, 127, 217, 0.28);
+  -uz-hover: rgba(11, 79, 108, 0.06);
+  -uz-selection: #d3e6f0;
+  -uz-scrim: rgba(12, 22, 31, 0.45);
+  -uz-overlay: rgba(255, 255, 255, 0.72);
+  -uz-shadow: rgba(16, 24, 40, 0.10);
+  -uz-shadow-strong: rgba(16, 24, 40, 0.22);
+
+  /* sidebar */
+  -uz-sidebar-bg: #0d2c3b;
+  -uz-sidebar-text: #bccbd6;
+  -uz-sidebar-text-strong: #ffffff;
+  -uz-sidebar-hover: #15394b;
+  -uz-sidebar-active: #1b4a60;
+  -uz-sidebar-divider: #1d3f50;
+
+  /* modena hooks, so built-in controls derive from the same palette */
+  -fx-base: -uz-surface;
+  -fx-background: -uz-bg;
+  -fx-control-inner-background: -uz-surface;
+  -fx-accent: -uz-primary;
+  -fx-default-button: -uz-primary;
+  -fx-focus-color: -uz-focus;
+  -fx-faint-focus-color: -uz-focus-halo;
+  -fx-selection-bar: -uz-selection;
+  -fx-selection-bar-non-focused: -uz-surface-sunken;
+  -fx-text-base-color: -uz-text;
+  -fx-text-background-color: -uz-text;
+  -fx-mark-color: -uz-text;
+  -fx-box-border: -uz-border;
+  -fx-text-box-border: -uz-border-strong;
+
+  -fx-font-family: "Inter";
   -fx-font-size: 14px;
   -fx-text-fill: -uz-text;
-  -fx-background-color: -uz-background;
+  -fx-background-color: -uz-bg;
 }
 
-.top-bar {
-  -fx-background-color: -uz-primary;
-  -fx-padding: 12 20;
+/* ===================================================================== typography */
+.text-display {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 30px;
+}
+
+.text-headline {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 24px;
+}
+
+.text-title {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 20px;
+}
+
+.text-subtitle {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 16px;
+}
+
+.text-body {
+  -fx-font-size: 14px;
+}
+
+.text-small {
+  -fx-font-size: 13px;
+}
+
+.text-caption {
+  -fx-font-size: 12px;
+  -fx-text-fill: -uz-text-muted;
+}
+
+.text-overline {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 11px;
+  -fx-text-fill: -uz-text-subtle;
+}
+
+.text-muted {
+  -fx-text-fill: -uz-text-muted;
+}
+
+.text-strong {
+  -fx-font-family: "Inter SemiBold";
+}
+
+.text-numeric {
+  -fx-font-family: "Inter Medium";
+}
+
+.text-danger {
+  -fx-text-fill: -uz-danger;
+}
+
+.text-success {
+  -fx-text-fill: -uz-success;
+}
+
+.label,
+.text {
+  -fx-text-fill: -uz-text;
+}
+
+/* ===================================================================== layout helpers */
+.surface {
+  -fx-background-color: -uz-surface;
+}
+
+.card {
+  -fx-background-color: -uz-surface;
+  -fx-background-radius: 8;
+  -fx-border-color: -uz-border;
+  -fx-border-radius: 8;
+  -fx-padding: 20;
+  -fx-effect: dropshadow(gaussian, -uz-shadow, 8, 0, 0, 1);
+}
+
+.divider {
+  -fx-background-color: -uz-border;
+  -fx-min-height: 1;
+  -fx-pref-height: 1;
+  -fx-max-height: 1;
+}
+
+.stack-4 {
+  -fx-spacing: 4;
+}
+
+.stack-8 {
+  -fx-spacing: 8;
+}
+
+.stack-12 {
+  -fx-spacing: 12;
+}
+
+.stack-16 {
+  -fx-spacing: 16;
+}
+
+.stack-24 {
+  -fx-spacing: 24;
+}
+
+.page {
+  -fx-padding: 24 32 32 32;
+  -fx-spacing: 20;
+}
+
+.page-header {
+  -fx-spacing: 12;
   -fx-alignment: center-left;
 }
 
-.brand {
-  -fx-text-fill: white;
-  -fx-font-size: 18px;
-  -fx-font-weight: bold;
+.scroll-pane,
+.scroll-pane > .viewport {
+  -fx-background-color: transparent;
+  -fx-background-insets: 0;
+  -fx-padding: 0;
 }
 
-.content {
-  -fx-padding: 24;
+/* ===================================================================== focus
+   Every focusable control shows a 2px focus ring; keyboard users must always see where they are. */
+.button:focused,
+.toggle-button:focused,
+.text-field:focused,
+.password-field:focused,
+.text-area:focused,
+.combo-box-base:focused,
+.choice-box:focused,
+.check-box:focused > .box,
+.radio-button:focused > .radio,
+.date-picker:focused,
+.spinner:focused,
+.hyperlink:focused,
+.table-view:focused,
+.list-view:focused {
+  -fx-border-color: -uz-focus;
+  -fx-border-width: 2;
+  -fx-border-radius: 6;
+  -fx-border-insets: -2;
 }
 
-.status-bar {
+/* ===================================================================== buttons */
+.button,
+.toggle-button {
   -fx-background-color: -uz-surface;
-  -fx-border-color: -uz-border transparent transparent transparent;
-  -fx-padding: 6 20;
+  -fx-background-radius: 6;
+  -fx-background-insets: 0;
+  -fx-border-color: -uz-border-strong;
+  -fx-border-radius: 6;
+  -fx-border-width: 1;
+  -fx-text-fill: -uz-text;
+  -fx-font-family: "Inter Medium";
+  -fx-font-size: 14px;
+  -fx-padding: 8 16;
+  -fx-cursor: hand;
+  -fx-effect: none;
 }
 
-.status-text {
-  -fx-text-fill: -uz-text-muted;
+.button:hover,
+.toggle-button:hover {
+  -fx-background-color: -uz-surface-alt;
+  -fx-border-color: -uz-text-subtle;
+}
+
+.button:armed,
+.toggle-button:selected {
+  -fx-background-color: -uz-surface-sunken;
+}
+
+.button.primary {
+  -fx-background-color: -uz-primary;
+  -fx-border-color: -uz-primary;
+  -fx-text-fill: -uz-on-primary;
+}
+
+.button.primary:hover {
+  -fx-background-color: -uz-primary-hover;
+  -fx-border-color: -uz-primary-hover;
+}
+
+.button.primary:armed {
+  -fx-background-color: -uz-primary-pressed;
+}
+
+.button.danger {
+  -fx-background-color: -uz-danger;
+  -fx-border-color: -uz-danger;
+  -fx-text-fill: -uz-on-primary;
+}
+
+.button.danger:hover {
+  -fx-background-color: -uz-danger-hover;
+  -fx-border-color: -uz-danger-hover;
+}
+
+.button.danger:armed {
+  -fx-background-color: -uz-danger-pressed;
+}
+
+.button.ghost {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+  -fx-text-fill: -uz-primary;
+}
+
+.button.ghost:hover {
+  -fx-background-color: -uz-hover;
+}
+
+.button.small {
+  -fx-font-size: 13px;
+  -fx-padding: 4 10;
+}
+
+.button.large {
+  -fx-font-size: 16px;
+  -fx-padding: 10 20;
+}
+
+.button:disabled {
+  -fx-opacity: 0.45;
+}
+
+.button:focused.primary,
+.button:focused.danger {
+  -fx-border-color: -uz-focus;
+}
+
+.hyperlink {
+  -fx-text-fill: -uz-primary;
+  -fx-border-color: transparent;
+  -fx-padding: 2 4;
+  -fx-underline: false;
+}
+
+.hyperlink:hover {
+  -fx-underline: true;
+}
+
+/* ===================================================================== inputs */
+.text-field,
+.password-field,
+.text-area,
+.combo-box-base,
+.choice-box,
+.date-picker > .text-field {
+  -fx-background-color: -uz-surface;
+  -fx-background-radius: 6;
+  -fx-background-insets: 0;
+  -fx-border-color: -uz-border-strong;
+  -fx-border-radius: 6;
+  -fx-border-width: 1;
+  -fx-text-fill: -uz-text;
+  -fx-prompt-text-fill: -uz-text-subtle;
+  -fx-highlight-fill: -uz-selection;
+  -fx-highlight-text-fill: -uz-text;
+  -fx-font-size: 14px;
+}
+
+.text-field,
+.password-field {
+  -fx-padding: 8 10;
+}
+
+.text-area .content {
+  -fx-background-color: -uz-surface;
+  -fx-background-radius: 6;
+  -fx-padding: 8 10;
+}
+
+.text-field:hover,
+.password-field:hover,
+.text-area:hover,
+.combo-box-base:hover {
+  -fx-border-color: -uz-text-subtle;
+}
+
+.text-field:disabled,
+.password-field:disabled,
+.text-area:disabled,
+.combo-box-base:disabled {
+  -fx-opacity: 1;
+  -fx-background-color: -uz-surface-sunken;
+  -fx-text-fill: -uz-text-disabled;
+}
+
+.text-field:invalid,
+.password-field:invalid,
+.text-area:invalid,
+.combo-box-base:invalid,
+.choice-box:invalid {
+  -fx-border-color: -uz-danger;
+}
+
+.text-field:readonly {
+  -fx-background-color: -uz-surface-alt;
+}
+
+/* Form field: label, input, then helper or error text underneath. */
+.form-field {
+  -fx-spacing: 6;
+}
+
+.form-field-label {
+  -fx-font-family: "Inter Medium";
+  -fx-font-size: 13px;
+  -fx-text-fill: -uz-text;
+}
+
+.form-field-required {
+  -fx-text-fill: -uz-danger;
+}
+
+.form-field-help {
   -fx-font-size: 12px;
+  -fx-text-fill: -uz-text-muted;
+}
+
+.form-field-error {
+  -fx-font-size: 12px;
+  -fx-text-fill: -uz-danger;
+}
+
+/* Adornment around a field: "KSh [ 1,000.00 ]" or "[ 120.00 ] m". */
+.input-group {
+  -fx-alignment: center-left;
+}
+
+.input-adornment {
+  -fx-background-color: -uz-surface-sunken;
+  -fx-border-color: -uz-border-strong;
+  -fx-text-fill: -uz-text-muted;
+  -fx-font-size: 13px;
+  -fx-padding: 8 10;
+}
+
+.input-adornment.leading {
+  -fx-background-radius: 6 0 0 6;
+  -fx-border-radius: 6 0 0 6;
+  -fx-border-width: 1 0 1 1;
+}
+
+.input-adornment.trailing {
+  -fx-background-radius: 0 6 6 0;
+  -fx-border-radius: 0 6 6 0;
+  -fx-border-width: 1 1 1 0;
+}
+
+.input-group .text-field.has-leading {
+  -fx-background-radius: 0 6 6 0;
+  -fx-border-radius: 0 6 6 0;
+}
+
+.input-group .text-field.has-trailing {
+  -fx-background-radius: 6 0 0 6;
+  -fx-border-radius: 6 0 0 6;
+}
+
+.input-group .text-field.numeric {
+  -fx-alignment: center-right;
+}
+
+.check-box,
+.radio-button {
+  -fx-text-fill: -uz-text;
+}
+
+.check-box > .box,
+.radio-button > .radio {
+  -fx-background-color: -uz-surface;
+  -fx-border-color: -uz-border-strong;
+  -fx-border-radius: 4;
+  -fx-background-radius: 4;
+}
+
+.check-box:selected > .box {
+  -fx-background-color: -uz-primary;
+  -fx-border-color: -uz-primary;
+}
+
+.check-box:selected > .box > .mark {
+  -fx-background-color: -uz-on-primary;
+}
+
+.combo-box-popup > .list-view,
+.context-menu {
+  -fx-background-color: -uz-surface;
+  -fx-border-color: -uz-border;
+  -fx-background-radius: 6;
+  -fx-border-radius: 6;
+  -fx-effect: dropshadow(gaussian, -uz-shadow-strong, 12, 0, 0, 4);
+}
+
+.list-cell:filled:selected,
+.list-cell:filled:hover,
+.menu-item:focused {
+  -fx-background-color: -uz-primary-soft;
+  -fx-text-fill: -uz-text;
+}
+
+.menu-item .label {
+  -fx-text-fill: -uz-text;
+}
+
+/* ===================================================================== banner (form-level message) */
+.banner {
+  -fx-background-radius: 6;
+  -fx-border-radius: 6;
+  -fx-border-width: 1;
+  -fx-padding: 10 12;
+  -fx-spacing: 8;
+  -fx-alignment: center-left;
+}
+
+.banner .label {
+  -fx-font-size: 13px;
+  -fx-wrap-text: true;
+}
+
+.banner.danger {
+  -fx-background-color: -uz-danger-soft;
+  -fx-border-color: -uz-danger;
+}
+
+.banner.danger .label {
+  -fx-text-fill: -uz-danger;
+}
+
+.banner.info {
+  -fx-background-color: -uz-info-soft;
+  -fx-border-color: -uz-info;
+}
+
+.banner.info .label {
+  -fx-text-fill: -uz-info;
+}
+
+.banner.success {
+  -fx-background-color: -uz-success-soft;
+  -fx-border-color: -uz-success;
+}
+
+.banner.success .label {
+  -fx-text-fill: -uz-success;
+}
+
+.banner.warning {
+  -fx-background-color: -uz-warning-soft;
+  -fx-border-color: -uz-warning;
+}
+
+.banner.warning .label {
+  -fx-text-fill: -uz-warning;
+}
+
+/* ===================================================================== components: data
+   Money and metres fields, status badges, data table. */
+
+/* ===================================================================== components: overlays
+   Dialog shell, toasts, loading overlay, state pane. */
+
+/* ===================================================================== app shell */
+
+/* ===================================================================== auth screens */
+
+/* ===================================================================== style guide (dev only) */
+.style-guide-swatch {
+  -fx-min-width: 120;
+  -fx-pref-width: 120;
+  -fx-spacing: 6;
+}
+
+.style-guide-chip {
+  -fx-min-height: 48;
+  -fx-pref-height: 48;
+  -fx-background-radius: 6;
+  -fx-border-color: -uz-border;
+  -fx-border-radius: 6;
+}
+
+.style-guide-chip-primary {
+  -fx-background-color: -uz-primary;
+}
+
+.style-guide-chip-primary-hover {
+  -fx-background-color: -uz-primary-hover;
+}
+
+.style-guide-chip-primary-soft {
+  -fx-background-color: -uz-primary-soft;
+}
+
+.style-guide-chip-accent {
+  -fx-background-color: -uz-accent;
+}
+
+.style-guide-chip-accent-soft {
+  -fx-background-color: -uz-accent-soft;
+}
+
+.style-guide-chip-bg {
+  -fx-background-color: -uz-bg;
+}
+
+.style-guide-chip-surface {
+  -fx-background-color: -uz-surface;
+}
+
+.style-guide-chip-surface-alt {
+  -fx-background-color: -uz-surface-alt;
+}
+
+.style-guide-chip-surface-sunken {
+  -fx-background-color: -uz-surface-sunken;
+}
+
+.style-guide-chip-border {
+  -fx-background-color: -uz-border;
+}
+
+.style-guide-chip-border-strong {
+  -fx-background-color: -uz-border-strong;
+}
+
+.style-guide-chip-text {
+  -fx-background-color: -uz-text;
+}
+
+.style-guide-chip-text-muted {
+  -fx-background-color: -uz-text-muted;
+}
+
+.style-guide-chip-text-subtle {
+  -fx-background-color: -uz-text-subtle;
+}
+
+.style-guide-chip-success {
+  -fx-background-color: -uz-success;
+}
+
+.style-guide-chip-success-soft {
+  -fx-background-color: -uz-success-soft;
+}
+
+.style-guide-chip-warning {
+  -fx-background-color: -uz-warning;
+}
+
+.style-guide-chip-warning-soft {
+  -fx-background-color: -uz-warning-soft;
+}
+
+.style-guide-chip-danger {
+  -fx-background-color: -uz-danger;
+}
+
+.style-guide-chip-danger-soft {
+  -fx-background-color: -uz-danger-soft;
+}
+
+.style-guide-chip-info {
+  -fx-background-color: -uz-info;
+}
+
+.style-guide-chip-info-soft {
+  -fx-background-color: -uz-info-soft;
+}
+
+.style-guide-chip-focus {
+  -fx-background-color: -uz-focus;
+}
+
+.style-guide-chip-sidebar-bg {
+  -fx-background-color: -uz-sidebar-bg;
+}
+
+.style-guide-chip-sidebar-active {
+  -fx-background-color: -uz-sidebar-active;
+}
+
+.style-guide-grid {
+  -fx-hgap: 32;
+  -fx-vgap: 12;
+}
+
+.style-guide-row {
+  -fx-spacing: 12;
+  -fx-alignment: center-left;
 }
