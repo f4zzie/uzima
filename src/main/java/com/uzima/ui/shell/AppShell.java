@@ -1,11 +1,16 @@
 package com.uzima.ui.shell;
 
 import com.uzima.ui.Views;
+import com.uzima.ui.component.OverlayHost;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
@@ -28,9 +33,16 @@ public final class AppShell {
   private final ShellViewModel model;
   private final Parent root;
   private final ToggleGroup group = new ToggleGroup();
+  private final Deque<Page> stack = new ArrayDeque<>();
+  private final Navigator navigator = new ShellNavigator();
+
+  /** A page in the content area and its top-bar title. */
+  private record Page(String title, Node node) {}
 
   @FXML private VBox nav;
   @FXML private Label shortcutHint;
+  @FXML private Button backButton;
+  @FXML private Label trail;
   @FXML private Label title;
   @FXML private MenuButton userMenu;
   @FXML private Label initials;
@@ -52,7 +64,7 @@ public final class AppShell {
 
   @FXML
   private void initialize() {
-    title.textProperty().bind(model.titleProperty());
+    model.titleProperty().addListener((obs, old, now) -> updateTopBar());
     initials.setText(model.initials());
     userName.setText(model.displayName());
     userRole.setText(model.roleLabel());
@@ -101,13 +113,102 @@ public final class AppShell {
             });
   }
 
+  /** The navigator pages use to open detail pages and other sidebar pages. */
+  public Navigator navigator() {
+    return navigator;
+  }
+
   private void show(Destination destination) {
     for (Node n : nav.getChildren()) {
       ToggleButton item = (ToggleButton) n;
       item.setSelected(item.getUserData() == destination);
     }
-    Node page = destination == null ? WelcomePanel.build(model) : destination.view().get();
-    content.getChildren().setAll(page);
+    stack.clear();
+    Node page =
+        destination == null ? WelcomePanel.build(model) : destination.view().apply(navigator);
+    stack.push(new Page(model.titleProperty().get(), page));
+    showTop();
+  }
+
+  private void showTop() {
+    Page top = stack.peek();
+    content.getChildren().setAll(top.node());
+    if (top.node() instanceof Refreshable page) {
+      page.refresh();
+    }
+    updateTopBar();
+  }
+
+  private void updateTopBar() {
+    boolean detail = stack.size() > 1;
+    backButton.setVisible(detail);
+    backButton.setManaged(detail);
+    if (detail) {
+      List<Page> pages = new ArrayList<>(stack);
+      java.util.Collections.reverse(pages);
+      trail.setText(
+          String.join(
+                  "  ›  ", pages.subList(0, pages.size() - 1).stream().map(Page::title).toList())
+              + "  ›");
+      title.setText(stack.peek().title());
+    } else {
+      trail.setText("");
+      title.setText(model.titleProperty().get());
+    }
+    trail.setVisible(detail);
+    trail.setManaged(detail);
+  }
+
+  @FXML
+  private void back() {
+    navigator.back();
+  }
+
+  /** The shell's {@link Navigator}: a stack of pages on top of the selected sidebar page. */
+  private final class ShellNavigator implements Navigator {
+
+    @Override
+    public boolean open(String destinationId) {
+      List<Destination> all = model.destinations();
+      for (int i = 0; i < all.size(); i++) {
+        if (all.get(i).id().equals(destinationId)) {
+          if (model.selectedProperty().get() == all.get(i)) {
+            show(all.get(i));
+          } else {
+            model.select(i);
+          }
+          return true;
+        }
+      }
+      return false;
+    }
+
+    @Override
+    public void push(String pageTitle, Node page) {
+      stack.push(new Page(pageTitle, page));
+      showTop();
+    }
+
+    @Override
+    public void replace(String pageTitle, Node page) {
+      if (stack.size() > 1) {
+        stack.pop();
+      }
+      push(pageTitle, page);
+    }
+
+    @Override
+    public void back() {
+      if (stack.size() > 1) {
+        stack.pop();
+        showTop();
+      }
+    }
+
+    @Override
+    public OverlayHost overlays() {
+      return OverlayHost.of(root);
+    }
   }
 
   private void onNavKey(KeyEvent e) {
@@ -127,6 +228,11 @@ public final class AppShell {
   }
 
   private void onShortcut(KeyEvent e) {
+    if (e.isAltDown() && e.getCode() == KeyCode.LEFT && stack.size() > 1) {
+      navigator.back();
+      e.consume();
+      return;
+    }
     if (!e.isShortcutDown() || e.isAltDown()) {
       return;
     }

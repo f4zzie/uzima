@@ -3,6 +3,7 @@ package com.uzima.ui.auth;
 import com.uzima.ui.Views;
 import com.uzima.ui.component.Banner;
 import com.uzima.ui.component.FormField;
+import com.uzima.ui.component.PasswordStrengthHint;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -41,6 +42,7 @@ public final class FirstRunView {
   @FXML
   private void initialize() {
     passwordField.setHelp(FirstRunViewModel.PASSWORD_HINT);
+    passwordField.setAccessory(new PasswordStrengthHint(password.textProperty()));
     displayName.textProperty().bindBidirectional(model.displayNameProperty());
     username.textProperty().bindBidirectional(model.usernameProperty());
     password.textProperty().bindBidirectional(model.passwordProperty());

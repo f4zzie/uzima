@@ -65,6 +65,7 @@ public class DataTable<T> extends VBox {
   private String emptyText = "";
   private Node emptyAction;
   private State state = State.READY;
+  private boolean showCount = true;
 
   private enum State {
     READY,
@@ -75,7 +76,8 @@ public class DataTable<T> extends VBox {
   public DataTable() {
     getStyleClass().add("data-table");
     sorted.comparatorProperty().bind(table.comparatorProperty());
-    table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+    // Fixed columns keep their width, bounded ones stop at their max, flex columns take the rest.
+    table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
     table.setPlaceholder(placeholder);
     VBox.setVgrow(table, Priority.ALWAYS);
 
@@ -185,6 +187,20 @@ public class DataTable<T> extends VBox {
     this.onOpen = Objects.requireNonNull(onOpen);
   }
 
+  /**
+   * The row count as shown ("6 jobs", "2 of 6 jobs"), so a {@link PageHeader} can show it instead
+   * of the toolbar; see {@link #setShowCount}.
+   */
+  public javafx.beans.property.ReadOnlyStringProperty countTextProperty() {
+    return count.textProperty();
+  }
+
+  /** Whether the toolbar shows the count itself; turn off when a page header shows it. */
+  public void setShowCount(boolean show) {
+    showCount = show;
+    refresh();
+  }
+
   /** Buttons shown at the right of the toolbar, e.g. "New client". */
   public ObservableList<Node> getActions() {
     return actions.getChildren();
@@ -192,15 +208,32 @@ public class DataTable<T> extends VBox {
 
   // ------------------------------------------------------------------ columns
 
-  public TableColumn<T, String> addTextColumn(String title, Function<T, String> value) {
+  /** A plain text column, e.g. a name (usually {@link ColumnWidth#flex flex}). */
+  public TableColumn<T, String> addTextColumn(
+      String title, Function<T, String> value, ColumnWidth width) {
     TableColumn<T, String> column = new TableColumn<>(title);
     column.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(value.apply(c.getValue())));
     column.setComparator(Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
+    width.applyTo(column);
     table.getColumns().add(column);
     return column;
   }
 
-  /** A right-aligned amount column, sorted by value and shown as {@code 1,234.00}. */
+  /**
+   * A text column set in tabular figures, for values whose digits should line up down the column:
+   * client IDs, job numbers, phone numbers and dates.
+   */
+  public TableColumn<T, String> addFiguresColumn(
+      String title, Function<T, String> value, ColumnWidth width) {
+    TableColumn<T, String> column = addTextColumn(title, value, width);
+    column.getStyleClass().add("figures");
+    return column;
+  }
+
+  /**
+   * A right-aligned amount column (header included), sorted by value and shown as {@code 1,234.00}
+   * in tabular figures so the digits line up.
+   */
   public TableColumn<T, Money> addMoneyColumn(String title, Function<T, Money> value) {
     TableColumn<T, Money> column = new TableColumn<>(title);
     column.getStyleClass().add("numeric");
@@ -219,13 +252,14 @@ public class DataTable<T> extends VBox {
                 setText(empty || money == null ? null : money.formatPlain());
               }
             });
+    ColumnWidth.range(140, 180).applyTo(column);
     table.getColumns().add(column);
     return column;
   }
 
   /** A column showing a node per row, such as a {@link StatusBadge}; sorted by {@code sortKey}. */
   public <K extends Comparable<K>> TableColumn<T, T> addNodeColumn(
-      String title, Function<T, Node> node, Function<T, K> sortKey) {
+      String title, Function<T, Node> node, Function<T, K> sortKey, ColumnWidth width) {
     TableColumn<T, T> column = new TableColumn<>(title);
     column.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue()));
     column.setComparator(
@@ -240,6 +274,7 @@ public class DataTable<T> extends VBox {
                 setGraphic(empty || row == null ? null : node.apply(row));
               }
             });
+    width.applyTo(column);
     table.getColumns().add(column);
     return column;
   }
@@ -315,8 +350,8 @@ public class DataTable<T> extends VBox {
     search.setVisible(hasData);
     search.setManaged(hasData);
     search.setDisable(state != State.READY);
-    count.setVisible(hasData);
-    count.setManaged(hasData);
+    count.setVisible(hasData && showCount);
+    count.setManaged(hasData && showCount);
     switch (state) {
       case LOADING -> {
         table.setItems(none);

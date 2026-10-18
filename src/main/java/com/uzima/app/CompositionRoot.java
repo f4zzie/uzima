@@ -96,7 +96,8 @@ public final class CompositionRoot implements AutoCloseable {
         jobs,
         payments,
         audit,
-        pricing);
+        pricing,
+        clock);
   }
 
   /** Opens and migrates the database. Runs off the JavaFX thread. */

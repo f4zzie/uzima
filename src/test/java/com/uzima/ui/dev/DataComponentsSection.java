@@ -4,6 +4,9 @@ import com.uzima.domain.common.Metres;
 import com.uzima.domain.job.JobStatus;
 import com.uzima.domain.money.Money;
 import com.uzima.domain.payment.PaymentStatus;
+import com.uzima.service.JobSummary;
+import com.uzima.ui.SampleData;
+import com.uzima.ui.component.ColumnWidth;
 import com.uzima.ui.component.DataTable;
 import com.uzima.ui.component.FormField;
 import com.uzima.ui.component.MetresField;
@@ -20,59 +23,10 @@ import javafx.scene.layout.VBox;
 /** Money and metres fields, status badges and the data table in each of its states. */
 final class DataComponentsSection implements StyleGuideSection {
 
-  /** A sample row; the real screens use service summaries. */
-  record SampleJob(
-      String number,
-      String client,
-      String county,
-      JobStatus status,
-      Money total,
-      PaymentStatus payment) {}
-
-  static final List<SampleJob> JOBS =
-      List.of(
-          new SampleJob(
-              "JOB-2026-00041",
-              "Wanjiru Kamau",
-              "Kiambu",
-              JobStatus.COMPLETED,
-              Money.of("298120.00"),
-              PaymentStatus.PAID),
-          new SampleJob(
-              "JOB-2026-00042",
-              "Baraka Dairy Ltd",
-              "Nakuru",
-              JobStatus.IN_PROGRESS,
-              Money.of("684400.00"),
-              PaymentStatus.PARTIALLY_PAID),
-          new SampleJob(
-              "JOB-2026-00043",
-              "Otieno Ochieng",
-              "Kisumu",
-              JobStatus.APPROVED,
-              Money.of("231840.00"),
-              PaymentStatus.NOT_PAID),
-          new SampleJob(
-              "JOB-2026-00044",
-              "Mwangaza Flower Farm",
-              "Laikipia",
-              JobStatus.PENDING_SURVEY,
-              Money.of("1412560.00"),
-              PaymentStatus.NOT_PAID),
-          new SampleJob(
-              "JOB-2026-00045",
-              "Chebet Kiprono",
-              "Uasin Gishu",
-              JobStatus.CANCELLED,
-              Money.of("189080.00"),
-              PaymentStatus.PARTIALLY_PAID),
-          new SampleJob(
-              "JOB-2026-00046",
-              "Mombasa Cement Works",
-              "Mombasa",
-              JobStatus.COMPLETED,
-              Money.of("2045800.00"),
-              PaymentStatus.PAID));
+  /** The jobs from the shared snapshot data, so the table matches every other screenshot. */
+  static List<JobSummary> jobs() {
+    return SampleData.shared().jobSummaries();
+  }
 
   @Override
   public String title() {
@@ -92,23 +46,23 @@ final class DataComponentsSection implements StyleGuideSection {
         fields(),
         badges(),
         caption("Table with rows"),
-        table(JOBS, ""),
+        table(jobs(), ""),
         caption("Empty"),
         emptyTable(),
         caption("No results"),
-        table(JOBS, "Garissa"),
+        table(jobs(), "Garissa"),
         caption("Loading"),
         loadingTable());
   }
 
   private static Node fields() {
     MoneyField amount = new MoneyField();
-    amount.setValue(Money.of("684400.00"));
+    amount.setValue(Money.of("600000.00"));
     FormField amountField = new FormField("Amount received", amount);
-    amountField.setHelp("Up to the balance of KSh 600,000.00");
+    amountField.setHelp("JOB-2026-00001 balance: KSh 600,000.00");
 
     MetresField depth = new MetresField();
-    depth.setValue(Metres.of("150.50"));
+    depth.setValue(Metres.of("150.00"));
     FormField depthField = new FormField("Drilling depth", depth);
 
     MoneyField bad = new MoneyField();
@@ -140,18 +94,24 @@ final class DataComponentsSection implements StyleGuideSection {
         12, ButtonsSection.row("Job status", jobs), ButtonsSection.row("Payment", payments));
   }
 
-  static DataTable<SampleJob> table(List<SampleJob> rows, String query) {
-    DataTable<SampleJob> table = new DataTable<>();
+  static DataTable<JobSummary> table(List<JobSummary> rows, String query) {
+    DataTable<JobSummary> table = new DataTable<>();
     table.setItemNouns("job", "jobs");
-    table.setSearchPrompt("Search jobs, clients or counties");
+    table.setSearchPrompt("Search by job, client or client ID");
     table.setSearchMatcher(
-        DataTable.containsIn(SampleJob::number, SampleJob::client, SampleJob::county));
-    table.addTextColumn("Job", SampleJob::number);
-    table.addTextColumn("Client", SampleJob::client);
-    table.addTextColumn("County", SampleJob::county);
-    table.addNodeColumn("Status", j -> StatusBadge.of(j.status()), SampleJob::status);
-    table.addMoneyColumn("Total (KSh)", SampleJob::total);
-    table.addNodeColumn("Payment", j -> StatusBadge.of(j.payment()), SampleJob::payment);
+        DataTable.containsIn(
+            j -> j.number().value(), JobSummary::clientName, j -> j.clientCode().value()));
+    table.addFiguresColumn("Job", j -> j.number().value(), ColumnWidth.fixed(150));
+    table.addTextColumn("Client", JobSummary::clientName, ColumnWidth.flex(200));
+    table.addNodeColumn(
+        "Status", j -> StatusBadge.of(j.status()), JobSummary::status, ColumnWidth.fixed(140));
+    table.addMoneyColumn("Total (KSh)", JobSummary::grandTotal);
+    table.addMoneyColumn("Balance (KSh)", JobSummary::balance);
+    table.addNodeColumn(
+        "Payment",
+        j -> StatusBadge.of(j.paymentStatus()),
+        JobSummary::paymentStatus,
+        ColumnWidth.fixed(140));
     Button add = new Button("New job");
     add.getStyleClass().add("primary");
     table.getActions().add(add);
@@ -162,7 +122,7 @@ final class DataComponentsSection implements StyleGuideSection {
   }
 
   private static Node emptyTable() {
-    DataTable<SampleJob> table = table(List.of(), "");
+    DataTable<JobSummary> table = table(List.of(), "");
     Button add = new Button("Register a client");
     add.getStyleClass().add("primary");
     table.getActions().clear();
@@ -173,7 +133,7 @@ final class DataComponentsSection implements StyleGuideSection {
   }
 
   private static Node loadingTable() {
-    DataTable<SampleJob> table = table(JOBS, "");
+    DataTable<JobSummary> table = table(jobs(), "");
     table.setLoading(true);
     table.setPrefHeight(220);
     return table;

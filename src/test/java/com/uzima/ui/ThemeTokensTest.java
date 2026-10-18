@@ -30,7 +30,8 @@ class ThemeTokensTest {
   private static final Pattern NUMBER = Pattern.compile("-?\\d+(\\.\\d+)?");
 
   private static final Set<Double> FONT_SIZES = set(11, 12, 13, 14, 16, 18, 20, 24, 30);
-  private static final Set<Double> SPACING = set(0, 1, 2, 4, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48);
+  private static final Set<Double> SPACING =
+      set(0, 1, 2, 3, 4, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48);
   private static final Set<Double> RADII = set(0, 4, 6, 8, 12, 999);
 
   @Test

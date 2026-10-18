@@ -37,7 +37,10 @@ final class OverlaysSection implements StyleGuideSection {
     HBox toasts =
         new HBox(
             16,
-            new Toast(Toast.Kind.SUCCESS, "Payment recorded", "RCP-2026-00012 · KSh 84,400.00"),
+            new Toast(
+                Toast.Kind.SUCCESS,
+                "Payment recorded",
+                "RCP-2026-00001 · KSh 84,400.00 · JOB-2026-00001"),
             new Toast(Toast.Kind.INFO, "Prices updated", "New quotes use today's catalog."),
             new Toast(Toast.Kind.ERROR, "Could not save", "The database is not reachable."));
     HBox states = new HBox(24, loadingCard(), emptyState(), errorState());
@@ -52,31 +55,30 @@ final class OverlaysSection implements StyleGuideSection {
   }
 
   private static DialogShell recordPayment() {
-    TextField amount = new TextField("84,400.00");
+    TextField amount = new TextField("600,000.00");
     ComboBox<String> method = new ComboBox<>();
     method.getItems().addAll("M-Pesa", "Cash", "Bank transfer", "Cheque");
     method.getSelectionModel().select(0);
     method.setMaxWidth(Double.MAX_VALUE);
-    TextField reference = new TextField("QK7H2X9");
+    TextField reference = new TextField("SIN7K2QX4P");
     FormField referenceField = new FormField("M-Pesa reference", reference);
     referenceField.setRequired(true);
-    referenceField.setError("This reference is already used on RCP-2026-00004");
+    referenceField.setError("This M-Pesa code is already on receipt RCP-2026-00001");
     VBox form =
         new VBox(
             new FormField("Amount (KSh)", amount), new FormField("Method", method), referenceField);
     form.getStyleClass().add("stack-16");
     DialogShell dialog = new DialogShell("Record payment");
-    dialog.setSubtitle("JOB-2026-00012 · Balance KSh 600,000.00");
+    dialog.setSubtitle("JOB-2026-00001 · Athi River Cement Ltd · Balance KSh 600,000.00");
     dialog.setContent(form);
     dialog.setPrimary("Record payment", false);
-    dialog.showError("Check the highlighted field.");
     return dialog;
   }
 
   private static DialogShell cancelJob() {
     return new ConfirmDialog(
-            "Cancel JOB-2026-00012?",
-            "The client will owe nothing. KSh 84,400.00 already received will show as refund due.")
+            "Cancel JOB-2026-00004?",
+            "St. Mary's Girls School will owe nothing. The KSh 200,000.00 already received will show as a refund due.")
         .confirmLabel("Cancel job", true)
         .cancelLabel("Keep job")
         .requireReason("Reason for cancelling")
@@ -92,11 +94,11 @@ final class OverlaysSection implements StyleGuideSection {
   }
 
   private static Node loadingCard() {
-    Label title = new Label("Jobs this month");
+    Label title = new Label("Open jobs");
     title.getStyleClass().add("text-subtitle");
-    Label value = new Label("27");
+    Label value = new Label("4");
     value.getStyleClass().add("text-display");
-    VBox card = new VBox(8, title, value, new Label("KSh 4,812,300.00 invoiced"));
+    VBox card = new VBox(8, title, value, new Label("2 awaiting survey"));
     card.getStyleClass().add("card");
     card.setPrefSize(320, 240);
     LoadingOverlay overlay = new LoadingOverlay();

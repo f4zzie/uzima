@@ -1,5 +1,6 @@
 package com.uzima.ui;
 
+import com.uzima.ui.component.KeyboardFocus;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -11,7 +12,20 @@ import javafx.scene.text.Font;
 /** Loads the bundled Inter fonts and applies the single design-system stylesheet to scenes. */
 public final class UiTheme {
 
-  private static final List<String> FONT_WEIGHTS = List.of("Regular", "Medium", "SemiBold", "Bold");
+  /**
+   * Inter, plus "Inter Num": Inter with tabular figures frozen in (see tools/fonts), because JavaFX
+   * can't turn on the OpenType tnum feature and amounts must line up in columns.
+   */
+  private static final List<String> FONT_FILES =
+      List.of(
+          "Inter-Regular",
+          "Inter-Medium",
+          "Inter-SemiBold",
+          "Inter-Bold",
+          "InterNum-Regular",
+          "InterNum-Medium",
+          "InterNum-SemiBold");
+
   private static final String STYLESHEET = "css/theme.css";
 
   private static volatile boolean fontsLoaded;
@@ -23,8 +37,8 @@ public final class UiTheme {
     if (fontsLoaded) {
       return;
     }
-    for (String weight : FONT_WEIGHTS) {
-      String resource = "fonts/Inter-" + weight + ".ttf";
+    for (String file : FONT_FILES) {
+      String resource = "fonts/" + file + ".ttf";
       try (InputStream in = UiTheme.class.getResourceAsStream(resource)) {
         if (in == null || Font.loadFont(in, 14) == null) {
           throw new IllegalStateException("Cannot load bundled font " + resource);
@@ -41,9 +55,10 @@ public final class UiTheme {
         .toExternalForm();
   }
 
-  /** Loads fonts if needed and puts the theme on {@code scene}. */
+  /** Loads fonts if needed, puts the theme on {@code scene} and tracks keyboard focus. */
   public static Scene apply(Scene scene) {
     loadFonts();
+    KeyboardFocus.install(scene);
     if (!scene.getStylesheets().contains(stylesheet())) {
       scene.getStylesheets().add(stylesheet());
     }

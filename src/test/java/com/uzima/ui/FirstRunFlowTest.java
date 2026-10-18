@@ -24,6 +24,11 @@ class FirstRunFlowTest {
   private UiTestBackend ui;
   private Stage stage;
 
+  @org.junit.jupiter.api.BeforeAll
+  static void seedSampleData() {
+    SampleData.shared();
+  }
+
   @Start
   void start(Stage stage) {
     this.stage = stage;

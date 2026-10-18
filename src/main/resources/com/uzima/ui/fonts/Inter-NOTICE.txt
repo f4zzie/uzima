@@ -1,0 +1,8 @@
+Inter 4.1 by The Inter Project Authors, https://github.com/rsms/inter
+Licensed under the SIL Open Font License 1.1 (Inter-LICENSE.txt).
+
+Inter-*.ttf are the unmodified static fonts from the Inter 4.1 release.
+
+InterNum-*.ttf ("Inter Num") are Modified Versions under the OFL: the digits 0-9 are mapped to
+Inter's own tabular-figure glyphs (zero.tf ... nine.tf) and the family is renamed. They are built by
+tools/fonts/freeze_tnum.py and are distributed under the same licence.

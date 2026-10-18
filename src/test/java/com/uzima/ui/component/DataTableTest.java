@@ -44,10 +44,13 @@ class DataTableTest {
     table = new DataTable<>();
     table.setItemNouns("client", "clients");
     table.setSearchMatcher(DataTable.containsIn(Client::code, Client::name, Client::county));
-    table.addTextColumn("ID", Client::code);
-    table.addTextColumn("Name", Client::name);
+    table.addFiguresColumn("ID", Client::code, ColumnWidth.fixed(130));
+    table.addTextColumn("Name", Client::name, ColumnWidth.flex(200));
     table.addNodeColumn(
-        "County", c -> new StatusBadge(c.county(), StatusBadge.Tone.NEUTRAL), Client::county);
+        "County",
+        c -> new StatusBadge(c.county(), StatusBadge.Tone.NEUTRAL),
+        Client::county,
+        ColumnWidth.fixed(140));
     balance = table.addMoneyColumn("Balance", Client::balance);
     table.setOnOpen(opened::add);
     table.setEmptyState("No clients yet", "Register your first client.", null);
@@ -212,5 +215,22 @@ class DataTableTest {
 
   private String countText() {
     return ((javafx.scene.control.Label) table.lookup(".data-table-count")).getText();
+  }
+
+  @Test
+  void fixedColumnsKeepTheirWidthAndFlexColumnsTakeTheRest() {
+    robotFx(() -> table.tableView().layout());
+    var columns = table.tableView().getColumns();
+    assertThat(columns.get(0).getWidth()).isEqualTo(130);
+    assertThat(columns.get(2).getWidth()).isEqualTo(140);
+    assertThat(columns.get(3).getWidth()).isBetween(140.0, 180.0);
+    assertThat(columns.get(1).getWidth()).isGreaterThan(300);
+  }
+
+  @Test
+  void moneyHeadersAreRightAlignedLikeTheirCells(FxRobot robot) {
+    assertThat(robot.lookup(".column-header.numeric").queryAll()).isNotEmpty();
+    var header = (javafx.scene.control.Label) robot.lookup(".column-header.numeric .label").query();
+    assertThat(header.getAlignment()).isEqualTo(javafx.geometry.Pos.CENTER_RIGHT);
   }
 }

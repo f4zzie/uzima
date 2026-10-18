@@ -34,7 +34,7 @@ class StatusBadgeTest {
     assertThat(StatusBadge.toneOf(JobStatus.IN_PROGRESS)).isEqualTo(Tone.ACCENT);
     assertThat(StatusBadge.toneOf(PaymentStatus.PAID)).isEqualTo(Tone.SUCCESS);
     assertThat(StatusBadge.toneOf(PaymentStatus.PARTIALLY_PAID)).isEqualTo(Tone.WARNING);
-    assertThat(StatusBadge.toneOf(PaymentStatus.NOT_PAID)).isEqualTo(Tone.DANGER);
+    assertThat(StatusBadge.toneOf(PaymentStatus.NOT_PAID)).isEqualTo(Tone.NEUTRAL);
   }
 
   @Test

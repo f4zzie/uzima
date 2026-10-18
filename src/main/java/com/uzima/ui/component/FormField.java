@@ -22,6 +22,7 @@ import javafx.scene.layout.VBox;
 public class FormField extends VBox {
 
   private static final PseudoClass INVALID = PseudoClass.getPseudoClass("invalid");
+  private static final String ACCESSORY = "form-field-accessory";
 
   private final Label label = new Label();
   private final Label requiredMark = new Label("*");
@@ -135,6 +136,19 @@ public class FormField extends VBox {
 
   public boolean hasError() {
     return !error.getText().isEmpty();
+  }
+
+  /**
+   * A node shown directly under the input, above the help and error text, such as a {@link
+   * PasswordStrengthHint}.
+   */
+  public void setAccessory(Node accessory) {
+    getChildren().removeIf(n -> n.getProperties().containsKey(ACCESSORY));
+    if (accessory != null) {
+      accessory.getProperties().put(ACCESSORY, Boolean.TRUE);
+      int at = input.get() == null ? 1 : getChildren().indexOf(input.get()) + 1;
+      getChildren().add(at, accessory);
+    }
   }
 
   /** The label node, for tests and for layouts that align labels. */

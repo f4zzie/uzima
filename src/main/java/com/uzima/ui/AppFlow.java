@@ -10,8 +10,10 @@ import com.uzima.ui.component.Banner;
 import com.uzima.ui.component.OverlayHost;
 import com.uzima.ui.shell.AppShell;
 import com.uzima.ui.shell.Destination;
+import com.uzima.ui.shell.Navigator;
 import com.uzima.ui.shell.ShellViewModel;
 import java.util.List;
+import java.util.Optional;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
@@ -34,6 +36,7 @@ public final class AppFlow {
   private final List<Destination> destinations;
   private final StackPane host = new StackPane();
   private final OverlayHost overlays = new OverlayHost(host);
+  private AppShell shell;
 
   public AppFlow(Backend backend, List<Destination> destinations) {
     this.backend = backend;
@@ -80,7 +83,13 @@ public final class AppFlow {
   public void showShell(User user) {
     ShellViewModel model =
         new ShellViewModel(backend, user, destinations, null, () -> showLogin(null));
-    show(new AppShell(model).root());
+    shell = new AppShell(model);
+    show(shell.root());
+  }
+
+  /** The shell's navigator while the shell is showing. */
+  public Optional<Navigator> navigator() {
+    return Optional.ofNullable(shell).map(AppShell::navigator);
   }
 
   private void signedIn(LoginResult.Success success) {
@@ -89,6 +98,9 @@ public final class AppFlow {
   }
 
   private void show(Node screen) {
+    if (shell != null && screen != shell.root()) {
+      shell = null;
+    }
     host.getChildren().setAll(screen);
   }
 

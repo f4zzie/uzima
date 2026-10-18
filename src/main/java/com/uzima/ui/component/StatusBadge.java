@@ -50,7 +50,7 @@ public class StatusBadge extends Label {
 
   public static Tone toneOf(PaymentStatus status) {
     return switch (status) {
-      case NOT_PAID -> Tone.DANGER;
+      case NOT_PAID -> Tone.NEUTRAL;
       case PARTIALLY_PAID -> Tone.WARNING;
       case PAID -> Tone.SUCCESS;
     };

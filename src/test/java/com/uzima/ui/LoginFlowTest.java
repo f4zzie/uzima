@@ -29,6 +29,11 @@ class LoginFlowTest {
   private UiTestBackend ui;
   private Stage stage;
 
+  @org.junit.jupiter.api.BeforeAll
+  static void seedSampleData() {
+    SampleData.shared();
+  }
+
   @Start
   void start(Stage stage) {
     this.stage = stage;
@@ -65,7 +70,37 @@ class LoginFlowTest {
         .release(KeyCode.CONTROL);
     waitUntil(
         () -> "Clients".equals(robot.lookup(".top-bar-title").queryAs(Label.class).getText()));
+    // A click (not the shortcut) last, so the snapshot shows the selected state without the
+    // keyboard focus ring.
+    robot.clickOn(robot.lookup(".nav-item").nth(1).queryAs(javafx.scene.Node.class));
     StageSnapshots.saveAtStandardSizes(stage, "shell");
+  }
+
+  @Test
+  void theSidebarFocusRingAppearsOnlyForKeyboardFocus(FxRobot robot) {
+    waitFor(robot, "#username");
+    robot.clickOn("#username").write(UiTestBackend.ADMIN_USERNAME);
+    robot.clickOn("#password").write(UiTestBackend.ADMIN_PASSWORD);
+    robot.clickOn("#signIn");
+    waitFor(robot, ".user-name");
+
+    robot.clickOn("Jobs");
+    javafx.scene.Node jobs = robot.lookup(".nav-item").nth(2).query();
+    waitUntil(jobs::isFocused);
+    assertThat(KeyboardFocusState.of(jobs)).isFalse();
+
+    robot.type(KeyCode.DOWN);
+    javafx.scene.Node payments = robot.lookup(".nav-item").nth(3).query();
+    waitUntil(payments::isFocused);
+    assertThat(KeyboardFocusState.of(payments)).isTrue();
+    assertThat(KeyboardFocusState.of(jobs)).isFalse();
+  }
+
+  /** Reads the keyboard-focus state on the FX thread. */
+  private static final class KeyboardFocusState {
+    static boolean of(javafx.scene.Node node) {
+      return FxTest.onFx(() -> com.uzima.ui.component.KeyboardFocus.hasKeyboardFocus(node));
+    }
   }
 
   @Test

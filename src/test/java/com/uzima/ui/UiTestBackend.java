@@ -18,8 +18,12 @@ public final class UiTestBackend implements AutoCloseable {
   public final Backend backend;
 
   public UiTestBackend() {
+    this(Clock.system(DisplayFormats.ZONE));
+  }
+
+  public UiTestBackend(Clock clock) {
     database = TestDatabases.h2();
-    services = CompositionRoot.wire(database, Clock.system(DisplayFormats.ZONE));
+    services = CompositionRoot.wire(database, clock);
     backend = new Backend(services);
   }
 

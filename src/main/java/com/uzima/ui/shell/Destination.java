@@ -4,17 +4,17 @@ import com.uzima.domain.user.Permission;
 import com.uzima.domain.user.Role;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import javafx.scene.Node;
 
 /**
  * One sidebar entry. The app supplies the list; the shell knows nothing about specific screens.
  *
  * @param permission null when every signed-in user may open it
- * @param view builds the page each time it is opened
+ * @param view builds the page each time it is opened, given the shell's {@link Navigator}
  */
 public record Destination(
-    String id, String title, Icon icon, Permission permission, Supplier<Node> view) {
+    String id, String title, Icon icon, Permission permission, Function<Navigator, Node> view) {
 
   public Destination {
     Objects.requireNonNull(id, "id");
