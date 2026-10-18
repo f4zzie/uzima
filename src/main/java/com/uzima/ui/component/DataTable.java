@@ -1,8 +1,10 @@
 package com.uzima.ui.component;
 
 import com.uzima.domain.money.Money;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.BiPredicate;
@@ -21,6 +23,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -36,8 +40,9 @@ import javafx.scene.layout.VBox;
  * states. Searching filters the rows with a caller-supplied predicate; clicking headers still sorts
  * the filtered rows.
  *
- * <p>Keyboard: Ctrl+F (Cmd+F on macOS) focuses the search box, Esc in the search box clears it, and
- * Enter or a double-click on a row calls the {@link #setOnOpen open} handler.
+ * <p>Keyboard: Ctrl+F (Cmd+F on macOS) focuses the search box, Esc in the search box clears it,
+ * Ctrl+C copies the selected row (tab-separated, as shown), and Enter or a double-click on a row
+ * calls the {@link #setOnOpen open} handler.
  *
  * @param <T> the row type
  */
@@ -45,6 +50,8 @@ public class DataTable<T> extends VBox {
 
   private static final KeyCombination FIND =
       new KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN);
+  private static final KeyCombination COPY =
+      new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN);
 
   private final ObservableList<T> items = FXCollections.observableArrayList();
   private final FilteredList<T> filtered = new FilteredList<>(items);
@@ -116,6 +123,9 @@ public class DataTable<T> extends VBox {
         e -> {
           if (e.getCode() == KeyCode.ENTER && selected() != null) {
             onOpen.accept(selected());
+            e.consume();
+          } else if (COPY.match(e) && selected() != null) {
+            copySelectedRow();
             e.consume();
           }
         });
@@ -274,6 +284,7 @@ public class DataTable<T> extends VBox {
                 setGraphic(empty || row == null ? null : node.apply(row));
               }
             });
+    column.setUserData(node);
     width.applyTo(column);
     table.getColumns().add(column);
     return column;
@@ -313,6 +324,46 @@ public class DataTable<T> extends VBox {
 
   public T selected() {
     return table.getSelectionModel().getSelectedItem();
+  }
+
+  /**
+   * The selected row as shown on screen, one value per text or amount column, separated by tabs so
+   * it pastes into a spreadsheet as one row. Columns showing a node (badges) use the node's
+   * accessible text.
+   */
+  public String selectedRowText() {
+    T row = selected();
+    if (row == null) {
+      return "";
+    }
+    List<String> values = new ArrayList<>();
+    for (TableColumn<T, ?> column : table.getColumns()) {
+      Object value = column.getCellData(row);
+      values.add(display(value, row, column));
+    }
+    return String.join("\t", values);
+  }
+
+  /** Copies {@link #selectedRowText()} to the system clipboard. */
+  public void copySelectedRow() {
+    ClipboardContent content = new ClipboardContent();
+    content.putString(selectedRowText());
+    Clipboard.getSystemClipboard().setContent(content);
+  }
+
+  private String display(Object value, T row, TableColumn<T, ?> column) {
+    if (value == null) {
+      return "";
+    }
+    if (value instanceof Money money) {
+      return money.formatPlain();
+    }
+    if (value == row && column.getUserData() instanceof Function<?, ?> node) {
+      @SuppressWarnings("unchecked")
+      Node shown = ((Function<T, Node>) node).apply(row);
+      return shown.getAccessibleText() == null ? "" : shown.getAccessibleText();
+    }
+    return value.toString();
   }
 
   public void focusSearch() {

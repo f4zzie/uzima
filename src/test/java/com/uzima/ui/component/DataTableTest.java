@@ -233,4 +233,19 @@ class DataTableTest {
     var header = (javafx.scene.control.Label) robot.lookup(".column-header.numeric .label").query();
     assertThat(header.getAlignment()).isEqualTo(javafx.geometry.Pos.CENTER_RIGHT);
   }
+
+  @Test
+  void ctrlCCopiesTheSelectedRowAsShown(FxRobot robot) {
+    robot.clickOn(table.tableView());
+    robotFx(() -> table.tableView().getSelectionModel().select(0));
+    String expected = robotFxGet(table::selectedRowText);
+    assertThat(expected.split("\t")).hasSize(4);
+    robot.press(KeyCode.CONTROL, KeyCode.C).release(KeyCode.C, KeyCode.CONTROL);
+    assertThat(robotFxGet(() -> javafx.scene.input.Clipboard.getSystemClipboard().getString()))
+        .isEqualTo(expected);
+  }
+
+  private static <V> V robotFxGet(java.util.concurrent.Callable<V> work) {
+    return com.uzima.ui.FxTest.onFx(work);
+  }
 }
