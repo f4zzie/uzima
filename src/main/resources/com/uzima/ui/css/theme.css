@@ -1427,6 +1427,161 @@
   -fx-font-size: 14px;
 }
 
+/* ===================================================================== screens: quote
+   The quote editor: form on the left (scrolls), price breakdown card on the right (stays put). */
+.quote-editor {
+  -fx-padding: 24 32 24 32;
+  -fx-spacing: 24;
+}
+
+.quote-form-scroll {
+  -fx-padding: 0 8 0 0;
+}
+
+.quote-form {
+  -fx-spacing: 16;
+}
+
+.quote-client,
+.service-section {
+  -fx-background-color: -uz-surface;
+  -fx-background-radius: 8;
+  -fx-border-color: -uz-border;
+  -fx-border-radius: 8;
+  -fx-padding: 16 20;
+}
+
+.service-section {
+  -fx-spacing: 16;
+}
+
+.service-section:on {
+  -fx-border-color: -uz-border-strong;
+}
+
+.service-toggle {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 16px;
+}
+
+.service-total {
+  -fx-font-size: 14px;
+  -fx-text-fill: -uz-text-muted;
+}
+
+.service-body {
+  -fx-padding: 0 0 0 32;
+}
+
+.quote-grid {
+  -fx-hgap: 16;
+  -fx-vgap: 12;
+}
+
+.plumbing-editor {
+  -fx-spacing: 16;
+}
+
+.plumbing-modes {
+  -fx-padding: 0 0 4 0;
+}
+
+.pipe-runs {
+  -fx-spacing: 8;
+}
+
+.pipe-run {
+  -fx-spacing: 12;
+}
+
+.quote-notice {
+  -fx-background-color: -uz-info-soft;
+  -fx-border-color: -uz-info;
+  -fx-background-radius: 6;
+  -fx-border-radius: 6;
+  -fx-padding: 10 12;
+}
+
+.quote-notice .label {
+  -fx-text-fill: -uz-info;
+  -fx-font-size: 13px;
+}
+
+.breakdown-card {
+  -fx-min-width: 380;
+  -fx-pref-width: 400;
+  -fx-max-width: 440;
+  -fx-background-color: -uz-surface;
+  -fx-background-radius: 8;
+  -fx-border-color: -uz-border;
+  -fx-border-radius: 8;
+  -fx-effect: dropshadow(gaussian, -uz-shadow, 8, 0, 0, 1);
+}
+
+.breakdown-card > .viewport {
+  -fx-background-color: -uz-surface;
+  -fx-background-radius: 8;
+}
+
+.breakdown {
+  -fx-padding: 20 24;
+  -fx-spacing: 16;
+}
+
+.breakdown-lines,
+.breakdown-todo {
+  -fx-spacing: 16;
+}
+
+.breakdown-todo {
+  -fx-spacing: 8;
+}
+
+.breakdown-group {
+  -fx-spacing: 8;
+  -fx-padding: 0 0 12 0;
+  -fx-border-color: transparent transparent -uz-border transparent;
+}
+
+.breakdown-group-total {
+  -fx-text-fill: -uz-text-muted;
+}
+
+.breakdown-row {
+  -fx-spacing: 2;
+}
+
+.breakdown-amount {
+  -fx-alignment: center-right;
+}
+
+.breakdown-working {
+  -fx-font-size: 12px;
+  -fx-text-fill: -uz-text-muted;
+}
+
+.breakdown-totals {
+  -fx-spacing: 8;
+}
+
+.breakdown-grand {
+  -fx-padding: 12 0 0 0;
+  -fx-border-color: -uz-border-strong transparent transparent transparent;
+}
+
+.breakdown-currency {
+  -fx-font-size: 14px;
+}
+
+.breakdown-grand-total {
+  -fx-text-fill: -uz-primary;
+}
+
+.reprice-grid {
+  -fx-hgap: 24;
+  -fx-vgap: 8;
+}
+
 /* ===================================================================== style guide (dev only) */
 .style-guide-swatch {
   -fx-min-width: 120;

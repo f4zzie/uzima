@@ -69,6 +69,17 @@ public final class JobService {
     return engine.quote(spec, currentBasis(client(clientId)));
   }
 
+  /**
+   * Prices an edit to a pending job the way {@link #editQuote} would save it: items already on the
+   * job at their snapshotted prices, with the job's own fees, tiers and tax rate. Nothing is saved.
+   *
+   * @throws com.uzima.domain.job.QuoteLockedException if the job has left PENDING_SURVEY
+   */
+  public Quote previewEdit(long jobId, QuoteSpec edited) {
+    session.require(Permission.CREATE_JOBS);
+    return engine.requote(load(jobId), edited).quote();
+  }
+
   /** Saves a new job awaiting survey, with its prices snapshotted. */
   public Job create(long clientId, QuoteSpec spec, String notes) {
     User user = session.require(Permission.CREATE_JOBS);

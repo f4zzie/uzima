@@ -163,4 +163,11 @@ class MoneyTest {
   void currencyIsKenyanShilling() {
     assertThat(Money.CURRENCY).isEqualTo("KES");
   }
+
+  @Test
+  void formatCompactDropsZeroCentsOnly() {
+    assertThat(Money.of(1_500).formatCompact()).isEqualTo("1,500");
+    assertThat(Money.of("333.33").formatCompact()).isEqualTo("333.33");
+    assertThat(Money.of("1500.50").formatCompact()).isEqualTo("1,500.50");
+  }
 }

@@ -126,6 +126,17 @@ public record Money(BigDecimal amount) implements Comparable<Money> {
     return number().format(amount);
   }
 
+  /**
+   * Like {@link #formatPlain()} but without ".00" on whole amounts: {@code 1,500} or {@code
+   * 333.33}. Used for per-metre rates in working such as "50 m × 1,500".
+   */
+  public String formatCompact() {
+    String plain = formatPlain();
+    return amount.remainder(BigDecimal.ONE).signum() == 0
+        ? plain.substring(0, plain.length() - 3)
+        : plain;
+  }
+
   @Override
   public String toString() {
     return format();
