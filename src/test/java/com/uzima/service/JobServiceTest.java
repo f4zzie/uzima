@@ -232,6 +232,22 @@ class JobServiceTest {
   }
 
   @Test
+  void previewEditPricesWithTheJobsSnapshotWithoutSaving() {
+    Job saved = createExample2();
+    f.signInAs(Role.MANAGER);
+    f.catalog.changeItem(f.drilling("Symmetric").withPrice(Money.of(150_000)));
+    f.signInAs(Role.CLERK);
+    int auditBefore = f.ctx.auditEntries().size();
+
+    Quote edited = jobs.previewEdit(saved.id(), f.basicDomestic("90"));
+
+    // 80 m → 90 m at the snapshotted KSh 130,000 down payment, not today's 150,000.
+    assertThat(edited.grandTotal()).isEqualTo(Money.of(309_720));
+    assertThat(reload(saved)).isEqualTo(saved);
+    assertThat(f.ctx.auditEntries()).hasSize(auditBefore);
+  }
+
+  @Test
   void previewRepriceShowsBeforeAndAfterWithoutSaving() {
     Job saved = createExample2();
     f.signInAs(Role.MANAGER);

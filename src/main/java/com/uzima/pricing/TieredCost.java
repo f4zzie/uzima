@@ -1,7 +1,6 @@
 package com.uzima.pricing;
 
 import com.uzima.domain.money.Money;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -20,14 +19,7 @@ public record TieredCost(List<TierSegment> segments, Money total) {
    */
   public String describe() {
     return segments.stream()
-        .map(s -> s.metres() + " × " + rate(s.tier().ratePerMetre()))
+        .map(s -> s.metres() + " × " + s.tier().ratePerMetre().formatCompact())
         .collect(Collectors.joining(" + "));
-  }
-
-  private static String rate(Money rate) {
-    String plain = rate.formatPlain();
-    return rate.amount().remainder(BigDecimal.ONE).signum() == 0
-        ? plain.substring(0, plain.length() - 3)
-        : plain;
   }
 }

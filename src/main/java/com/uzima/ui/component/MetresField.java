@@ -7,6 +7,8 @@ import java.text.DecimalFormatSymbols;
 /** A length in metres with a trailing "m" label, shown as {@code 1,250.50}. */
 public class MetresField extends NumericField<Metres> {
 
+  private boolean allowZero = true;
+
   public MetresField() {
     super("m", false);
     getStyleClass().add("metres-field");
@@ -16,6 +18,21 @@ public class MetresField extends NumericField<Metres> {
   @Override
   protected Metres parse(String plain) {
     return Metres.of(plain);
+  }
+
+  public boolean isAllowZero() {
+    return allowZero;
+  }
+
+  /** When false, 0 m is rejected ("Enter more than 0 m"), e.g. for a borehole depth. */
+  public void setAllowZero(boolean allowZero) {
+    this.allowZero = allowZero;
+    revalidate();
+  }
+
+  @Override
+  protected String check(Metres metres) {
+    return !allowZero && metres.isZero() ? "Enter more than 0 m" : null;
   }
 
   @Override
