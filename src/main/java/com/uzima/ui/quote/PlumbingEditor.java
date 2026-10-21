@@ -147,7 +147,7 @@ final class PlumbingEditor extends VBox {
     diameterField.setPrefWidth(120);
     lengthField.setPrefWidth(150);
     HBox row = new HBox(12, pipeField, diameterField, lengthField, remove);
-    row.setAlignment(index == 0 ? Pos.BOTTOM_LEFT : Pos.TOP_LEFT);
+    row.setAlignment(Pos.BOTTOM_LEFT);
     row.getStyleClass().add("pipe-run");
     return row;
   }
