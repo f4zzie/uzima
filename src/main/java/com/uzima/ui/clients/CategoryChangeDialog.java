@@ -3,6 +3,7 @@ package com.uzima.ui.clients;
 import com.uzima.domain.client.Client;
 import com.uzima.domain.client.ClientCategory;
 import com.uzima.ui.component.DialogShell;
+import com.uzima.ui.component.FormBinding;
 import com.uzima.ui.component.FormField;
 import java.util.function.Consumer;
 import javafx.scene.control.ComboBox;
