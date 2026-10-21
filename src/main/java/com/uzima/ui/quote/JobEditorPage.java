@@ -202,6 +202,7 @@ public final class JobEditorPage {
         labels(d -> d.name() + " · KSh " + d.downPayment().formatCompact() + " down"));
     type.valueProperty().bindBidirectional(model.drillingTypeProperty());
     type.setPromptText("Choose a type");
+    TypeAhead.install(type, DrillingType::name);
     MetresField depth = new MetresField();
     depth.setId("depth");
     depth.valueProperty().bindBidirectional(model.depthProperty());
@@ -215,6 +216,7 @@ public final class JobEditorPage {
     type.setConverter(labels(p -> p.name() + " · KSh " + p.baseCost().formatCompact()));
     type.valueProperty().bindBidirectional(model.pumpTypeProperty());
     type.setPromptText("Choose a pump");
+    TypeAhead.install(type, PumpType::name);
     MetresField lift = new MetresField();
     lift.setId("lift");
     lift.valueProperty().bindBidirectional(model.liftProperty());
@@ -230,6 +232,7 @@ public final class JobEditorPage {
     capacity.setConverter(labels(t -> t.displayName() + " · KSh " + t.price().formatCompact()));
     capacity.valueProperty().bindBidirectional(model.tankProperty());
     capacity.setPromptText("Choose a size");
+    TypeAhead.install(capacity, TankType::displayName);
     return grid(field("tank", "Capacity", capacity), new VBox());
   }
 

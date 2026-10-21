@@ -4,6 +4,7 @@ import com.uzima.domain.catalog.PipeType;
 import com.uzima.ui.component.FormField;
 import com.uzima.ui.component.MetresField;
 import com.uzima.ui.component.MoneyField;
+import com.uzima.ui.component.TypeAhead;
 import com.uzima.ui.quote.QuoteEditorViewModel.PlumbingMode;
 import java.util.function.BiConsumer;
 import javafx.collections.ListChangeListener;
@@ -118,6 +119,7 @@ final class PlumbingEditor extends VBox {
         JobEditorPage.labels(p -> p.name() + " · KSh " + p.costPerMetre().formatCompact() + "/m"));
     pipe.valueProperty().bindBidirectional(run.pipeProperty());
     pipe.setPromptText("Pipe type");
+    TypeAhead.install(pipe, PipeType::name);
     pipe.setMaxWidth(Double.MAX_VALUE);
     TextField diameter = new TextField();
     diameter.textProperty().bindBidirectional(run.diameterProperty());
