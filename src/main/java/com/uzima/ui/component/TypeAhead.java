@@ -1,4 +1,4 @@
-package com.uzima.ui.clients;
+package com.uzima.ui.component;
 
 import java.util.Locale;
 import java.util.function.Function;
@@ -9,13 +9,13 @@ import javafx.scene.input.KeyEvent;
  * Lets a non-editable combo box jump to an item by typing the start of its name, as native lists
  * do: "na" selects Nairobi, then "nak" Nakuru. Typing pauses longer than a second start over.
  */
-final class TypeAhead {
+public final class TypeAhead {
 
   private static final long RESET_NANOS = 1_000_000_000L;
 
   private TypeAhead() {}
 
-  static <T> void install(ComboBox<T> box, Function<T, String> label) {
+  public static <T> void install(ComboBox<T> box, Function<T, String> label) {
     StringBuilder typed = new StringBuilder();
     long[] last = {0};
     box.addEventHandler(

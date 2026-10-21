@@ -43,6 +43,8 @@ public class FormField extends VBox {
     error.getStyleClass().add("form-field-error");
     error.setWrapText(true);
     HBox heading = new HBox(4, label, requiredMark);
+    heading.setVisible(false);
+    heading.setManaged(false);
     getChildren().addAll(heading, help, error);
     showText(help, "");
     showText(error, "");
@@ -70,6 +72,10 @@ public class FormField extends VBox {
 
   public void setLabel(String text) {
     label.setText(text);
+    // A field without a label (e.g. the second row of a repeated group) takes no label space.
+    boolean shown = text != null && !text.isBlank();
+    label.getParent().setVisible(shown);
+    label.getParent().setManaged(shown);
     applyAccessibleText();
   }
 

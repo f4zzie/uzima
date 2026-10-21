@@ -94,7 +94,12 @@ public final class AppShell {
       item.setToggleGroup(group);
       item.setUserData(d);
       item.setAccessibleHelp(i < 9 ? "Ctrl+" + (i + 1) : null);
-      item.setOnAction(e -> model.selectedProperty().set(d));
+      item.setOnAction(
+          e -> {
+            // Keep the current page selected until the page agrees to be left.
+            show(model.selectedProperty().get(), false);
+            leaveThen(() -> model.selectedProperty().set(d));
+          });
       item.addEventHandler(KeyEvent.KEY_PRESSED, this::onNavKey);
       nav.getChildren().add(item);
     }
@@ -119,9 +124,16 @@ public final class AppShell {
   }
 
   private void show(Destination destination) {
+    show(destination, true);
+  }
+
+  private void show(Destination destination, boolean rebuild) {
     for (Node n : nav.getChildren()) {
       ToggleButton item = (ToggleButton) n;
       item.setSelected(item.getUserData() == destination);
+    }
+    if (!rebuild) {
+      return;
     }
     stack.clear();
     Node page =
@@ -166,6 +178,14 @@ public final class AppShell {
     navigator.back();
   }
 
+  /** Runs {@code leave} now, or once the current page's {@link LeaveGuard} agrees. */
+  private void leaveThen(Runnable leave) {
+    Page top = stack.peek();
+    if (top == null || LeaveGuard.of(top.node()).map(g -> g.allowLeave(leave)).orElse(true)) {
+      leave.run();
+    }
+  }
+
   /** The shell's {@link Navigator}: a stack of pages on top of the selected sidebar page. */
   private final class ShellNavigator implements Navigator {
 
@@ -174,11 +194,16 @@ public final class AppShell {
       List<Destination> all = model.destinations();
       for (int i = 0; i < all.size(); i++) {
         if (all.get(i).id().equals(destinationId)) {
-          if (model.selectedProperty().get() == all.get(i)) {
-            show(all.get(i));
-          } else {
-            model.select(i);
-          }
+          Destination target = all.get(i);
+          int index = i;
+          leaveThen(
+              () -> {
+                if (model.selectedProperty().get() == target) {
+                  show(target);
+                } else {
+                  model.select(index);
+                }
+              });
           return true;
         }
       }
@@ -202,8 +227,11 @@ public final class AppShell {
     @Override
     public void back() {
       if (stack.size() > 1) {
-        stack.pop();
-        returnToTop();
+        leaveThen(
+            () -> {
+              stack.pop();
+              returnToTop();
+            });
       }
     }
 
@@ -240,9 +268,13 @@ public final class AppShell {
     }
     KeyCode code = e.getCode();
     int digit = code.isDigitKey() ? code.getChar().charAt(0) - '1' : -1;
-    if (digit >= 0 && digit < 9 && model.select(digit)) {
-      nav.getChildren().get(digit).requestFocus();
+    if (digit >= 0 && digit < 9 && digit < model.destinations().size()) {
       e.consume();
+      leaveThen(
+          () -> {
+            model.select(digit);
+            nav.getChildren().get(digit).requestFocus();
+          });
     }
   }
 
