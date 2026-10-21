@@ -99,7 +99,7 @@ public final class ClientsPage implements Refreshable {
   }
 
   public Node root() {
-    return root;
+    return Refreshable.attach(root, this);
   }
 
   public ClientsViewModel model() {

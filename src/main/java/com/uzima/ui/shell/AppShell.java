@@ -131,12 +131,14 @@ public final class AppShell {
   }
 
   private void showTop() {
-    Page top = stack.peek();
-    content.getChildren().setAll(top.node());
-    if (top.node() instanceof Refreshable page) {
-      page.refresh();
-    }
+    content.getChildren().setAll(stack.peek().node());
     updateTopBar();
+  }
+
+  /** Shows the page below the current one again, reloading it if it is {@link Refreshable}. */
+  private void returnToTop() {
+    showTop();
+    Refreshable.of(stack.peek().node()).ifPresent(Refreshable::refresh);
   }
 
   private void updateTopBar() {
@@ -201,7 +203,7 @@ public final class AppShell {
     public void back() {
       if (stack.size() > 1) {
         stack.pop();
-        showTop();
+        returnToTop();
       }
     }
 

@@ -475,6 +475,13 @@
   -fx-padding: 8 10;
 }
 
+/* Pickers match the 36px height of the text fields they sit beside. */
+.combo-box-base,
+.choice-box {
+  -fx-min-height: 36;
+  -fx-pref-height: 36;
+}
+
 .text-area .content {
   -fx-background-color: -uz-surface;
   -fx-background-radius: 6;
@@ -1343,8 +1350,6 @@
   -fx-vgap: 16;
 }
 
-/* Pickers match the height of the text fields beside them. */
-.client-form-grid .combo-box-base,
 .client-category-row {
   -fx-min-height: 36;
   -fx-pref-height: 36;

@@ -417,7 +417,7 @@ public class DataTable<T> extends VBox {
         } else if (filtered.isEmpty()) {
           placeholder.showNoMatches(search.getText().trim(), this::clearSearch);
         }
-        count.setText(countText());
+        count.setText(items.isEmpty() ? "" : countText());
       }
     }
   }
