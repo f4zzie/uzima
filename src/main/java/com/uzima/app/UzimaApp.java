@@ -1,8 +1,12 @@
 package com.uzima.app;
 
-import com.uzima.ui.MainWindow;
+import com.uzima.ui.AppFlow;
+import com.uzima.ui.Backend;
+import com.uzima.ui.UiTheme;
+import java.util.List;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -15,6 +19,7 @@ public final class UzimaApp extends Application {
 
   private CompositionRoot root;
   private Exception startupFailure;
+  private Backend backend;
 
   @Override
   public void init() {
@@ -41,12 +46,23 @@ public final class UzimaApp extends Application {
       Platform.exit();
       return;
     }
-    new MainWindow(root.databaseDescription()).show(stage);
-    log.info("Main window shown");
+    backend = new Backend(root.services());
+    // Pages are registered here as they are built; the shell itself knows none of them.
+    AppFlow flow = new AppFlow(backend, List.of());
+    stage.setTitle("Uzima");
+    stage.setMinWidth(1024);
+    stage.setMinHeight(640);
+    stage.setScene(UiTheme.apply(new Scene(flow.root(), 1280, 800)));
+    stage.show();
+    flow.start();
+    log.info("Main window shown ({})", root.databaseDescription());
   }
 
   @Override
   public void stop() {
+    if (backend != null) {
+      backend.close();
+    }
     if (root != null) {
       root.close();
     }

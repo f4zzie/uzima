@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            styleClass="app-shell">
+  <left>
+    <VBox styleClass="sidebar">
+      <VBox styleClass="sidebar-brand">
+        <Label text="Uzima" styleClass="brand-wordmark"/>
+        <Label text="Borehole drilling" styleClass="brand-subtitle"/>
+      </VBox>
+      <ScrollPane fitToWidth="true" styleClass="sidebar-scroll" VBox.vgrow="ALWAYS"
+                  focusTraversable="false">
+        <VBox fx:id="nav" styleClass="nav-list"/>
+      </ScrollPane>
+      <Label fx:id="shortcutHint" styleClass="sidebar-hint" wrapText="true"/>
+    </VBox>
+  </left>
+  <center>
+    <BorderPane styleClass="main-area">
+      <top>
+        <HBox styleClass="top-bar">
+          <Button fx:id="backButton" styleClass="ghost, top-bar-back" text="Back"
+                  onAction="#back" accessibleText="Back" accessibleHelp="Alt+Left"/>
+          <Label fx:id="trail" styleClass="top-bar-trail"/>
+          <Label fx:id="title" styleClass="top-bar-title"/>
+          <Region HBox.hgrow="ALWAYS"/>
+          <MenuButton fx:id="userMenu" styleClass="user-menu" accessibleText="Account menu">
+            <graphic>
+              <HBox styleClass="user-chip">
+                <StackPane styleClass="avatar">
+                  <Label fx:id="initials" styleClass="avatar-text"/>
+                </StackPane>
+                <VBox styleClass="user-chip-text">
+                  <Label fx:id="userName" styleClass="user-name"/>
+                  <Label fx:id="userRole" styleClass="user-role"/>
+                </VBox>
+              </HBox>
+            </graphic>
+            <items>
+              <MenuItem fx:id="lockItem" text="Lock screen" onAction="#lock"/>
+              <SeparatorMenuItem fx:id="lockSeparator"/>
+              <MenuItem fx:id="signOutItem" text="Sign out" onAction="#signOut"/>
+            </items>
+          </MenuButton>
+        </HBox>
+      </top>
+      <center>
+        <StackPane fx:id="content" styleClass="content-area"/>
+      </center>
+    </BorderPane>
+  </center>
+</BorderPane>

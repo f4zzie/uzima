@@ -1,43 +1,1553 @@
-/* Uzima theme. Colour tokens are looked-up colours on .root so a dark variant can override them. */
-.root {
-  -uz-primary: #0b4f6c;
-  -uz-primary-dark: #083a50;
-  -uz-accent: #f2a541;
-  -uz-surface: #ffffff;
-  -uz-background: #f4f7f9;
-  -uz-text: #1d2a33;
-  -uz-text-muted: #5b6b77;
-  -uz-border: #dde4e9;
+/*
+ * Uzima design system. This is the only stylesheet; every colour, spacing step, radius and font
+ * size used by the app is defined or listed here.
+ *
+ * COLOURS are looked-up colours declared once on .root (the token block below). Rules further down
+ * may only reference them (-uz-...), never a literal colour; ThemeTokensTest enforces this. Dark
+ * mode (Phase 5) is a second token block that redefines the same names.
+ *
+ * SIZES: JavaFX CSS can only look up paints, not lengths, so sizes can't be variables. Every
+ * length must come from these scales instead (also enforced by ThemeTokensTest):
+ *   font size  11 12 13 14 16 18 20 24 30          (14 = body)
+ *   spacing    0 1 2 3 4 6 8 10 12 16 20 24 32 40 48   (3 = the selected-nav bar)
+ *   radius     0 4 6 8 12 999                      (6 = controls, 8 = cards, 12 = dialogs)
+ *
+ * FONTS: Inter is bundled (see fonts/Inter-LICENSE.txt). Regular and Bold share the "Inter"
+ * family; Medium and SemiBold register as their own families, so headings name them directly.
+ * "Inter Num" is Inter with tabular figures frozen in (tools/fonts/freeze_tnum.py); use it through
+ * .figures, .text-numeric and .figures-strong for amounts, lengths, IDs and dates, so digits line
+ * up in columns.
+ */
 
-  -fx-font-family: "Inter", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+/* ===================================================================== tokens */
+.root {
+  /* brand */
+  -uz-primary: #0b4f6c;
+  -uz-primary-hover: #0a4561;
+  -uz-primary-pressed: #083a52;
+  -uz-primary-soft: #e4eff4;
+  -uz-on-primary: #ffffff;
+  -uz-accent: #f2a541;
+  -uz-accent-soft: #fdf1de;
+  -uz-accent-strong: #8a4b00;
+
+  /* neutrals */
+  -uz-bg: #f3f5f7;
+  -uz-surface: #ffffff;
+  -uz-surface-alt: #f8fafb;
+  -uz-surface-sunken: #eef1f4;
+  -uz-border: #dde3e8;
+  -uz-border-strong: #c3ccd4;
+  -uz-text: #17232d;
+  -uz-text-muted: #556370;
+  -uz-text-subtle: #7d8b97;
+  -uz-text-disabled: #a7b1ba;
+
+  /* semantic */
+  -uz-success: #1d7a4b;
+  -uz-success-soft: #e2f3e9;
+  -uz-warning: #685800;
+  -uz-warning-soft: #f8f3c8;
+  -uz-danger: #b42318;
+  -uz-danger-hover: #9b1d14;
+  -uz-danger-pressed: #811810;
+  -uz-danger-soft: #fdeae8;
+  -uz-info: #1d5fa8;
+  -uz-info-soft: #e3edf9;
+  -uz-neutral-soft: #eceff2;
+
+  /* interaction */
+  -uz-focus: #2b7fd9;
+  -uz-focus-halo: rgba(43, 127, 217, 0.28);
+  -uz-hover: rgba(11, 79, 108, 0.06);
+  -uz-selection: #d3e6f0;
+  -uz-scrim: rgba(12, 22, 31, 0.45);
+  -uz-overlay: rgba(255, 255, 255, 0.72);
+  -uz-shadow: rgba(16, 24, 40, 0.10);
+  -uz-shadow-strong: rgba(16, 24, 40, 0.22);
+
+  /* sidebar */
+  -uz-sidebar-bg: #0d2c3b;
+  -uz-sidebar-text: #bccbd6;
+  -uz-sidebar-text-strong: #ffffff;
+  -uz-sidebar-hover: #15394b;
+  -uz-sidebar-active: #1b4a60;
+  -uz-sidebar-divider: #1d3f50;
+
+  /* modena hooks, so built-in controls derive from the same palette */
+  -fx-base: -uz-surface;
+  -fx-background: -uz-bg;
+  -fx-control-inner-background: -uz-surface;
+  -fx-accent: -uz-primary;
+  -fx-default-button: -uz-primary;
+  -fx-focus-color: -uz-focus;
+  -fx-faint-focus-color: -uz-focus-halo;
+  -fx-selection-bar: -uz-selection;
+  -fx-selection-bar-non-focused: -uz-surface-sunken;
+  -fx-text-base-color: -uz-text;
+  -fx-text-background-color: -uz-text;
+  -fx-mark-color: -uz-text;
+  -fx-box-border: -uz-border;
+  -fx-text-box-border: -uz-border-strong;
+
+  -fx-font-family: "Inter";
   -fx-font-size: 14px;
   -fx-text-fill: -uz-text;
-  -fx-background-color: -uz-background;
+  -fx-background-color: -uz-bg;
 }
 
-.top-bar {
-  -fx-background-color: -uz-primary;
-  -fx-padding: 12 20;
+/* ===================================================================== typography */
+.label,
+.text {
+  -fx-text-fill: -uz-text;
+}
+
+.text-display {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 30px;
+}
+
+.text-headline {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 24px;
+}
+
+.text-title {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 20px;
+}
+
+.text-subtitle {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 16px;
+}
+
+.text-body {
+  -fx-font-size: 14px;
+}
+
+.text-small {
+  -fx-font-size: 13px;
+}
+
+.text-caption {
+  -fx-font-size: 12px;
+  -fx-text-fill: -uz-text-muted;
+}
+
+.text-overline {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 11px;
+  -fx-text-fill: -uz-text-subtle;
+}
+
+.text-muted {
+  -fx-text-fill: -uz-text-muted;
+}
+
+.text-strong {
+  -fx-font-family: "Inter SemiBold";
+}
+
+/* Tabular figures. Declared after the type sizes, so ".text-headline figures-strong" keeps the
+   headline size and swaps in the tabular face. */
+.figures {
+  -fx-font-family: "Inter Num";
+}
+
+.text-numeric {
+  -fx-font-family: "Inter Num Medium";
+}
+
+.figures-strong {
+  -fx-font-family: "Inter Num SemiBold";
+}
+
+.text-danger {
+  -fx-text-fill: -uz-danger;
+}
+
+.text-success {
+  -fx-text-fill: -uz-success;
+}
+
+/* ===================================================================== layout helpers */
+.surface {
+  -fx-background-color: -uz-surface;
+}
+
+.card {
+  -fx-background-color: -uz-surface;
+  -fx-background-radius: 8;
+  -fx-border-color: -uz-border;
+  -fx-border-radius: 8;
+  -fx-padding: 20;
+  -fx-effect: dropshadow(gaussian, -uz-shadow, 8, 0, 0, 1);
+}
+
+.divider {
+  -fx-background-color: -uz-border;
+  -fx-min-height: 1;
+  -fx-pref-height: 1;
+  -fx-max-height: 1;
+}
+
+.stack-4 {
+  -fx-spacing: 4;
+}
+
+.stack-8 {
+  -fx-spacing: 8;
+}
+
+.stack-12 {
+  -fx-spacing: 12;
+}
+
+.stack-16 {
+  -fx-spacing: 16;
+}
+
+.stack-24 {
+  -fx-spacing: 24;
+}
+
+.page {
+  -fx-padding: 24 32 32 32;
+  -fx-spacing: 20;
+}
+
+.page-header {
+  -fx-spacing: 12;
   -fx-alignment: center-left;
 }
 
-.brand {
-  -fx-text-fill: white;
-  -fx-font-size: 18px;
-  -fx-font-weight: bold;
+.page-subtitle {
+  -fx-font-size: 14px;
+  -fx-text-fill: -uz-text-muted;
 }
 
-.content {
+.page-count {
+  -fx-font-size: 13px;
+  -fx-text-fill: -uz-text-subtle;
+}
+
+.page-actions {
+  -fx-spacing: 8;
+  -fx-alignment: center-right;
+}
+
+/* Password strength: three bars and a word under the password field. Red is kept for errors, so
+   weak is olive, fair amber and strong green. */
+.password-strength {
+  -fx-spacing: 8;
+  -fx-alignment: center-left;
+}
+
+.password-strength-bars {
+  -fx-spacing: 4;
+}
+
+.password-strength-bar {
+  -fx-min-width: 32;
+  -fx-pref-width: 32;
+  -fx-min-height: 4;
+  -fx-pref-height: 4;
+  -fx-max-height: 4;
+  -fx-background-radius: 999;
+  -fx-background-color: -uz-border;
+}
+
+.password-strength-label {
+  -fx-font-size: 12px;
+  -fx-text-fill: -uz-text-muted;
+}
+
+.password-strength.weak .password-strength-bar.on {
+  -fx-background-color: -uz-warning;
+}
+
+.password-strength.fair .password-strength-bar.on {
+  -fx-background-color: -uz-accent;
+}
+
+.password-strength.strong .password-strength-bar.on {
+  -fx-background-color: -uz-success;
+}
+
+.scroll-pane,
+.scroll-pane > .viewport {
+  -fx-background-color: transparent;
+  -fx-background-insets: 0;
+  -fx-padding: 0;
+}
+
+/* Slim scroll bars: a rounded thumb on a clear track, no arrow buttons. */
+.scroll-bar {
+  -fx-background-color: transparent;
+  -fx-background-insets: 0;
+  -fx-padding: 2;
+}
+
+.scroll-bar:vertical {
+  -fx-pref-width: 12;
+}
+
+.scroll-bar:horizontal {
+  -fx-pref-height: 12;
+}
+
+.scroll-bar > .track,
+.scroll-bar > .track-background {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+}
+
+.scroll-bar > .thumb {
+  -fx-background-color: -uz-border-strong;
+  -fx-background-radius: 999;
+  -fx-background-insets: 0;
+}
+
+.scroll-bar > .thumb:hover,
+.scroll-bar > .thumb:pressed {
+  -fx-background-color: -uz-text-subtle;
+}
+
+.scroll-bar > .increment-button,
+.scroll-bar > .decrement-button {
+  -fx-padding: 0;
+  -fx-background-color: transparent;
+}
+
+.scroll-bar > .increment-button > .increment-arrow,
+.scroll-bar > .decrement-button > .decrement-arrow {
+  -fx-shape: " ";
+  -fx-padding: 0;
+}
+
+.corner {
+  -fx-background-color: transparent;
+}
+
+/* ===================================================================== focus
+   Every focusable control shows a 2px focus ring; keyboard users must always see where they are. */
+.button:focused,
+.toggle-button:focused,
+.text-field:focused,
+.password-field:focused,
+.text-area:focused,
+.combo-box-base:focused,
+.choice-box:focused,
+.check-box:focused > .box,
+.radio-button:focused > .radio,
+.date-picker:focused,
+.spinner:focused,
+.hyperlink:focused,
+.table-view:focused,
+.list-view:focused {
+  -fx-border-color: -uz-focus;
+  -fx-border-width: 2;
+  -fx-border-radius: 6;
+  -fx-border-insets: -2;
+}
+
+/* ===================================================================== buttons */
+.button,
+.toggle-button {
+  -fx-background-color: -uz-surface;
+  -fx-background-radius: 6;
+  -fx-background-insets: 0;
+  -fx-border-color: -uz-border-strong;
+  -fx-border-radius: 6;
+  -fx-border-width: 1;
+  -fx-text-fill: -uz-text;
+  -fx-font-family: "Inter Medium";
+  -fx-font-size: 14px;
+  -fx-padding: 8 16;
+  -fx-cursor: hand;
+  -fx-effect: none;
+}
+
+.button:hover,
+.toggle-button:hover {
+  -fx-background-color: -uz-surface-alt;
+  -fx-border-color: -uz-text-subtle;
+}
+
+.button:armed,
+.toggle-button:selected {
+  -fx-background-color: -uz-surface-sunken;
+}
+
+.button.primary {
+  -fx-background-color: -uz-primary;
+  -fx-border-color: -uz-primary;
+  -fx-text-fill: -uz-on-primary;
+}
+
+.button.primary:hover {
+  -fx-background-color: -uz-primary-hover;
+  -fx-border-color: -uz-primary-hover;
+}
+
+.button.primary:armed {
+  -fx-background-color: -uz-primary-pressed;
+}
+
+.button.danger {
+  -fx-background-color: -uz-danger;
+  -fx-border-color: -uz-danger;
+  -fx-text-fill: -uz-on-primary;
+}
+
+.button.danger:hover {
+  -fx-background-color: -uz-danger-hover;
+  -fx-border-color: -uz-danger-hover;
+}
+
+.button.danger:armed {
+  -fx-background-color: -uz-danger-pressed;
+}
+
+.button.ghost {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+  -fx-text-fill: -uz-primary;
+}
+
+.button.ghost:hover {
+  -fx-background-color: -uz-hover;
+}
+
+.button.small {
+  -fx-font-size: 13px;
+  -fx-padding: 4 10;
+}
+
+.button.large {
+  -fx-font-size: 16px;
+  -fx-padding: 10 20;
+}
+
+.button:disabled {
+  -fx-opacity: 0.45;
+}
+
+.button:focused.primary,
+.button:focused.danger {
+  -fx-border-color: -uz-focus;
+}
+
+.hyperlink {
+  -fx-text-fill: -uz-primary;
+  -fx-border-color: transparent;
+  -fx-padding: 2 4;
+  -fx-underline: false;
+}
+
+.hyperlink:hover {
+  -fx-underline: true;
+}
+
+/* ===================================================================== inputs */
+.text-field,
+.password-field,
+.text-area,
+.combo-box-base,
+.choice-box,
+.date-picker > .text-field {
+  -fx-background-color: -uz-surface;
+  -fx-background-radius: 6;
+  -fx-background-insets: 0;
+  -fx-border-color: -uz-border-strong;
+  -fx-border-radius: 6;
+  -fx-border-width: 1;
+  -fx-text-fill: -uz-text;
+  -fx-prompt-text-fill: -uz-text-subtle;
+  -fx-highlight-fill: -uz-selection;
+  -fx-highlight-text-fill: -uz-text;
+  -fx-font-size: 14px;
+}
+
+.text-field,
+.password-field {
+  -fx-padding: 8 10;
+}
+
+/* Pickers match the 36px height of the text fields they sit beside. */
+.combo-box-base,
+.choice-box {
+  -fx-min-height: 36;
+  -fx-pref-height: 36;
+}
+
+.text-area .content {
+  -fx-background-color: -uz-surface;
+  -fx-background-radius: 6;
+  -fx-padding: 8 10;
+}
+
+.text-field:hover,
+.password-field:hover,
+.text-area:hover,
+.combo-box-base:hover {
+  -fx-border-color: -uz-text-subtle;
+}
+
+.text-field:disabled,
+.password-field:disabled,
+.text-area:disabled,
+.combo-box-base:disabled {
+  -fx-opacity: 1;
+  -fx-background-color: -uz-surface-sunken;
+  -fx-text-fill: -uz-text-disabled;
+}
+
+.text-field:invalid,
+.password-field:invalid,
+.text-area:invalid,
+.combo-box-base:invalid,
+.choice-box:invalid {
+  -fx-border-color: -uz-danger;
+}
+
+.text-field:readonly {
+  -fx-background-color: -uz-surface-alt;
+}
+
+/* Form field: label, input, then helper or error text underneath. */
+.form-field {
+  -fx-spacing: 6;
+}
+
+.form-field-label {
+  -fx-font-family: "Inter Medium";
+  -fx-font-size: 13px;
+  -fx-text-fill: -uz-text;
+}
+
+.form-field-required {
+  -fx-text-fill: -uz-danger;
+}
+
+.form-field-help {
+  -fx-font-size: 12px;
+  -fx-text-fill: -uz-text-muted;
+}
+
+.form-field-error {
+  -fx-font-size: 12px;
+  -fx-text-fill: -uz-danger;
+}
+
+/* Adornment around a field: "KSh [ 1,000.00 ]" or "[ 120.00 ] m". */
+.input-group {
+  -fx-alignment: center-left;
+}
+
+.input-adornment {
+  -fx-background-color: -uz-surface-sunken;
+  -fx-border-color: -uz-border-strong;
+  -fx-text-fill: -uz-text-muted;
+  -fx-font-size: 13px;
+  -fx-padding: 8 10;
+}
+
+.input-adornment.leading {
+  -fx-background-radius: 6 0 0 6;
+  -fx-border-radius: 6 0 0 6;
+  -fx-border-width: 1 0 1 1;
+}
+
+.input-adornment.trailing {
+  -fx-background-radius: 0 6 6 0;
+  -fx-border-radius: 0 6 6 0;
+  -fx-border-width: 1 1 1 0;
+}
+
+.input-group .text-field.has-leading {
+  -fx-background-radius: 0 6 6 0;
+  -fx-border-radius: 0 6 6 0;
+}
+
+.input-group .text-field.has-trailing {
+  -fx-background-radius: 6 0 0 6;
+  -fx-border-radius: 6 0 0 6;
+}
+
+.input-group .text-field.numeric {
+  -fx-font-family: "Inter Num";
+  -fx-alignment: center-right;
+}
+
+.check-box,
+.radio-button {
+  -fx-text-fill: -uz-text;
+}
+
+.check-box > .box,
+.radio-button > .radio {
+  -fx-background-color: -uz-surface;
+  -fx-border-color: -uz-border-strong;
+  -fx-border-radius: 4;
+  -fx-background-radius: 4;
+}
+
+.check-box:selected > .box {
+  -fx-background-color: -uz-primary;
+  -fx-border-color: -uz-primary;
+}
+
+.check-box:selected > .box > .mark {
+  -fx-background-color: -uz-on-primary;
+}
+
+.combo-box-popup > .list-view,
+.context-menu {
+  -fx-background-color: -uz-surface;
+  -fx-border-color: -uz-border;
+  -fx-background-radius: 6;
+  -fx-border-radius: 6;
+  -fx-effect: dropshadow(gaussian, -uz-shadow-strong, 12, 0, 0, 4);
+}
+
+.list-view .list-cell:filled:selected,
+.list-view .list-cell:filled:hover,
+.menu-item:focused {
+  -fx-background-color: -uz-primary-soft;
+  -fx-text-fill: -uz-text;
+}
+
+.menu-item .label {
+  -fx-text-fill: -uz-text;
+}
+
+/* ===================================================================== banner (form-level message) */
+.banner {
+  -fx-background-radius: 6;
+  -fx-border-radius: 6;
+  -fx-border-width: 1;
+  -fx-padding: 10 12;
+  -fx-spacing: 8;
+  -fx-alignment: center-left;
+}
+
+.banner .label {
+  -fx-font-size: 13px;
+  -fx-wrap-text: true;
+}
+
+.banner.danger {
+  -fx-background-color: -uz-danger-soft;
+  -fx-border-color: -uz-danger;
+}
+
+.banner.danger .label {
+  -fx-text-fill: -uz-danger;
+}
+
+.banner.info {
+  -fx-background-color: -uz-info-soft;
+  -fx-border-color: -uz-info;
+}
+
+.banner.info .label {
+  -fx-text-fill: -uz-info;
+}
+
+.banner.success {
+  -fx-background-color: -uz-success-soft;
+  -fx-border-color: -uz-success;
+}
+
+.banner.success .label {
+  -fx-text-fill: -uz-success;
+}
+
+.banner.warning {
+  -fx-background-color: -uz-warning-soft;
+  -fx-border-color: -uz-warning;
+}
+
+.banner.warning .label {
+  -fx-text-fill: -uz-warning;
+}
+
+/* ===================================================================== components: data
+   Money and metres fields, status badges, data table. */
+
+/* Money and metres fields: the group turns red as a whole when the FormField marks it invalid. */
+.input-group:invalid > .text-field,
+.input-group:invalid > .input-adornment {
+  -fx-border-color: -uz-danger;
+}
+
+.input-group > .text-field:focused {
+  -fx-border-insets: 0;
+  -fx-border-radius: 0 6 6 0;
+}
+
+.input-group > .text-field.has-trailing:focused {
+  -fx-border-radius: 6 0 0 6;
+}
+
+/* Status badges: a rounded pill, tinted background with strong text of the same hue. */
+.badge {
+  -fx-background-radius: 999;
+  -fx-padding: 2 10;
+  -fx-font-family: "Inter Medium";
+  -fx-font-size: 12px;
+}
+
+.badge-neutral {
+  -fx-background-color: -uz-neutral-soft;
+  -fx-text-fill: -uz-text-muted;
+}
+
+.badge-info {
+  -fx-background-color: -uz-info-soft;
+  -fx-text-fill: -uz-info;
+}
+
+.badge-success {
+  -fx-background-color: -uz-success-soft;
+  -fx-text-fill: -uz-success;
+}
+
+.badge-warning {
+  -fx-background-color: -uz-warning-soft;
+  -fx-text-fill: -uz-warning;
+}
+
+.badge-danger {
+  -fx-background-color: -uz-danger-soft;
+  -fx-text-fill: -uz-danger;
+}
+
+.badge-accent {
+  -fx-background-color: -uz-accent-soft;
+  -fx-text-fill: -uz-accent-strong;
+}
+
+/* Data table: toolbar above a bordered table. */
+.data-table {
+  -fx-spacing: 12;
+}
+
+.data-table-toolbar {
+  -fx-spacing: 8;
+  -fx-alignment: center-left;
+}
+
+.data-table-search {
+  -fx-pref-width: 300;
+}
+
+.data-table-count {
+  -fx-font-size: 13px;
+  -fx-text-fill: -uz-text-muted;
+  -fx-padding: 0 0 0 8;
+}
+
+.data-table-actions {
+  -fx-spacing: 8;
+  -fx-alignment: center-right;
+}
+
+.data-table .table-view {
+  -fx-background-color: -uz-surface;
+  -fx-background-radius: 8;
+  -fx-border-color: -uz-border;
+  -fx-border-radius: 8;
+  -fx-border-width: 1;
+  -fx-border-insets: 0;
+  -fx-padding: 0;
+}
+
+.data-table .table-view:focused {
+  -fx-border-color: -uz-focus;
+  -fx-border-width: 2;
+}
+
+.table-view .column-header-background {
+  -fx-background-color: -uz-surface-alt;
+  -fx-background-radius: 8 8 0 0;
+  -fx-border-color: transparent transparent -uz-border transparent;
+}
+
+.table-view .column-header,
+.table-view .filler {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+  -fx-padding: 10 12;
+}
+
+.table-view .column-header .label {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 12px;
+  -fx-text-fill: -uz-text-muted;
+  -fx-alignment: center-left;
+}
+
+.table-view .column-header.numeric .label {
+  -fx-alignment: center-right;
+}
+
+.table-view .column-header .arrow {
+  -fx-background-color: -uz-text-muted;
+}
+
+.table-row-cell {
+  -fx-background-color: -uz-surface;
+  -fx-border-color: transparent transparent -uz-border transparent;
+  -fx-cell-size: 44;
+  -fx-text-fill: -uz-text;
+}
+
+.table-row-cell:empty {
+  -fx-border-color: transparent;
+}
+
+.table-row-cell:empty .table-cell {
+  -fx-border-color: transparent;
+}
+
+.table-row-cell:filled:hover {
+  -fx-background-color: -uz-surface-alt;
+}
+
+.table-row-cell:filled:selected {
+  -fx-background-color: -uz-selection;
+}
+
+.table-row-cell:filled:selected .table-cell {
+  -fx-text-fill: -uz-text;
+}
+
+.table-cell {
+  -fx-padding: 0 12;
+  -fx-alignment: center-left;
+  -fx-text-fill: -uz-text;
+  -fx-border-color: transparent;
+}
+
+.table-cell.numeric {
+  -fx-alignment: center-right;
+}
+
+.table-view .placeholder {
+  -fx-background-color: transparent;
+}
+
+/* Empty, no-results, loading and error states. */
+.empty-state {
+  -fx-spacing: 8;
+  -fx-padding: 48 24;
+}
+
+.empty-state-title {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 16px;
+  -fx-text-fill: -uz-text;
+}
+
+.empty-state-text {
+  -fx-font-size: 13px;
+  -fx-text-fill: -uz-text-muted;
+  -fx-text-alignment: center;
+}
+
+.empty-state-kind-error .empty-state-title {
+  -fx-text-fill: -uz-danger;
+}
+
+.empty-state-spinner {
+  -fx-progress-color: -uz-primary;
+  -fx-min-width: 40;
+  -fx-min-height: 40;
+  -fx-pref-width: 40;
+  -fx-pref-height: 40;
+}
+
+/* ===================================================================== components: overlays
+   Dialog shell, toasts, loading overlay, state pane. */
+
+/* Dialogs: an in-window card on a scrim. */
+.dialog-scrim {
+  -fx-background-color: -uz-scrim;
+  -fx-padding: 32;
+}
+
+.dialog {
+  -fx-background-color: -uz-surface;
+  -fx-background-radius: 12;
+  -fx-border-color: -uz-border;
+  -fx-border-radius: 12;
+  -fx-effect: dropshadow(gaussian, -uz-shadow-strong, 32, 0, 0, 8);
+}
+
+.dialog-small {
+  -fx-pref-width: 440;
+  -fx-max-width: 440;
+}
+
+.dialog-medium {
+  -fx-pref-width: 560;
+  -fx-max-width: 560;
+}
+
+.dialog-large {
+  -fx-pref-width: 760;
+  -fx-max-width: 760;
+}
+
+.dialog-top {
+  -fx-padding: 20 24 0 24;
+  -fx-spacing: 12;
+}
+
+.dialog-header {
+  -fx-spacing: 12;
+  -fx-alignment: top-left;
+}
+
+.dialog-headings {
+  -fx-spacing: 4;
+}
+
+.button.ghost.dialog-close,
+.button.ghost.toast-dismiss {
+  -fx-font-family: "Inter";
+  -fx-font-size: 20px;
+  -fx-padding: 0 8 2 8;
+  -fx-text-fill: -uz-text-muted;
+}
+
+.button.ghost.dialog-close:hover,
+.button.ghost.toast-dismiss:hover {
+  -fx-text-fill: -uz-text;
+}
+
+.dialog-body {
+  -fx-padding: 16 24 20 24;
+}
+
+.dialog-body > .viewport > * {
+  -fx-spacing: 16;
+}
+
+.dialog-footer {
+  -fx-padding: 12 24;
+  -fx-spacing: 8;
+  -fx-alignment: center-right;
+  -fx-background-color: -uz-surface-alt;
+  -fx-background-radius: 0 0 12 12;
+  -fx-border-color: -uz-border transparent transparent transparent;
+}
+
+.dialog-busy {
+  -fx-pref-width: 20;
+  -fx-pref-height: 20;
+  -fx-max-width: 20;
+  -fx-max-height: 20;
+}
+
+.confirm-content {
+  -fx-spacing: 16;
+}
+
+.confirm-message {
+  -fx-text-fill: -uz-text;
+}
+
+/* Toasts: bottom-right, a coloured edge says what kind. */
+.toast-layer {
+  -fx-padding: 24;
+  -fx-spacing: 8;
+}
+
+.toast {
+  -fx-background-color: -uz-surface;
+  -fx-background-radius: 8;
+  -fx-border-color: -uz-border;
+  -fx-border-radius: 8;
+  -fx-border-width: 1 1 1 4;
+  -fx-padding: 12 8 12 16;
+  -fx-spacing: 8;
+  -fx-pref-width: 380;
+  -fx-max-width: 380;
+  -fx-alignment: top-left;
+  -fx-effect: dropshadow(gaussian, -uz-shadow-strong, 16, 0, 0, 4);
+}
+
+.toast-success {
+  -fx-border-color: -uz-border -uz-border -uz-border -uz-success;
+}
+
+.toast-info {
+  -fx-border-color: -uz-border -uz-border -uz-border -uz-info;
+}
+
+.toast-error {
+  -fx-border-color: -uz-border -uz-border -uz-border -uz-danger;
+}
+
+.toast-text {
+  -fx-spacing: 2;
+}
+
+.toast-title {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 14px;
+}
+
+.toast-error .toast-title {
+  -fx-text-fill: -uz-danger;
+}
+
+.toast-message {
+  -fx-font-size: 13px;
+  -fx-text-fill: -uz-text-muted;
+}
+
+/* Loading overlay: blocks input at once, shows itself after a short delay. */
+.loading-overlay {
+  -fx-background-color: transparent;
+}
+
+.loading-overlay > .loading-panel {
+  -fx-opacity: 0;
+}
+
+.loading-overlay.revealed {
+  -fx-background-color: -uz-overlay;
+}
+
+.loading-overlay.revealed > .loading-panel {
+  -fx-opacity: 1;
+}
+
+.loading-panel {
+  -fx-alignment: center;
+  -fx-spacing: 12;
+}
+
+.loading-spinner {
+  -fx-progress-color: -uz-primary;
+  -fx-pref-width: 40;
+  -fx-pref-height: 40;
+  -fx-max-width: 40;
+  -fx-max-height: 40;
+}
+
+.loading-message {
+  -fx-font-family: "Inter Medium";
+  -fx-text-fill: -uz-text-muted;
+}
+
+.dialog-busy {
+  -fx-progress-color: -uz-primary;
+}
+
+/* ===================================================================== app shell */
+.app-host {
+  -fx-background-color: -uz-bg;
+}
+
+.app-loading {
+  -fx-alignment: center;
+  -fx-max-width: 480;
   -fx-padding: 24;
 }
 
-.status-bar {
-  -fx-background-color: -uz-surface;
-  -fx-border-color: -uz-border transparent transparent transparent;
-  -fx-padding: 6 20;
+.app-loading-spinner {
+  -fx-progress-color: -uz-primary;
+  -fx-pref-width: 40;
+  -fx-pref-height: 40;
 }
 
-.status-text {
-  -fx-text-fill: -uz-text-muted;
+.sidebar {
+  -fx-background-color: -uz-sidebar-bg;
+  -fx-pref-width: 232;
+  -fx-min-width: 232;
+  -fx-padding: 20 12 16 12;
+  -fx-spacing: 16;
+}
+
+.sidebar-brand {
+  -fx-padding: 0 12 8 12;
+  -fx-spacing: 2;
+}
+
+.brand-wordmark {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 24px;
+  -fx-text-fill: -uz-sidebar-text-strong;
+}
+
+.brand-subtitle {
   -fx-font-size: 12px;
+  -fx-text-fill: -uz-sidebar-text;
+}
+
+.sidebar-scroll,
+.sidebar-scroll > .viewport {
+  -fx-background-color: transparent;
+}
+
+.nav-list {
+  -fx-spacing: 2;
+  -fx-padding: 2;
+}
+
+.toggle-button.nav-item {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+  -fx-text-fill: -uz-sidebar-text;
+  -fx-font-family: "Inter Medium";
+  -fx-font-size: 14px;
+  -fx-alignment: center-left;
+  -fx-graphic-text-gap: 12;
+  -fx-padding: 10 12;
+  -fx-background-radius: 6;
+  -fx-border-radius: 6;
+}
+
+.toggle-button.nav-item:hover {
+  -fx-background-color: -uz-sidebar-hover;
+  -fx-text-fill: -uz-sidebar-text-strong;
+}
+
+/* Selected: filled background with a 3px amber bar on the left (the amber layer peeks out from
+   under the fill, which is inset 3px). The blue ring below is only for keyboard focus
+   (:keyboard-focus, see KeyboardFocus), never for a click. */
+.toggle-button.nav-item:selected {
+  -fx-background-color: -uz-accent, -uz-sidebar-active;
+  -fx-background-insets: 0, 0 0 0 3;
+  -fx-background-radius: 6, 0 6 6 0;
+  -fx-text-fill: -uz-sidebar-text-strong;
+}
+
+.toggle-button.nav-item:focused {
+  -fx-border-color: transparent;
+}
+
+.toggle-button.nav-item:keyboard-focus {
+  -fx-border-color: -uz-focus;
+  -fx-border-width: 2;
+  -fx-border-insets: 0;
+}
+
+.nav-icon {
+  -fx-fill: -uz-sidebar-text;
+  -fx-scale-x: 0.9;
+  -fx-scale-y: 0.9;
+}
+
+.toggle-button.nav-item:selected .nav-icon,
+.toggle-button.nav-item:hover .nav-icon {
+  -fx-fill: -uz-accent;
+}
+
+.sidebar-hint {
+  -fx-font-size: 12px;
+  -fx-text-fill: -uz-sidebar-text;
+  -fx-padding: 8 12 0 12;
+  -fx-border-color: -uz-sidebar-divider transparent transparent transparent;
+  -fx-border-width: 1 0 0 0;
+  -fx-max-width: Infinity;
+}
+
+.top-bar {
+  -fx-background-color: -uz-surface;
+  -fx-border-color: transparent transparent -uz-border transparent;
+  -fx-border-width: 0 0 1 0;
+  -fx-padding: 12 32;
+  -fx-alignment: center-left;
+  -fx-min-height: 64;
+}
+
+.top-bar-title {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 20px;
+}
+
+/* Detail pages: "← Back  Clients ›  Wanjiru Kamau". */
+.top-bar {
+  -fx-spacing: 8;
+}
+
+.top-bar-trail {
+  -fx-font-family: "Inter Medium";
+  -fx-font-size: 20px;
+  -fx-text-fill: -uz-text-subtle;
+}
+
+.button.ghost.top-bar-back {
+  -fx-padding: 6 10;
+  -fx-font-size: 13px;
+}
+
+.menu-button.user-menu {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+  -fx-background-radius: 8;
+  -fx-border-radius: 8;
+  -fx-padding: 4 8;
+}
+
+.menu-button.user-menu:hover,
+.menu-button.user-menu:showing {
+  -fx-background-color: -uz-hover;
+}
+
+.menu-button.user-menu:focused {
+  -fx-border-color: -uz-focus;
+  -fx-border-width: 2;
+}
+
+.menu-button.user-menu > .arrow-button > .arrow {
+  -fx-background-color: -uz-text-muted;
+}
+
+.user-chip {
+  -fx-spacing: 10;
+  -fx-alignment: center-left;
+}
+
+.avatar {
+  -fx-background-color: -uz-primary-soft;
+  -fx-background-radius: 999;
+  -fx-min-width: 36;
+  -fx-min-height: 36;
+  -fx-max-width: 36;
+  -fx-max-height: 36;
+}
+
+.avatar-text {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 13px;
+  -fx-text-fill: -uz-primary;
+}
+
+.user-chip-text {
+  -fx-spacing: 0;
+}
+
+.user-name {
+  -fx-font-family: "Inter Medium";
+  -fx-font-size: 14px;
+}
+
+.user-role {
+  -fx-font-size: 12px;
+  -fx-text-fill: -uz-text-muted;
+}
+
+.content-area {
+  -fx-background-color: -uz-bg;
+  -fx-alignment: top-left;
+}
+
+/* ===================================================================== auth screens */
+.auth-screen {
+  -fx-background-color: -uz-bg;
+}
+
+.auth-brand-panel {
+  -fx-background-color: -uz-sidebar-bg;
+  -fx-pref-width: 440;
+  -fx-min-width: 360;
+  -fx-padding: 48 48 32 48;
+  -fx-spacing: 24;
+}
+
+.auth-brand {
+  -fx-spacing: 12;
+  -fx-alignment: center-left;
+}
+
+.auth-brand-mark {
+  -fx-fill: -uz-accent;
+}
+
+.auth-wordmark {
+  -fx-font-family: "Inter SemiBold";
+  -fx-font-size: 30px;
+  -fx-text-fill: -uz-sidebar-text-strong;
+}
+
+.auth-tagline {
+  -fx-font-family: "Inter Medium";
+  -fx-font-size: 18px;
+  -fx-text-fill: -uz-sidebar-text-strong;
+}
+
+.auth-points {
+  -fx-spacing: 16;
+  -fx-padding: 16 0 0 0;
+}
+
+.auth-point-row {
+  -fx-spacing: 12;
+  -fx-alignment: top-left;
+}
+
+.auth-point-mark {
+  -fx-background-color: -uz-accent;
+  -fx-background-radius: 999;
+  -fx-min-width: 8;
+  -fx-min-height: 8;
+  -fx-max-width: 8;
+  -fx-max-height: 8;
+  -fx-translate-y: 6;
+}
+
+.auth-point {
+  -fx-font-size: 14px;
+  -fx-text-fill: -uz-sidebar-text;
+}
+
+.auth-footer {
+  -fx-font-size: 12px;
+  -fx-text-fill: -uz-sidebar-text;
+}
+
+.auth-scroll,
+.auth-scroll > .viewport {
+  -fx-background-color: -uz-bg;
+}
+
+.auth-form-side {
+  -fx-padding: 32;
+  -fx-alignment: center;
+}
+
+.auth-card {
+  -fx-background-color: -uz-surface;
+  -fx-background-radius: 12;
+  -fx-border-color: -uz-border;
+  -fx-border-radius: 12;
+  -fx-padding: 40;
+  -fx-spacing: 20;
+  -fx-pref-width: 440;
+  -fx-max-width: 440;
+  -fx-effect: dropshadow(gaussian, -uz-shadow, 24, 0, 0, 4);
+}
+
+.auth-heading {
+  -fx-spacing: 6;
+}
+
+.button.auth-submit {
+  -fx-padding: 12 20;
+}
+
+/* ===================================================================== screens: clients */
+.client-form-grid {
+  -fx-hgap: 16;
+  -fx-vgap: 16;
+}
+
+.client-category-row {
+  -fx-min-height: 36;
+  -fx-pref-height: 36;
+}
+
+.client-form-section {
+  -fx-padding: 16 0 0 0;
+  -fx-border-color: -uz-border transparent transparent transparent;
+  -fx-border-width: 1 0 0 0;
+}
+
+/* A non-blocking warning under a field (e.g. GPS outside Kenya): warning tone, never red. */
+.form-warning {
+  -fx-background-color: -uz-warning-soft;
+  -fx-background-radius: 6;
+  -fx-text-fill: -uz-warning;
+  -fx-font-size: 12px;
+  -fx-padding: 6 10;
+}
+
+.client-category-row {
+  -fx-spacing: 12;
+  -fx-alignment: center-left;
+}
+
+.client-category-value {
+  -fx-font-family: "Inter Medium";
+}
+
+.client-audit-note {
+  -fx-background-color: -uz-info-soft;
+  -fx-background-radius: 6;
+  -fx-text-fill: -uz-info;
+  -fx-font-size: 13px;
+  -fx-padding: 10 12;
+}
+
+.client-stats {
+  -fx-spacing: 16;
+}
+
+.client-stat {
+  -fx-padding: 16 20;
+}
+
+.client-stat-value {
+  -fx-font-size: 20px;
+}
+
+.client-stat-refund {
+  -fx-background-color: -uz-warning-soft;
+  -fx-border-color: -uz-warning;
+}
+
+.client-stat-refund .client-stat-value,
+.client-stat-refund .text-overline {
+  -fx-text-fill: -uz-warning;
+}
+
+.client-detail-body {
+  -fx-spacing: 24;
+}
+
+.client-facts {
+  -fx-hgap: 24;
+  -fx-vgap: 10;
+}
+
+.client-fact-term {
+  -fx-font-size: 13px;
+  -fx-text-fill: -uz-text-muted;
+}
+
+.client-fact-value {
+  -fx-font-size: 14px;
+}
+
+/* ===================================================================== style guide (dev only) */
+.style-guide-swatch {
+  -fx-min-width: 120;
+  -fx-pref-width: 120;
+  -fx-spacing: 6;
+}
+
+.style-guide-chip {
+  -fx-min-height: 48;
+  -fx-pref-height: 48;
+  -fx-background-radius: 6;
+  -fx-border-color: -uz-border;
+  -fx-border-radius: 6;
+}
+
+.style-guide-chip-primary {
+  -fx-background-color: -uz-primary;
+}
+
+.style-guide-chip-primary-hover {
+  -fx-background-color: -uz-primary-hover;
+}
+
+.style-guide-chip-primary-soft {
+  -fx-background-color: -uz-primary-soft;
+}
+
+.style-guide-chip-accent {
+  -fx-background-color: -uz-accent;
+}
+
+.style-guide-chip-accent-soft {
+  -fx-background-color: -uz-accent-soft;
+}
+
+.style-guide-chip-bg {
+  -fx-background-color: -uz-bg;
+}
+
+.style-guide-chip-surface {
+  -fx-background-color: -uz-surface;
+}
+
+.style-guide-chip-surface-alt {
+  -fx-background-color: -uz-surface-alt;
+}
+
+.style-guide-chip-surface-sunken {
+  -fx-background-color: -uz-surface-sunken;
+}
+
+.style-guide-chip-border {
+  -fx-background-color: -uz-border;
+}
+
+.style-guide-chip-border-strong {
+  -fx-background-color: -uz-border-strong;
+}
+
+.style-guide-chip-text {
+  -fx-background-color: -uz-text;
+}
+
+.style-guide-chip-text-muted {
+  -fx-background-color: -uz-text-muted;
+}
+
+.style-guide-chip-text-subtle {
+  -fx-background-color: -uz-text-subtle;
+}
+
+.style-guide-chip-success {
+  -fx-background-color: -uz-success;
+}
+
+.style-guide-chip-success-soft {
+  -fx-background-color: -uz-success-soft;
+}
+
+.style-guide-chip-warning {
+  -fx-background-color: -uz-warning;
+}
+
+.style-guide-chip-warning-soft {
+  -fx-background-color: -uz-warning-soft;
+}
+
+.style-guide-chip-danger {
+  -fx-background-color: -uz-danger;
+}
+
+.style-guide-chip-danger-soft {
+  -fx-background-color: -uz-danger-soft;
+}
+
+.style-guide-chip-info {
+  -fx-background-color: -uz-info;
+}
+
+.style-guide-chip-info-soft {
+  -fx-background-color: -uz-info-soft;
+}
+
+.style-guide-chip-focus {
+  -fx-background-color: -uz-focus;
+}
+
+.style-guide-chip-sidebar-bg {
+  -fx-background-color: -uz-sidebar-bg;
+}
+
+.style-guide-chip-sidebar-active {
+  -fx-background-color: -uz-sidebar-active;
+}
+
+.style-guide-grid {
+  -fx-hgap: 32;
+  -fx-vgap: 12;
+}
+
+.style-guide-row {
+  -fx-spacing: 12;
+  -fx-alignment: center-left;
 }

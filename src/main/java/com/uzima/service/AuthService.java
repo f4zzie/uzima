@@ -134,33 +134,48 @@ public final class AuthService {
   /**
    * Checks the signed-in user's password on the idle lock screen. Wrong attempts count toward the
    * same lockout as sign-in, so an unattended machine can't be brute-forced from the lock screen.
-   * Returns false once the account is locked or deactivated; the UI then signs the user out.
+   * When the account is (or becomes) locked or deactivated, the session is ended here, so the UI
+   * cannot leave a locked-out user signed in.
    */
-  public boolean verifyPassword(char[] password) {
+  public UnlockResult unlock(char[] password) {
     User current = reload(session.requireUser());
     Instant now = clock.instant();
     boolean matches = hasher.matches(password, current.passwordHash());
     if (!current.active() || current.isLockedAt(now)) {
-      return false;
+      endSession(current, current.active() ? "Account locked" : "Inactive");
+      return UnlockResult.SESSION_ENDED;
     }
     if (!matches) {
-      recordFailure(current, now, "Wrong password on lock screen");
-      return false;
+      User failed = recordFailure(current, now, "Wrong password on lock screen");
+      if (failed.isLockedAt(now)) {
+        endSession(failed, "Locked out from the lock screen");
+        return UnlockResult.SESSION_ENDED;
+      }
+      return UnlockResult.WRONG_PASSWORD;
     }
     if (current.failedLoginAttempts() > 0) {
       User reset = current.recordSuccessfulLogin();
       tx.run(() -> users.update(reset));
       session.refresh(reset);
     }
-    return true;
+    return UnlockResult.UNLOCKED;
   }
 
-  public void signOut() {
-    session
-        .currentUser()
-        .ifPresent(
-            u -> tx.run(() -> audit.recordFor(u, AuditAction.SIGNED_OUT, "user", u.id(), "")));
+  private void endSession(User user, String reason) {
+    tx.run(() -> audit.recordFor(user, AuditAction.SIGNED_OUT, "user", user.id(), reason));
     session.signOut();
+  }
+
+  /** Signs out. The session is cleared even if writing the audit entry fails. */
+  public void signOut() {
+    try {
+      session
+          .currentUser()
+          .ifPresent(
+              u -> tx.run(() -> audit.recordFor(u, AuditAction.SIGNED_OUT, "user", u.id(), "")));
+    } finally {
+      session.signOut();
+    }
   }
 
   /** Builds a validated, hashed, unsaved user; reports every invalid field at once. */
@@ -180,7 +195,7 @@ public final class AuthService {
     return User.create(name[0], displayName, role, hasher.hash(password), mustChange);
   }
 
-  private void recordFailure(User user, Instant now, String reason) {
+  private User recordFailure(User user, Instant now, String reason) {
     User failed = user.recordFailedLogin(now);
     tx.run(
         () -> {
@@ -195,6 +210,7 @@ public final class AuthService {
                 "Locked until " + failed.lockedUntil().orElseThrow());
           }
         });
+    return failed;
   }
 
   private Optional<User> findQuietly(String username) {

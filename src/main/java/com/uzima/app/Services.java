@@ -10,8 +10,12 @@ import com.uzima.service.PaymentService;
 import com.uzima.service.Session;
 import com.uzima.service.SettingsService;
 import com.uzima.service.UserService;
+import java.time.Clock;
 
-/** The use cases the UI calls. Built once by {@link CompositionRoot}. */
+/**
+ * The use cases the UI calls. Built once by {@link CompositionRoot}. {@code clock} is the same
+ * clock the services use (Africa/Nairobi), so screens default dates such as "today" consistently.
+ */
 public record Services(
     Session session,
     AuthService auth,
@@ -22,4 +26,5 @@ public record Services(
     JobService jobs,
     PaymentService payments,
     AuditLog audit,
-    PricingEngine pricing) {}
+    PricingEngine pricing,
+    Clock clock) {}

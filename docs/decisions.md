@@ -241,7 +241,7 @@ Superseded by D-027.
 **Rejected.** Extending the lock on every attempt.
 
 ### D-047 Lock-screen failures count toward lockout
-**Decision.** Wrong passwords on the idle lock screen use the same 5-failure / 15-minute lockout as sign-in. Once the account is locked or deactivated, `verifyPassword` returns false and the UI signs the user out.
+**Decision.** Wrong passwords on the idle lock screen use the same 5-failure / 15-minute lockout as sign-in. The fifth failure locks the account; `AuthService.unlock` then ends the session itself and returns `SESSION_ENDED`, and the UI goes back to the sign-in screen with the generic failure message (Phase 2 follow-up).
 **Why.** An unattended, idle-locked machine must not offer unlimited guesses.
 **Rejected.** A separate, unlimited lock-screen check.
 
@@ -457,3 +457,159 @@ Superseded by D-027.
 **Decision.** `CompositionRoot.wire(database, clock)` builds every repository and service once and returns them as a `Services` record for the UI. The clock is `Clock.system(Africa/Nairobi)`.
 **Why.** One readable place shows the whole object graph, and tests can wire the same graph against any database and clock.
 **Rejected.** A DI container, and service locators or static singletons.
+
+## Phase 3: user interface
+
+### D-091 One stylesheet; colours are tokens, lengths come from fixed scales
+**Decision.** `theme.css` is the only stylesheet. Every colour is a looked-up colour declared once on `.root`; every other rule refers to those names. JavaFX CSS can only look up paints, not lengths, so font sizes, spacing and radii come from scales documented at the top of the file. `ThemeTokensTest` fails on a literal colour outside the token block, a length outside the scales, `style=` in FXML or `setStyle` in UI code.
+**Why.** Dark mode in Phase 5 becomes a second token block, and the design can't drift one hard-coded value at a time.
+**Rejected.** Per-screen stylesheets; generating CSS from Java constants (adds a build step for little gain).
+
+### D-092 Inter is bundled as four static weights
+**Decision.** Inter 4.1 Regular, Medium, SemiBold and Bold (TTF, OFL licence alongside) are loaded from the classpath at startup. Medium and SemiBold register as their own families in JavaFX, so CSS selects them by family name (`"Inter SemiBold"`) rather than by `-fx-font-weight`.
+**Why.** The app looks the same on every machine, with no font installation step. JavaFX handles static fonts reliably; it doesn't support variable-font weights.
+**Rejected.** The variable font (JavaFX ignores its weight axis) and relying on system fonts.
+
+### D-093 All service calls go through `Backend`
+**Decision.** Screens never hold `Services`. `Backend.run(work, onSuccess, onFailure)` runs work on a two-thread daemon pool and calls back on the FX thread, unwrapping exceptions. Every call passes `Backend.requireOffFxThread()`, which throws if it is on the FX thread; `BackendTest` checks this. The session can still be read on the FX thread because it's an in-memory value.
+**Why.** A slow query or a BCrypt check (≈250 ms at cost 12) never freezes the window, and the mistake fails loudly in tests instead of producing an occasional stutter.
+**Rejected.** `javafx.concurrent.Task` at every call site (repetitive and easy to forget), and an unbounded thread pool.
+
+### D-094 Visual checks are snapshots of the app's own scenes
+**Decision.** Tests run on headless Monocle with software rendering, set through Surefire system properties. `UiSnapshots` lays out a themed scene at 1366×768 and 1920×1080 (plus full-length for long pages), renders it with `Scene.snapshot` and writes PNGs to `target/ui-snapshots/`.
+**Why.** Layout can be reviewed and later shown in the README without ever capturing the desktop, and the same images come out of CI.
+**Rejected.** Screen capture through the TestFX robot, and pixel-diff assertions (fragile across fonts and platforms; the images are for review).
+
+### D-095 The style guide lives in test sources
+**Decision.** The style guide (tokens, typography and every component, with realistic Kenyan sample data) is built from `StyleGuideSection`s in `src/test`, and rendered by `StyleGuideSnapshotTest`.
+**Why.** It is dev-only by construction: it can't ship in the installer or show up in the app's menu.
+**Rejected.** A hidden menu item or a debug flag in the production app.
+
+### D-096 Dialogs are in-window overlays
+**Decision.** `OverlayHost` is the scene root and owns a dialog layer (on a scrim), a toast layer and a window-wide loading layer. While a dialog is open, the content underneath ignores mouse and key events; it isn't disabled, so it doesn't restyle. Dialogs can stack, and only the top one takes input.
+**Why.** Dialogs share the theme, appear in scene snapshots and are easy to drive in TestFX. Stacking allows "Discard changes?" over an editor.
+**Rejected.** Separate modal `Stage`s, and `setDisable(true)` on the content (it greys every control behind the scrim).
+
+### D-097 The primary handler decides when a dialog closes
+**Decision.** A dialog's primary action calls `setBusy(true)` and the service; on success it closes the dialog, and on failure it puts the errors inline and stays open. Esc cancels. Enter confirms unless focus is on a button (which fires that button) or in a text area (new line). Tab is trapped inside the dialog, and focus goes back where it was when the dialog closes.
+**Why.** Service validation errors land next to the field the user is still looking at, and the keyboard behaviour is predictable.
+**Rejected.** Closing on click and reporting errors afterwards; Enter always meaning confirm.
+
+### D-098 Loading feedback waits 150 ms; error toasts wait for the user
+**Decision.** The loading overlay blocks input at once but only shows itself after 150 ms. Success and info toasts hide after 4 s; error toasts stay until dismissed. At most three toasts show, and the oldest is dropped.
+**Why.** Fast calls don't flicker and can't be double-submitted, and errors can't be missed.
+**Rejected.** Showing the spinner immediately; auto-hiding errors.
+
+### D-099 One empty/loading/error look everywhere
+**Decision.** `EmptyState` draws the "nothing yet", "no results for 'x'", loading and error-with-retry states. `DataTable` uses it as its placeholder, and `StatePane` uses it to switch a whole screen area between its content and those states.
+**Why.** Two forks each built one; merging them keeps every screen's states identical.
+**Rejected.** Separate panels for tables and screens.
+
+### D-100 Money and metres inputs parse through the domain types
+**Decision.** `MoneyField` and `MetresField` share a `NumericField<V>` base. It limits typing to digits, commas and one decimal point (2 dp), reformats when focus leaves, and parses with `Money.parse` / `Metres.of`. A blank or invalid entry gives a null value plus a problem message that the form shows when it validates. Money must be positive unless `allowZero` is set, and negatives are never accepted; reversals have their own flow.
+**Why.** No number logic lives in the UI, and errors don't appear while the user is still typing.
+**Rejected.** `Spinner`s, BigDecimal parsing in the UI, and showing errors on every keystroke.
+
+### D-101 Status badge tones
+**Decision.** The badge tones are:
+- Pending survey: neutral
+- Approved: info
+- In progress: primary-soft background with primary text
+- Completed: success
+- Cancelled: danger
+- Not paid: danger
+- Partially paid: warning
+- Paid: success
+
+**Why.** Amber text on a soft amber background fails contrast and would look the same as the warning tone.
+**Rejected.** A separate accent-text token.
+
+### D-102 `DataTable` filters, then sorts
+**Decision.** `DataTable` runs `FilteredList` → `SortedList` and binds the sorted list's comparator to the table's. The caller supplies a case-insensitive search predicate. Enter or a double-click opens a row, Ctrl+F focuses the search box and Esc clears it.
+**Why.** Sorting by a column header keeps working while a search is active.
+**Rejected.** Re-sorting by hand after each filter.
+
+### D-103 The shell is given its pages
+**Decision.** The app passes `AppShell` a list of `Destination`s: id, title, icon, required permission and view factory. The shell filters them with `Role.has` and knows no screen by name. Ctrl+1…9 jump to the pages, and the sidebar also works with Tab and the arrow keys.
+**Why.** The permission matrix stays the single source of truth, and a new screen is one list entry.
+**Rejected.** A hard-coded menu inside the shell.
+
+### D-104 Icons are drawn in-house as SVG paths
+**Decision.** The `Icon` enum holds the app's own 20×20 `SVGPath` glyphs, coloured by the theme tokens.
+**Why.** No new dependency and no third-party path data to license.
+**Rejected.** Ikonli and Font Awesome.
+
+### D-105 Forms check blanks locally; the service owns every other rule
+**Decision.** Sign-in flags blank fields, and first-run flags a mismatched confirmation, before calling a service. Every other rule comes back from the service as `FieldError`s, which are shown under the matching field; focus moves to the first one in error. View models set their errors before clearing `busy`, so the view can focus the right field.
+**Why.** An empty submit doesn't write a LOGIN_FAILED audit entry, and the password and username rules live in one place.
+**Rejected.** Copying the domain rules into the UI.
+
+### D-106 `Backend` surfaces callback exceptions
+**Decision.** If an FX-thread callback passed to `Backend.run` throws, the exception is logged and handed to the thread's uncaught-exception handler.
+**Why.** `whenCompleteAsync` silently swallowed them, so a broken screen failed without a trace.
+**Rejected.** Making every callback catch its own exceptions.
+
+### D-107 Sign-out always clears the session
+**Decision.** `AuthService.signOut` clears the session in a `finally` block, even if writing the SIGNED_OUT audit entry fails.
+**Why.** The UI returns to the sign-in screen either way, and a stale session must not outlive it.
+**Rejected.** Letting the UI clear the session (`Session.signOut` is package-private to the service layer on purpose).
+
+### D-108 The focus ring shows only for keyboard focus
+**Decision.** A `:keyboard-focus` pseudo-class, set by `KeyboardFocus` on every themed scene, marks the focus owner when focus arrived by key press and clears it on any mouse press. The sidebar shows its blue ring only in that state. The selected page has a filled background with a 3px amber bar on the left.
+**Why.** A click shouldn't leave a ring on the item you just picked, but keyboard users must always see where they are. JavaFX's own `:focus-visible` is set only by Tab traversal, so it disappears when the sidebar moves focus itself on arrow keys.
+**Rejected.** `:focus-visible` alone; an outline on the selected item.
+
+### D-109 Table columns declare a width policy
+**Decision.** Every `DataTable` column is `fixed`, `range(min, max)` or `flex(min)`, under the all-columns constrained resize policy. IDs, categories, counties, phones, statuses, dates and amounts are fixed or bounded; names and descriptions flex. Amount headers are right-aligned like their cells. Ctrl+C copies the selected row, tab-separated, as shown.
+**Why.** Short values keep a stable width, and the extra space goes to the text that needs it.
+**Rejected.** Equal-width columns, and letting the last column take all spare space.
+
+### D-110 "Inter Num": Inter with tabular figures frozen in
+**Decision.** `tools/fonts/freeze_tnum.py` (fontTools) maps the digit characters of Inter Regular, Medium and SemiBold to Inter's own tabular glyphs (`zero.tf` … `nine.tf`). It renames the family to "Inter Num", as the OFL requires for modified versions, and leaves the licence file alongside with a notice. `.figures`, `.text-numeric` and `.figures-strong` use it for amounts, lengths, IDs and dates. `TabularFiguresTest` checks the digits have equal widths and renders a column of amounts to look at.
+**Why.** Inter's default digits are proportional ("1" is 850 units wide, "0" 1322), so amounts in a column don't line up, and JavaFX can't switch on the OpenType `tnum` feature.
+**Rejected.** A monospaced font for numbers, which clashes with Inter; leaving the digits ragged.
+
+### D-111 Status colours
+**Decision.** Badge tones:
+- Pending survey: neutral
+- Approved: info blue
+- In progress: amber accent
+- Completed: success
+- Cancelled: danger
+- Not paid: neutral
+- Partially paid: olive-yellow warning
+- Paid: success
+
+Red is reserved for errors, cancellation and, later, overdue balances. `BadgeContrastTest` reads the colour tokens from `theme.css` and requires at least 4.5:1 for every badge.
+**Why.** An unpaid fresh quote isn't an error, and Approved and In progress must be told apart at a glance.
+**Rejected.** Red for Not paid; one blue for every active state.
+
+### D-112 Banners only for errors with no field
+**Decision.** A form shows a banner only for an error that doesn't belong to a field: a conflict, a connection failure or the generic sign-in message. When every error maps to a field, there is no banner.
+**Why.** A "check the highlighted fields" banner repeats what the inline errors already say, and pulls the eye away from them.
+**Rejected.** An always-on summary banner.
+
+### D-113 The page name lives in the top bar only
+**Decision.** The top bar shows the page name, with a "Clients › Wanjiru Kamau" trail and a Back button on detail pages (Alt+Left also goes back). The page's own `PageHeader` shows only the subtitle, the count (taken from the table) and the actions.
+**Why.** The same title twice in one view wastes the most valuable space on the screen.
+**Rejected.** A large in-page heading under the top bar.
+
+### D-114 Screens link through `Navigator` and `Pages`
+**Decision.** The shell gives each page a `Navigator`: open another sidebar page, or push, replace and go back through a stack of detail pages. `Pages` opens screens by what they show (a client, a job, the quote editor), so the clients, jobs and editor screens link to each other without depending on each other's classes. A page that implements `Refreshable` reloads when the user comes back to it.
+**Why.** The screens could be built in parallel and stay decoupled, and Back always returns to the page the user came from.
+**Rejected.** Screens constructing each other directly; a URL-style router.
+
+### D-115 One sample story for all screenshots
+**Decision.** The test fixture `SampleData` seeds six clients, six jobs and four payments through the real services, with a controlled clock: "today" is Friday 16 October 2026. Every snapshot, dialog, toast and style-guide specimen refers to these same records. `Services` now exposes the app clock, so screens take "today" from it too.
+**Why.** The snapshots become the README screenshots, and figures that disagree between images look careless. Seeding through the services means every amount comes from the pricing engine.
+**Rejected.** Hand-written sample rows in each test.
+
+### D-116 The password strength hint
+**Decision.** `PasswordStrengthHint` shows three bars and a word (weak, fair, strong) from `PasswordPolicy.strengthOf`, under the new-password field on first run, the forced change and the voluntary change. Weak is olive, fair amber and strong green; red stays reserved for errors. It is a hint and never blocks a password the policy accepts.
+**Why.** Administrators reset accounts to a generated temporary password, so the only places a person types a new password are these three screens.
+**Rejected.** An admin "set password" field, which would show the admin the user's password.
+
+### D-117 Client GPS is shown as the borehole location
+**Decision.** The client dialog labels the optional latitude/longitude pair "Borehole location (GPS)", next to the postal address. A valid point outside Kenya's bounding box shows a warning under the fields and still saves.
+**Why.** The spec's client record has an address and one optional GPS pair, and that pair is where the borehole is drilled. A cross-border site is legitimate, so the check warns rather than blocks.
+**Rejected.** A separate free-text location field that the spec doesn't define.
