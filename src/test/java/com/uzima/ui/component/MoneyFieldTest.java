@@ -3,6 +3,7 @@ package com.uzima.ui.component;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.uzima.domain.money.Money;
+import com.uzima.ui.KeyboardStageExtension;
 import com.uzima.ui.UiTheme;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
@@ -15,7 +16,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 import org.testfx.util.WaitForAsyncUtils;
 
-@ExtendWith(ApplicationExtension.class)
+@ExtendWith({ApplicationExtension.class, KeyboardStageExtension.class})
 class MoneyFieldTest {
 
   private MoneyField field;

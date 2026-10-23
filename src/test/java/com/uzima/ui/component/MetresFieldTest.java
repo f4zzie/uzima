@@ -4,6 +4,7 @@ import static com.uzima.ui.component.MoneyFieldTest.robotFx;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.uzima.domain.common.Metres;
+import com.uzima.ui.KeyboardStageExtension;
 import com.uzima.ui.UiTheme;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
@@ -15,7 +16,7 @@ import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-@ExtendWith(ApplicationExtension.class)
+@ExtendWith({ApplicationExtension.class, KeyboardStageExtension.class})
 class MetresFieldTest {
 
   private MetresField field;

@@ -136,15 +136,18 @@ public final class ClientDetailPage implements Refreshable {
     boolean inShowingScene = scene != null && window != null && window.isShowing();
     if (!inShowingScene) {
       // Not in a showing scene yet; focus once it is.
-      target.sceneProperty().addListener(new ChangeListener<Scene>() {
-        @Override
-        public void changed(ObservableValue<? extends Scene> obs, Scene old, Scene now) {
-          if (now != null) {
-            target.sceneProperty().removeListener(this);
-            Platform.runLater(ClientDetailPage.this::focusFirstAction);
-          }
-        }
-      });
+      target
+          .sceneProperty()
+          .addListener(
+              new ChangeListener<Scene>() {
+                @Override
+                public void changed(ObservableValue<? extends Scene> obs, Scene old, Scene now) {
+                  if (now != null) {
+                    target.sceneProperty().removeListener(this);
+                    Platform.runLater(ClientDetailPage.this::focusFirstAction);
+                  }
+                }
+              });
       return;
     }
     target.requestFocus();

@@ -11,6 +11,7 @@ import com.uzima.domain.money.Money;
 import com.uzima.service.JobSearch;
 import com.uzima.ui.AppFlow;
 import com.uzima.ui.FxTest;
+import com.uzima.ui.KeyboardStageExtension;
 import com.uzima.ui.SampleData;
 import com.uzima.ui.ShellHarness;
 import com.uzima.ui.StageSnapshots;
@@ -18,6 +19,7 @@ import com.uzima.ui.component.Banner;
 import com.uzima.ui.component.FormField;
 import com.uzima.ui.quote.QuoteEditorViewModel.PlumbingMode;
 import java.util.OptionalLong;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
@@ -29,7 +31,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 /** The quote editor end to end: real services, real pricing, headless. */
-@ExtendWith(ApplicationExtension.class)
+@ExtendWith({ApplicationExtension.class, KeyboardStageExtension.class})
 class QuoteEditorFlowTest {
 
   private SampleData data;
@@ -50,12 +52,17 @@ class QuoteEditorFlowTest {
 
   @AfterEach
   void close() {
-    data.close();
-    FxTest.onFx(() -> {
-      if (stage != null && stage.isShowing()) {
-        stage.hide();
-      }
-    });
+    try {
+      data.close();
+    } finally {
+      FxTest.onFx(
+          () -> {
+            if (stage != null && stage.isShowing()) {
+              stage.hide();
+            }
+          });
+      FxTest.settle();
+    }
   }
 
   /** Opens the editor as a detail page over Jobs, as the app does. */
@@ -125,7 +132,7 @@ class QuoteEditorFlowTest {
   @Test
   void aQuoteCanBeEnteredWithTheKeyboardAlone(FxRobot robot) {
     open(OptionalLong.empty(), OptionalLong.empty());
-    waitUntil(() -> robot.lookup("#client").query().isFocused());
+    FxTest.ensureStageReadyForInput(stage, "#client");
     robot.write("Che"); // type-ahead: Chebet Kiprono
     robot.type(KeyCode.TAB); // the Drilling switch (already on)
     robot.type(KeyCode.TAB).write("s"); // drilling type: Symmetric
@@ -224,8 +231,10 @@ class QuoteEditorFlowTest {
   }
 
   /** Focuses a field (scrolled out of view or not) and types into it, as a keyboard user would. */
-  private static void typeInto(FxRobot robot, String query, String text) {
-    FxTest.onFx(() -> robot.lookup(query).query().requestFocus());
+  private void typeInto(FxRobot robot, String query, String text) {
+    Node node = FxTest.onFx(() -> robot.lookup(query).query());
+    FxTest.onFx(node::requestFocus);
+    FxTest.waitForFocus(stage, node);
     robot.write(text);
   }
 

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.uzima.ui.FxTest;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testfx.api.FxRobot;
@@ -46,6 +47,7 @@ class ConfirmDialogTest {
     FxTest.onFx(() -> host.showDialog(confirm.shell()));
     robot.clickOn(confirm.shell().primaryButton());
 
+    FxTest.ensureStageReadyForInput((Stage) FxTest.onFx(() -> host.getScene().getWindow()));
     robot.clickOn(confirm.reasonField().getInput()).write("  Client moved to Nakuru  ");
     assertThat(confirm.reasonField().hasError()).isFalse();
     robot.clickOn(confirm.shell().primaryButton());

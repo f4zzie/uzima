@@ -23,7 +23,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 /** Sign-in through the real screens, services and an in-memory database. */
-@ExtendWith(ApplicationExtension.class)
+@ExtendWith({ApplicationExtension.class, KeyboardStageExtension.class})
 class LoginFlowTest {
 
   private UiTestBackend ui;
@@ -88,12 +88,12 @@ class LoginFlowTest {
 
     robot.clickOn("Jobs");
     javafx.scene.Node jobs = robot.lookup(".nav-item").nth(2).query();
-    waitUntil(jobs::isFocused);
+    FxTest.waitForFocus(stage, jobs);
     assertThat(KeyboardFocusState.of(jobs)).isFalse();
 
     robot.type(KeyCode.DOWN);
     javafx.scene.Node payments = robot.lookup(".nav-item").nth(3).query();
-    waitUntil(payments::isFocused);
+    FxTest.waitForFocus(stage, payments);
     assertThat(KeyboardFocusState.of(payments)).isTrue();
     assertThat(KeyboardFocusState.of(jobs)).isFalse();
   }
@@ -109,7 +109,7 @@ class LoginFlowTest {
   void keyboardOnlySignIn(FxRobot robot) {
     waitFor(robot, "#username");
     // The username box has focus when the screen opens.
-    waitUntil(() -> robot.lookup("#username").query().isFocused());
+    FxTest.waitForFocus(stage, "#username");
     robot.write(UiTestBackend.ADMIN_USERNAME);
     robot.type(KeyCode.TAB);
     robot.write(UiTestBackend.ADMIN_PASSWORD);

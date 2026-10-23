@@ -3,6 +3,7 @@ package com.uzima.ui.component;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.uzima.ui.FxTest;
+import com.uzima.ui.KeyboardStageExtension;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import javafx.scene.Scene;
@@ -12,9 +13,11 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.api.FxRobot;
 import org.testfx.util.WaitForAsyncUtils;
 
+@ExtendWith(KeyboardStageExtension.class)
 class LoadingOverlayTest {
 
   private final FxRobot robot = new FxRobot();

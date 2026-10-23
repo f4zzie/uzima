@@ -380,7 +380,8 @@ public final class JobEditorPage {
     // In headless Monocle, the scene may not be laid out on the first pulse.
     Scene scene = input.getScene();
     Window window = scene != null ? scene.getWindow() : null;
-    boolean inShowingScene = scene != null && scene.getWindow() != null && scene.getWindow().isShowing();
+    boolean inShowingScene =
+        scene != null && scene.getWindow() != null && scene.getWindow().isShowing();
     if (!inShowingScene) {
       if (attempt < 15) {
         Platform.runLater(() -> focus(key, attempt + 1));

@@ -1,0 +1,46 @@
+name: Keyboard flow stress
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/keyboard-stress.yml'
+      - 'tools/stress-keyboard-flows.py'
+      - 'src/main/java/com/uzima/ui/**'
+      - 'src/test/java/com/uzima/ui/**'
+      - 'src/test/resources/**'
+      - 'pom.xml'
+
+permissions:
+  contents: read
+
+jobs:
+  keyboard-stress:
+    name: Keyboard flows (${{ matrix.mode }}, shard ${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [default, ci]
+        shard: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      # Three independent loops give 30 runs per mode without retrying a failed test.
+      - name: Run both flow classes ten times
+        run: python3 tools/stress-keyboard-flows.py --runs 10 --mode "${{ matrix.mode }}"
+      - name: Upload stress diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: keyboard-stress-${{ matrix.mode }}-${{ matrix.shard }}
+          path: |
+            target/keyboard-stress/
+            target/surefire-reports/
+            target/ui-snapshots/
+          if-no-files-found: error
