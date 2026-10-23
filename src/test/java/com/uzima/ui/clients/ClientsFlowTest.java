@@ -12,6 +12,7 @@ import com.uzima.service.AuditQuery;
 import com.uzima.service.ClientSearch;
 import com.uzima.ui.AppFlow;
 import com.uzima.ui.FxTest;
+import com.uzima.ui.KeyboardStageExtension;
 import com.uzima.ui.SampleData;
 import com.uzima.ui.ShellHarness;
 import com.uzima.ui.StageSnapshots;
@@ -31,7 +32,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 /** The clients screens through the real shell, services and an in-memory database. */
-@ExtendWith(ApplicationExtension.class)
+@ExtendWith({ApplicationExtension.class, KeyboardStageExtension.class})
 class ClientsFlowTest {
 
   private SampleData data;
@@ -121,7 +122,7 @@ class ClientsFlowTest {
   void keyboardOnlyRegistration(FxRobot robot) {
     waitFor(robot, "Wanjiru Kamau");
     robot.press(KeyCode.CONTROL, KeyCode.N).release(KeyCode.N, KeyCode.CONTROL);
-    waitUntil(() -> robot.lookup("#name").tryQuery().map(Node::isFocused).orElse(false));
+    FxTest.waitForFocus(stage, "#name");
     robot.write("Achieng Atieno");
     robot.type(KeyCode.TAB).write("d"); // category type-ahead: Domestic
     robot.type(KeyCode.TAB).write("0722 111 000");
@@ -147,7 +148,7 @@ class ClientsFlowTest {
     waitFor(robot, "JOB-2026-00001");
     assertThat(pages.calls).contains("client " + data.athiRiver.id());
     // Focus lands in the page (on its primary action), not back in the sidebar.
-    waitUntil(() -> robot.lookup("#newJob").tryQuery().map(Node::isFocused).orElse(false));
+    FxTest.waitForFocus(stage, "#newJob");
 
     robot.clickOn("JOB-2026-00001").type(KeyCode.ENTER);
     assertThat(pages.calls).contains("job " + data.athiRiverJob.id());

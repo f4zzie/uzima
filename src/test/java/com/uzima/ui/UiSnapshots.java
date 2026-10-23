@@ -21,7 +21,7 @@ import javax.imageio.ImageIO;
 public final class UiSnapshots {
 
   /** The two window sizes every screen is checked at. */
-  public static final List<int[]> SIZES = List.of(new int[] {1366, 768}, new int[] {1920, 1080});
+  public static final List<int[]> SIZES = List.of(new int[] {1366, 768}, new int[] {1280, 720});
 
   private UiSnapshots() {}
 

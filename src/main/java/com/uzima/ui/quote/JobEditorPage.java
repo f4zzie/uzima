@@ -18,13 +18,13 @@ import com.uzima.ui.component.OverlayHost;
 import com.uzima.ui.component.PageHeader;
 import com.uzima.ui.component.StatePane;
 import com.uzima.ui.component.TypeAhead;
+import com.uzima.ui.shell.InitialFocus;
 import com.uzima.ui.shell.LeaveGuard;
 import com.uzima.ui.shell.Navigator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.OptionalLong;
 import java.util.function.Function;
-import javafx.application.Platform;
 import javafx.collections.MapChangeListener;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -50,7 +50,7 @@ import javafx.util.StringConverter;
  *
  * <p>Keyboard: Ctrl+S saves; Back or a sidebar click with unsaved changes asks first.
  */
-public final class JobEditorPage {
+public final class JobEditorPage implements InitialFocus {
 
   private static final KeyCombination SAVE =
       new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN);
@@ -87,7 +87,17 @@ public final class JobEditorPage {
 
   /** The node to put in the shell. */
   public Node root() {
-    return root;
+    return InitialFocus.attach(root, this);
+  }
+
+  @Override
+  public Node initialFocusTarget() {
+    return switch (model.stateProperty().get()) {
+      case READY -> model.isEdit() ? save : fields.get("client").getInput();
+      case ERROR -> root.retryButton();
+      case LOADING -> null;
+      case null -> null;
+    };
   }
 
   /** The top-bar title: "New quote", or the job number when editing. */
@@ -322,21 +332,14 @@ public final class JobEditorPage {
     switch (model.stateProperty().get()) {
       case LOADING -> root.showLoading("Loading clients and prices…");
       case ERROR -> root.showError(QuoteEditorViewModel.LOAD_FAILED, model::load);
-      case READY -> {
-        root.showContent();
-        if (model.clientProperty().get() == null) {
-          // Content is visible and managed in the scene now; focus synchronously so keyboard
-          // users (and tests) land on the client field without waiting for a pulse.
-          focus("client");
-        }
-      }
+      case READY -> root.showContent();
       case null -> root.showLoading("Loading…");
     }
   }
 
   private void save() {
     model.save(this::saved);
-    Platform.runLater(this::focusFirstError);
+    focusFirstError();
   }
 
   private void saved(Job job) {
@@ -365,21 +368,10 @@ public final class JobEditorPage {
         .ifPresent(e -> focus(e.getKey()));
   }
 
-  private void focus(String key, int attempt) {
+  private void focus(String key) {
     FormField field = fields.get(key);
-    if (field == null || field.getInput() == null) {
-      throw new IllegalStateException("Cannot focus field '" + key + "': input node is null");
-    }
-    Node input = field.getInput();
-    input.requestFocus();
-    if (!input.isFocused() && attempt < 5) {
-      // The pane may not yet be laid out in the scene; retry on the next pulse so the focus
-      // request lands once the node is showing. Capped so a mis-wired field can't loop forever.
-      Platform.runLater(() -> focus(key, attempt + 1));
-    }
-    if (!input.isFocused()) {
-      throw new IllegalStateException(
-          "Control '" + key + "' did not receive focus after " + (attempt + 1) + " attempts");
+    if (field != null && field.getInput() != null) {
+      field.getInput().requestFocus();
     }
   }
 

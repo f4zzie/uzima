@@ -6,10 +6,10 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
@@ -35,6 +35,8 @@ public final class AppShell {
   private final ToggleGroup group = new ToggleGroup();
   private final Deque<Page> stack = new ArrayDeque<>();
   private final Navigator navigator = new ShellNavigator();
+  private final Runnable navigationPulse = this::completeNavigation;
+  private Node awaitingInitialFocus;
 
   /** A page in the content area and its top-bar title. */
   private record Page(String title, Node node) {}
@@ -56,6 +58,16 @@ public final class AppShell {
     this.model = model;
     this.root = Views.load("shell", this);
     root.addEventFilter(KeyEvent.KEY_PRESSED, this::onShortcut);
+    root.sceneProperty()
+        .addListener(
+            (obs, old, now) -> {
+              if (old != null) {
+                old.removePostLayoutPulseListener(navigationPulse);
+              }
+              if (now != null) {
+                now.addPostLayoutPulseListener(navigationPulse);
+              }
+            });
   }
 
   public Parent root() {
@@ -75,17 +87,6 @@ public final class AppShell {
     buildNavigation(model.destinations());
     model.selectedProperty().addListener((obs, old, now) -> show(now));
     show(model.selectedProperty().get());
-    // Keyboard users start in the navigation rather than on the account menu.
-    // Unless a page has already taken focus by the time this runs.
-    Platform.runLater(
-        () -> {
-          if (!focusInsideContent()) {
-            nav.getChildren().stream()
-                .filter(n -> ((ToggleButton) n).isSelected())
-                .findFirst()
-                .ifPresent(Node::requestFocus);
-          }
-        });
   }
 
   private void buildNavigation(List<Destination> destinations) {
@@ -102,7 +103,7 @@ public final class AppShell {
           e -> {
             // Keep the current page selected until the page agrees to be left.
             show(model.selectedProperty().get(), false);
-            leaveThen(() -> model.selectedProperty().set(d));
+            navigator.open(d.id());
           });
       item.addEventHandler(KeyEvent.KEY_PRESSED, this::onNavKey);
       nav.getChildren().add(item);
@@ -120,16 +121,6 @@ public final class AppShell {
                 old.setSelected(true);
               }
             });
-  }
-
-  private boolean focusInsideContent() {
-    Node owner = root.getScene() == null ? null : root.getScene().getFocusOwner();
-    for (Node n = owner; n != null; n = n.getParent()) {
-      if (n == content) {
-        return true;
-      }
-    }
-    return false;
   }
 
   /** The navigator pages use to open detail pages and other sidebar pages. */
@@ -157,8 +148,42 @@ public final class AppShell {
   }
 
   private void showTop() {
-    content.getChildren().setAll(stack.peek().node());
+    awaitingInitialFocus = stack.peek().node();
+    content.getChildren().setAll(awaitingInitialFocus);
     updateTopBar();
+  }
+
+  /**
+   * Navigation finishes after input dispatch and CSS/layout (including lazy ScrollPane skins).
+   * Loading pages declare no target yet. Only the current presentation can receive this one call.
+   */
+  private void completeNavigation() {
+    Node page = awaitingInitialFocus;
+    Scene scene = root.getScene();
+    if (page == null
+        || scene == null
+        || scene.getWindow() == null
+        || !scene.getWindow().isShowing()) {
+      return;
+    }
+    InitialFocus focus = InitialFocus.of(page).orElse(() -> page);
+    Node target = focus.initialFocusTarget();
+    if (target == null || target.getScene() != scene || target.isDisabled()) {
+      return;
+    }
+    boolean insidePage = false;
+    for (Node node = target; node != null; node = node.getParent()) {
+      if (!node.isVisible()
+          || (node instanceof OverlayHost host
+              && (host.isDialogOpen() || host.loading().isShowing()))) {
+        return;
+      }
+      insidePage |= node == page;
+    }
+    if (insidePage) {
+      awaitingInitialFocus = null;
+      focus.requestInitialFocus();
+    }
   }
 
   /** Shows the page below the current one again, reloading it if it is {@link Refreshable}. */
@@ -232,6 +257,13 @@ public final class AppShell {
 
     @Override
     public void replace(String pageTitle, Node page) {
+      if (!stack.isEmpty() && stack.peek().node() == page) {
+        // An asynchronously loaded name updates the title, not the page's presentation.
+        stack.pop();
+        stack.push(new Page(pageTitle, page));
+        updateTopBar();
+        return;
+      }
       if (stack.size() > 1) {
         stack.pop();
       }
@@ -284,11 +316,7 @@ public final class AppShell {
     int digit = code.isDigitKey() ? code.getChar().charAt(0) - '1' : -1;
     if (digit >= 0 && digit < 9 && digit < model.destinations().size()) {
       e.consume();
-      leaveThen(
-          () -> {
-            model.select(digit);
-            nav.getChildren().get(digit).requestFocus();
-          });
+      navigator.open(model.destinations().get(digit).id());
     }
   }
 

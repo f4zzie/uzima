@@ -15,11 +15,11 @@ import com.uzima.ui.component.DialogShell;
 import com.uzima.ui.component.PageHeader;
 import com.uzima.ui.component.StatePane;
 import com.uzima.ui.component.StatusBadge;
+import com.uzima.ui.shell.InitialFocus;
 import com.uzima.ui.shell.Navigator;
 import com.uzima.ui.shell.Refreshable;
 import java.util.List;
 import java.util.OptionalLong;
-import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -35,7 +35,7 @@ import javafx.scene.layout.VBox;
  * One client: contact details and borehole location, totals across their jobs, and the jobs
  * themselves. Pushed onto the shell with the client's name as its title.
  */
-public final class ClientDetailPage implements Refreshable {
+public final class ClientDetailPage implements Refreshable, InitialFocus {
 
   private final Backend backend;
   private final Navigator nav;
@@ -76,7 +76,7 @@ public final class ClientDetailPage implements Refreshable {
   }
 
   public Node root() {
-    return root;
+    return InitialFocus.attach(root, this);
   }
 
   public ClientDetailViewModel model() {
@@ -97,13 +97,8 @@ public final class ClientDetailPage implements Refreshable {
       }
       case ERROR -> state.showError(model.errorProperty().get(), model::load);
       case READY -> {
-        boolean first = content.getChildren().isEmpty();
         show(model.detailProperty().get());
         state.showContent();
-        if (first) {
-          // Keyboard users land on the page's first action, not back in the sidebar.
-          Platform.runLater(this::focusFirstAction);
-        }
       }
     }
   }
@@ -119,14 +114,17 @@ public final class ClientDetailPage implements Refreshable {
     content.getChildren().setAll(header(client), totals(detail.totals()), body(client));
   }
 
-  /** Focuses the primary action (the last one in the header), or the jobs table if none. */
-  private void focusFirstAction() {
-    List<Node> actions = header == null ? List.of() : header.getActions();
-    if (actions.isEmpty()) {
-      jobs.tableView().requestFocus();
-    } else {
-      actions.get(actions.size() - 1).requestFocus();
+  /** The primary action (last in the header), or the jobs table if none. */
+  @Override
+  public Node initialFocusTarget() {
+    if (model.stateProperty().get() == ClientDetailViewModel.State.LOADING) {
+      return null;
     }
+    if (model.stateProperty().get() == ClientDetailViewModel.State.ERROR) {
+      return state.retryButton();
+    }
+    List<Node> actions = header == null ? List.of() : header.getActions();
+    return actions.isEmpty() ? jobs.tableView() : actions.getLast();
   }
 
   private PageHeader header(Client client) {

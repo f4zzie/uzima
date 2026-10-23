@@ -31,6 +31,7 @@
 
     <!-- Test -->
     <junit.version>5.13.4</junit.version>
+    <junit-platform.version>1.13.4</junit-platform.version>
     <assertj.version>3.27.6</assertj.version>
     <testcontainers.version>2.0.5</testcontainers.version>
     <testfx.version>4.0.18</testfx.version>
@@ -111,6 +112,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-testkit</artifactId>
+      <version>${junit-platform.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
       <version>${assertj.version}</version>
@@ -186,16 +193,18 @@
         <version>${surefire.version}</version>
         <configuration>
           <!-- @{argLine} lets JaCoCo prepend its agent. -->
-          <argLine>@{argLine} -Duser.timezone=Africa/Nairobi -Dfile.encoding=UTF-8</argLine>
+          <argLine>
+            @{argLine} -Duser.timezone=Africa/Nairobi -Dfile.encoding=UTF-8
+            -Dtestfx.robot=glass -Dtestfx.headless=true
+            -Dglass.platform=Monocle -Dmonocle.platform=Headless -Dprism.order=sw
+          </argLine>
           <!-- UI tests always run headless on Monocle with software rendering; they never open a
                window on the desktop. -->
           <systemPropertyVariables>
-            <testfx.robot>glass</testfx.robot>
-            <testfx.headless>true</testfx.headless>
-            <glass.platform>Monocle</glass.platform>
-            <monocle.platform>Headless</monocle.platform>
+            <!-- Monocle 21 sizes its framebuffer from this geometry, not buffer.maxsize.
+                 Keep the virtual screen larger than the 1366x768 test stages and their popups.
+                 A smaller screen triggers Monocle's clipped full-width pixel-copy bug. -->
             <headless.geometry>1920x1080-32</headless.geometry>
-            <prism.order>sw</prism.order>
             <prism.text>t2k</prism.text>
             <prism.lcdtext>false</prism.lcdtext>
             <java.awt.headless>true</java.awt.headless>

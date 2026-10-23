@@ -21,6 +21,6 @@ final class WelcomePanel {
     card.setMaxHeight(VBox.USE_PREF_SIZE);
     VBox page = new VBox(card);
     page.getStyleClass().add("page");
-    return page;
+    return InitialFocus.attach(page, () -> heading);
   }
 }

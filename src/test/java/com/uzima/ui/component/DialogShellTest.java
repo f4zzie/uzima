@@ -3,6 +3,7 @@ package com.uzima.ui.component;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.uzima.ui.FxTest;
+import com.uzima.ui.KeyboardStageExtension;
 import java.util.concurrent.atomic.AtomicInteger;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -13,8 +14,10 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.api.FxRobot;
 
+@ExtendWith(KeyboardStageExtension.class)
 class DialogShellTest {
 
   private final FxRobot robot = new FxRobot();
