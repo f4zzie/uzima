@@ -186,7 +186,7 @@
         <version>${surefire.version}</version>
         <configuration>
           <!-- @{argLine} lets JaCoCo prepend its agent. -->
-          <argLine>@{argLine} -Duser.timezone=Africa/Nairobi -Dfile.encoding=UTF-8</argLine>
+          <argLine>@{argLine} -Duser.timezone=Africa/Nairobi -Dfile.encoding=UTF-8 -Dmonocle.buffers.maxsize=100000000</argLine>
           <!-- UI tests always run headless on Monocle with software rendering; they never open a
                window on the desktop. -->
           <systemPropertyVariables>
@@ -195,7 +195,6 @@
             <glass.platform>Monocle</glass.platform>
             <monocle.platform>Headless</monocle.platform>
             <headless.geometry>1280x720-32</headless.geometry>
-            <monocle.buffers.maxsize>100000000</monocle.buffers.maxsize>
             <prism.order>sw</prism.order>
             <prism.text>t2k</prism.text>
             <prism.lcdtext>false</prism.lcdtext>
