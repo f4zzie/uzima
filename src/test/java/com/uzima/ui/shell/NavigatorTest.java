@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.uzima.ui.AppFlow;
 import com.uzima.ui.FxTest;
+import com.uzima.ui.KeyboardStageExtension;
 import com.uzima.ui.SampleData;
 import com.uzima.ui.ShellHarness;
 import javafx.scene.control.Label;
@@ -18,7 +19,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 /** Detail pages stack on top of a sidebar page, with a trail and Back. */
-@ExtendWith(ApplicationExtension.class)
+@ExtendWith({ApplicationExtension.class, KeyboardStageExtension.class})
 class NavigatorTest {
 
   private AppFlow flow;

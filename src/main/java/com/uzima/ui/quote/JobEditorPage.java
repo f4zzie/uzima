@@ -18,13 +18,13 @@ import com.uzima.ui.component.OverlayHost;
 import com.uzima.ui.component.PageHeader;
 import com.uzima.ui.component.StatePane;
 import com.uzima.ui.component.TypeAhead;
+import com.uzima.ui.shell.InitialFocus;
 import com.uzima.ui.shell.LeaveGuard;
 import com.uzima.ui.shell.Navigator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.OptionalLong;
 import java.util.function.Function;
-import javafx.application.Platform;
 import javafx.collections.MapChangeListener;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -41,7 +41,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.stage.Window;
 import javafx.util.StringConverter;
 
 /**
@@ -51,7 +50,7 @@ import javafx.util.StringConverter;
  *
  * <p>Keyboard: Ctrl+S saves; Back or a sidebar click with unsaved changes asks first.
  */
-public final class JobEditorPage {
+public final class JobEditorPage implements InitialFocus {
 
   private static final KeyCombination SAVE =
       new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN);
@@ -88,7 +87,17 @@ public final class JobEditorPage {
 
   /** The node to put in the shell. */
   public Node root() {
-    return root;
+    return InitialFocus.attach(root, this);
+  }
+
+  @Override
+  public Node initialFocusTarget() {
+    return switch (model.stateProperty().get()) {
+      case READY -> model.isEdit() ? save : fields.get("client").getInput();
+      case ERROR -> root.retryButton();
+      case LOADING -> null;
+      case null -> null;
+    };
   }
 
   /** The top-bar title: "New quote", or the job number when editing. */
@@ -323,21 +332,14 @@ public final class JobEditorPage {
     switch (model.stateProperty().get()) {
       case LOADING -> root.showLoading("Loading clients and prices…");
       case ERROR -> root.showError(QuoteEditorViewModel.LOAD_FAILED, model::load);
-      case READY -> {
-        root.showContent();
-        if (model.clientProperty().get() == null) {
-          // Content is visible and managed in the scene now; focus synchronously so keyboard
-          // users (and tests) land on the client field without waiting for a pulse.
-          focus("client");
-        }
-      }
+      case READY -> root.showContent();
       case null -> root.showLoading("Loading…");
     }
   }
 
   private void save() {
     model.save(this::saved);
-    Platform.runLater(this::focusFirstError);
+    focusFirstError();
   }
 
   private void saved(Job job) {
@@ -367,30 +369,9 @@ public final class JobEditorPage {
   }
 
   private void focus(String key) {
-    focus(key, 0);
-  }
-
-  private void focus(String key, int attempt) {
     FormField field = fields.get(key);
-    if (field == null || field.getInput() == null) {
-      return;
-    }
-    Node input = field.getInput();
-    // Wait for the node to be in a scene and showing before requesting focus.
-    // In headless Monocle, the scene may not be laid out on the first pulse.
-    Scene scene = input.getScene();
-    Window window = scene != null ? scene.getWindow() : null;
-    boolean inShowingScene = scene != null && scene.getWindow() != null && scene.getWindow().isShowing();
-    if (!inShowingScene) {
-      if (attempt < 15) {
-        Platform.runLater(() -> focus(key, attempt + 1));
-      }
-      return;
-    }
-    input.requestFocus();
-    if (!input.isFocused() && attempt < 15) {
-      // Still not focused after layout; retry on next pulse.
-      Platform.runLater(() -> focus(key, attempt + 1));
+    if (field != null && field.getInput() != null) {
+      field.getInput().requestFocus();
     }
   }
 

@@ -18,7 +18,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 /** First run on an empty database: create the administrator and land in the shell. */
-@ExtendWith(ApplicationExtension.class)
+@ExtendWith({ApplicationExtension.class, KeyboardStageExtension.class})
 class FirstRunFlowTest {
 
   private UiTestBackend ui;

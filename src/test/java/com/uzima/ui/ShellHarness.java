@@ -32,12 +32,15 @@ public final class ShellHarness {
     AppFlow flow = new AppFlow(backend, destinations);
     // Test the app's window size, independently of the larger virtual screen used by Monocle.
     stage.setScene(UiTheme.apply(new Scene(flow.root(), 1366, 768)));
+    FxTest.traceFocus(stage.getScene());
     stage.show();
     // Earlier test classes leave windows open; keyboard input and Node.isFocused() follow the
     // focused window, so make sure it is this one.
     stage.toFront();
     stage.requestFocus();
+    FxTest.markFocus(stage.getScene(), "showShell sent");
     flow.showShell(backend.session().requireUser());
+    FxTest.markFocus(stage.getScene(), "navigator.open(" + destinationId + ") sent");
     flow.navigator().orElseThrow().open(destinationId);
     return flow;
   }

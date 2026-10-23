@@ -4,6 +4,7 @@ import static com.uzima.ui.component.MoneyFieldTest.robotFx;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.uzima.domain.money.Money;
+import com.uzima.ui.KeyboardStageExtension;
 import com.uzima.ui.UiTheme;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,7 @@ import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-@ExtendWith(ApplicationExtension.class)
+@ExtendWith({ApplicationExtension.class, KeyboardStageExtension.class})
 class DataTableTest {
 
   record Client(String code, String name, String county, Money balance) {}
