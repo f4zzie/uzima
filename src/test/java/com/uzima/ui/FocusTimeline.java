@@ -3,7 +3,10 @@ package com.uzima.ui;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Locale;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 
@@ -67,6 +70,44 @@ final class FocusTimeline {
             && scene.getProperties().get(FocusTimeline.class) instanceof FocusTimeline t
         ? "\n" + t.events
         : "";
+  }
+
+  static void watchTarget(Scene scene, Node page, String id) {
+    if (!(scene.getProperties().get(FocusTimeline.class) instanceof FocusTimeline t)) {
+      return;
+    }
+    Node target = find(page, id);
+    if (target == null) {
+      throw new IllegalArgumentException("No diagnostic target #" + id);
+    }
+    t.record("target #" + id + "; attached=" + (target.getScene() == scene));
+    target
+        .sceneProperty()
+        .addListener(
+            (obs, old, now) ->
+                t.record("target #" + id + " scene changed; attached=" + (now == scene)));
+  }
+
+  private static Node find(Node node, String id) {
+    if (id.equals(node.getId())) {
+      return node;
+    }
+    // ScrollPane content is not in the scene graph until its skin's first CSS pass.
+    if (node instanceof ScrollPane scroll && scroll.getContent() != null) {
+      Node found = find(scroll.getContent(), id);
+      if (found != null) {
+        return found;
+      }
+    }
+    if (node instanceof Parent parent) {
+      for (Node child : parent.getChildrenUnmodifiable()) {
+        Node found = find(child, id);
+        if (found != null) {
+          return found;
+        }
+      }
+    }
+    return null;
   }
 
   private void record(String event) {

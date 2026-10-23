@@ -141,6 +141,11 @@ public final class FxTest {
     FocusTimeline.mark(scene, event);
   }
 
+  /** Observes a logical page control even before a ScrollPane skin attaches it to the scene. */
+  public static void traceFocusTarget(Scene scene, Node page, String id) {
+    FocusTimeline.watchTarget(scene, page, id);
+  }
+
   static String describe(Node node) {
     return node == null
         ? "null"

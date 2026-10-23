@@ -71,6 +71,7 @@ class QuoteEditorFlowTest {
         () -> {
           var nav = flow.navigator().orElseThrow();
           page = new JobEditorPage(data.ui.backend, nav, pages, clientId, jobId);
+          FxTest.traceFocusTarget(stage.getScene(), page.root(), "client");
           page.model()
               .stateProperty()
               .addListener(
