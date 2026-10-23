@@ -8,6 +8,7 @@ import com.uzima.ui.component.ColumnWidth;
 import com.uzima.ui.component.DataTable;
 import com.uzima.ui.component.PageHeader;
 import com.uzima.ui.component.StatusBadge;
+import com.uzima.ui.shell.InitialFocus;
 import com.uzima.ui.shell.Navigator;
 import com.uzima.ui.shell.Refreshable;
 import javafx.scene.Node;
@@ -23,7 +24,7 @@ import javafx.scene.layout.VBox;
  * The Clients page: a searchable table of clients (active ones by default) with "New client"
  * (Ctrl+N). Enter or a double-click opens the client's detail page.
  */
-public final class ClientsPage implements Refreshable {
+public final class ClientsPage implements Refreshable, InitialFocus {
 
   private static final KeyCombination NEW =
       new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN);
@@ -33,6 +34,7 @@ public final class ClientsPage implements Refreshable {
   private final ClientsViewModel model;
   private final DataTable<ClientSummary> table = new DataTable<>();
   private final VBox root;
+  private final Button add = new Button("New client");
 
   public ClientsPage(Backend backend, Navigator nav, Pages pages) {
     this.backend = backend;
@@ -67,7 +69,6 @@ public final class ClientsPage implements Refreshable {
     VBox.setVgrow(table, Priority.ALWAYS);
 
     PageHeader header = PageHeader.forTable("Everyone you have quoted or drilled for", table);
-    Button add = new Button("New client");
     add.getStyleClass().add("primary");
     add.setId("newClient");
     add.setAccessibleHelp("Ctrl+N");
@@ -99,7 +100,16 @@ public final class ClientsPage implements Refreshable {
   }
 
   public Node root() {
-    return Refreshable.attach(root, this);
+    return InitialFocus.attach(Refreshable.attach(root, this), this);
+  }
+
+  @Override
+  public Node initialFocusTarget() {
+    return switch (model.stateProperty().get()) {
+      case LOADING -> null;
+      case READY -> table.searchField().isVisible() ? table.searchField() : add;
+      case ERROR -> add;
+    };
   }
 
   public ClientsViewModel model() {

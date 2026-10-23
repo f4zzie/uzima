@@ -14,6 +14,7 @@ import com.uzima.ui.shell.SampleDestinations;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -86,10 +87,12 @@ class LoginFlowTest {
     robot.clickOn("#signIn");
     waitFor(robot, ".user-name");
 
-    robot.clickOn("Jobs");
     javafx.scene.Node jobs = robot.lookup(".nav-item").nth(2).query();
+    // Observe mouse focus before release completes navigation and focuses the page.
+    robot.moveTo(jobs).press(MouseButton.PRIMARY);
     FxTest.waitForFocus(stage, jobs);
     assertThat(KeyboardFocusState.of(jobs)).isFalse();
+    robot.moveTo(".top-bar-title").release(MouseButton.PRIMARY);
 
     robot.type(KeyCode.DOWN);
     javafx.scene.Node payments = robot.lookup(".nav-item").nth(3).query();

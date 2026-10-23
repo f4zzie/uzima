@@ -15,15 +15,12 @@ import com.uzima.ui.component.DialogShell;
 import com.uzima.ui.component.PageHeader;
 import com.uzima.ui.component.StatePane;
 import com.uzima.ui.component.StatusBadge;
+import com.uzima.ui.shell.InitialFocus;
 import com.uzima.ui.shell.Navigator;
 import com.uzima.ui.shell.Refreshable;
 import java.util.List;
 import java.util.OptionalLong;
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -33,13 +30,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.stage.Window;
 
 /**
  * One client: contact details and borehole location, totals across their jobs, and the jobs
  * themselves. Pushed onto the shell with the client's name as its title.
  */
-public final class ClientDetailPage implements Refreshable {
+public final class ClientDetailPage implements Refreshable, InitialFocus {
 
   private final Backend backend;
   private final Navigator nav;
@@ -80,7 +76,7 @@ public final class ClientDetailPage implements Refreshable {
   }
 
   public Node root() {
-    return root;
+    return InitialFocus.attach(root, this);
   }
 
   public ClientDetailViewModel model() {
@@ -101,13 +97,8 @@ public final class ClientDetailPage implements Refreshable {
       }
       case ERROR -> state.showError(model.errorProperty().get(), model::load);
       case READY -> {
-        boolean first = content.getChildren().isEmpty();
         show(model.detailProperty().get());
         state.showContent();
-        if (first) {
-          // Keyboard users land on the page's first action, not back in the sidebar.
-          focusFirstAction();
-        }
       }
     }
   }
@@ -123,37 +114,17 @@ public final class ClientDetailPage implements Refreshable {
     content.getChildren().setAll(header(client), totals(detail.totals()), body(client));
   }
 
-  /** Focuses the primary action (the last one in the header), or the jobs table if none. */
-  private void focusFirstAction() {
-    focusFirstAction(0);
-  }
-
-  private void focusFirstAction(int attempt) {
+  /** The primary action (last in the header), or the jobs table if none. */
+  @Override
+  public Node initialFocusTarget() {
+    if (model.stateProperty().get() == ClientDetailViewModel.State.LOADING) {
+      return null;
+    }
+    if (model.stateProperty().get() == ClientDetailViewModel.State.ERROR) {
+      return state.retryButton();
+    }
     List<Node> actions = header == null ? List.of() : header.getActions();
-    Node target = actions.isEmpty() ? jobs.tableView() : actions.get(actions.size() - 1);
-    Scene scene = target.getScene();
-    Window window = scene != null ? scene.getWindow() : null;
-    boolean inShowingScene = scene != null && window != null && window.isShowing();
-    if (!inShowingScene) {
-      // Not in a showing scene yet; focus once it is.
-      target
-          .sceneProperty()
-          .addListener(
-              new ChangeListener<Scene>() {
-                @Override
-                public void changed(ObservableValue<? extends Scene> obs, Scene old, Scene now) {
-                  if (now != null) {
-                    target.sceneProperty().removeListener(this);
-                    Platform.runLater(ClientDetailPage.this::focusFirstAction);
-                  }
-                }
-              });
-      return;
-    }
-    target.requestFocus();
-    if (!target.isFocused() && attempt < 15) {
-      Platform.runLater(() -> focusFirstAction(attempt + 1));
-    }
+    return actions.isEmpty() ? jobs.tableView() : actions.getLast();
   }
 
   private PageHeader header(Client client) {

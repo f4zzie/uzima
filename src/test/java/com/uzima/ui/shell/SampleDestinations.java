@@ -83,7 +83,7 @@ public final class SampleDestinations {
     Button add = new Button("New client");
     add.getStyleClass().add("primary");
     header.getActions().add(add);
-    return page(header, table);
+    return InitialFocus.attach(page(header, table), table::searchField);
   }
 
   private static Node simple(String title) {
@@ -97,7 +97,7 @@ public final class SampleDestinations {
   private static VBox page(PageHeader header, Node body) {
     VBox page = new VBox(header, body);
     page.getStyleClass().add("page");
-    return page;
+    return InitialFocus.attach(page, () -> header.lookup(".page-subtitle"));
   }
 
   private static VBox stat(String label, String value, String note) {
