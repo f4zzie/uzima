@@ -1,7 +1,6 @@
 # Uzima - borehole drilling management for Kenya
 
 [![Main CI][main-badge]][main-ci]
-[![Phase 3 CI][phase3-badge]][phase3-ci]
 ![Java 21][java-badge]
 ![JavaFX 21][javafx-badge]
 ![H2 / MySQL 8][database-badge]
@@ -165,10 +164,10 @@ from the payment ledger. They are not separately maintained totals that can drif
 
 ### Run from source
 
-The current UI work lives on `phase3`:
+Clone the current application from `main`:
 
 ```bash
-git clone --branch phase3 https://github.com/f4zzie/uzima.git
+git clone --branch main https://github.com/f4zzie/uzima.git
 cd uzima
 ./mvnw javafx:run
 ```
@@ -301,8 +300,6 @@ The [keyboard stress workflow][stress-ci] splits this into independent Ubuntu jo
 
 [main-badge]: https://github.com/f4zzie/uzima/actions/workflows/ci.yml/badge.svg?branch=main
 [main-ci]: https://github.com/f4zzie/uzima/actions/workflows/ci.yml?query=branch%3Amain
-[phase3-badge]: https://github.com/f4zzie/uzima/actions/workflows/ci.yml/badge.svg?branch=phase3
-[phase3-ci]: https://github.com/f4zzie/uzima/actions/workflows/ci.yml?query=branch%3Aphase3
 [java-badge]: https://img.shields.io/badge/Java-21-007396
 [javafx-badge]: https://img.shields.io/badge/JavaFX-21-347a41
 [database-badge]: https://img.shields.io/badge/Database-H2%20%2F%20MySQL%208-4479a1
