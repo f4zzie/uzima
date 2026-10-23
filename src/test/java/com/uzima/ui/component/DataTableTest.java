@@ -57,6 +57,8 @@ class DataTableTest {
     table.setItems(CLIENTS);
     stage.setScene(UiTheme.apply(new Scene(new VBox(table), 900, 500)));
     stage.show();
+    stage.toFront();
+    stage.requestFocus();
   }
 
   @Test

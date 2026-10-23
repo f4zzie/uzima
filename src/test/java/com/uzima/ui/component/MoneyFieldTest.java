@@ -27,6 +27,8 @@ class MoneyFieldTest {
     other = new TextField();
     stage.setScene(UiTheme.apply(new Scene(new VBox(field, other), 400, 200)));
     stage.show();
+    stage.toFront();
+    stage.requestFocus();
   }
 
   @Test

@@ -31,6 +31,8 @@ class FieldErrorsTest {
     email = field("email", "Email");
     stage.setScene(UiTheme.apply(new Scene(new VBox(name, phone, email), 400, 300)));
     stage.show();
+    stage.toFront();
+    stage.requestFocus();
   }
 
   @Test

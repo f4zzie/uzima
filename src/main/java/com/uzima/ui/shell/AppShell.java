@@ -76,12 +76,16 @@ public final class AppShell {
     model.selectedProperty().addListener((obs, old, now) -> show(now));
     show(model.selectedProperty().get());
     // Keyboard users start in the navigation rather than on the account menu.
+    // Unless a page has already taken focus by the time this runs.
     Platform.runLater(
-        () ->
+        () -> {
+          if (!focusInsideContent()) {
             nav.getChildren().stream()
                 .filter(n -> ((ToggleButton) n).isSelected())
                 .findFirst()
-                .ifPresent(Node::requestFocus));
+                .ifPresent(Node::requestFocus);
+          }
+        });
   }
 
   private void buildNavigation(List<Destination> destinations) {
@@ -116,6 +120,16 @@ public final class AppShell {
                 old.setSelected(true);
               }
             });
+  }
+
+  private boolean focusInsideContent() {
+    Node owner = root.getScene() == null ? null : root.getScene().getFocusOwner();
+    for (Node n = owner; n != null; n = n.getParent()) {
+      if (n == content) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /** The navigator pages use to open detail pages and other sidebar pages. */

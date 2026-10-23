@@ -594,6 +594,21 @@
   -fx-background-radius: 4;
 }
 
+.radio-button > .radio {
+  -fx-background-radius: 999;
+  -fx-border-radius: 999;
+  -fx-padding: 4;
+}
+
+.radio-button:selected > .radio {
+  -fx-border-color: -uz-primary;
+}
+
+.radio-button:selected > .radio > .dot {
+  -fx-background-color: -uz-primary;
+  -fx-background-radius: 999;
+}
+
 .check-box:selected > .box {
   -fx-background-color: -uz-primary;
   -fx-border-color: -uz-primary;
