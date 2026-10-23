@@ -41,6 +41,8 @@ class LoginFlowTest {
     AppFlow flow = new AppFlow(ui.backend, SampleDestinations.all());
     stage.setScene(UiTheme.apply(new Scene(flow.root(), 1366, 768)));
     stage.show();
+    stage.toFront();
+    stage.requestFocus();
     flow.start();
   }
 

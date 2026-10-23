@@ -32,6 +32,10 @@ public final class ShellHarness {
     AppFlow flow = new AppFlow(backend, destinations);
     stage.setScene(UiTheme.apply(new Scene(flow.root(), 1366, 768)));
     stage.show();
+    // Earlier test classes leave windows open; keyboard input and Node.isFocused() follow the
+    // focused window, so make sure it is this one.
+    stage.toFront();
+    stage.requestFocus();
     flow.showShell(backend.session().requireUser());
     flow.navigator().orElseThrow().open(destinationId);
     return flow;

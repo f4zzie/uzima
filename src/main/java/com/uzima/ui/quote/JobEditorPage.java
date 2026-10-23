@@ -325,7 +325,9 @@ public final class JobEditorPage {
       case READY -> {
         root.showContent();
         if (model.clientProperty().get() == null) {
-          Platform.runLater(() -> focus("client"));
+          // Content is visible and managed in the scene now; focus synchronously so keyboard
+          // users (and tests) land on the client field without waiting for a pulse.
+          focus("client");
         }
       }
       case null -> root.showLoading("Loading…");
@@ -364,9 +366,20 @@ public final class JobEditorPage {
   }
 
   private void focus(String key) {
+    focus(key, 0);
+  }
+
+  private void focus(String key, int attempt) {
     FormField field = fields.get(key);
-    if (field != null && field.getInput() != null) {
-      field.getInput().requestFocus();
+    if (field == null || field.getInput() == null) {
+      return;
+    }
+    Node input = field.getInput();
+    input.requestFocus();
+    if (!input.isFocused() && attempt < 5) {
+      // The pane may not yet be laid out in the scene; retry on the next pulse so the focus
+      // request lands once the node is showing. Capped so a mis-wired field can't loop forever.
+      Platform.runLater(() -> focus(key, attempt + 1));
     }
   }
 
