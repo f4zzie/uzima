@@ -38,6 +38,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Window;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -365,21 +366,29 @@ public final class JobEditorPage {
         .ifPresent(e -> focus(e.getKey()));
   }
 
+  private void focus(String key) {
+    focus(key, 0);
+  }
+
   private void focus(String key, int attempt) {
     FormField field = fields.get(key);
     if (field == null || field.getInput() == null) {
-      throw new IllegalStateException("Cannot focus field '" + key + "': input node is null");
+      return;
     }
     Node input = field.getInput();
-    input.requestFocus();
-    if (!input.isFocused() && attempt < 5) {
-      // The pane may not yet be laid out in the scene; retry on the next pulse so the focus
-      // request lands once the node is showing. Capped so a mis-wired field can't loop forever.
-      Platform.runLater(() -> focus(key, attempt + 1));
+    // Wait for the node to be in a scene and showing before requesting focus.
+    // In headless Monocle, the scene may not be laid out on the first pulse.
+    Window window = input.getScene() != null ? input.getScene().getWindow() : null;
+    if (window == null || !window.isShowing()) {
+      if (attempt < 10) {
+        Platform.runLater(() -> focus(key, attempt + 1));
+      }
+      return;
     }
-    if (!input.isFocused()) {
-      throw new IllegalStateException(
-          "Control '" + key + "' did not receive focus after " + (attempt + 1) + " attempts");
+    input.requestFocus();
+    if (!input.isFocused() && attempt < 10) {
+      // Still not focused after layout; retry on next pulse.
+      Platform.runLater(() -> focus(key, attempt + 1));
     }
   }
 

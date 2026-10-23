@@ -20,7 +20,10 @@ import com.uzima.ui.shell.Refreshable;
 import java.util.List;
 import java.util.OptionalLong;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -102,7 +105,7 @@ public final class ClientDetailPage implements Refreshable {
         state.showContent();
         if (first) {
           // Keyboard users land on the page's first action, not back in the sidebar.
-          Platform.runLater(this::focusFirstAction);
+          focusFirstAction();
         }
       }
     }
@@ -121,11 +124,31 @@ public final class ClientDetailPage implements Refreshable {
 
   /** Focuses the primary action (the last one in the header), or the jobs table if none. */
   private void focusFirstAction() {
+    focusFirstAction(0);
+  }
+
+  private void focusFirstAction(int attempt) {
     List<Node> actions = header == null ? List.of() : header.getActions();
-    if (actions.isEmpty()) {
-      jobs.tableView().requestFocus();
-    } else {
-      actions.get(actions.size() - 1).requestFocus();
+    Node target = actions.isEmpty() ? jobs.tableView() : actions.get(actions.size() - 1);
+    if (target.getScene() == null) {
+      // Not in the scene yet; focus once it is.
+      target
+          .sceneProperty()
+          .addListener(
+              new ChangeListener<Scene>() {
+                @Override
+                public void changed(ObservableValue<? extends Scene> obs, Scene old, Scene now) {
+                  if (now != null) {
+                    target.sceneProperty().removeListener(this);
+                    Platform.runLater(ClientDetailPage.this::focusFirstAction);
+                  }
+                }
+              });
+      return;
+    }
+    target.requestFocus();
+    if (!target.isFocused() && attempt < 5) {
+      Platform.runLater(() -> focusFirstAction(attempt + 1));
     }
   }
 

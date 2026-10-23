@@ -194,7 +194,8 @@
             <testfx.headless>true</testfx.headless>
             <glass.platform>Monocle</glass.platform>
             <monocle.platform>Headless</monocle.platform>
-            <headless.geometry>1920x1080-32</headless.geometry>
+            <headless.geometry>1280x720-32</headless.geometry>
+            <monocle.buffers.maxsize>3000000</monocle.buffers.maxsize>
             <prism.order>sw</prism.order>
             <prism.text>t2k</prism.text>
             <prism.lcdtext>false</prism.lcdtext>
