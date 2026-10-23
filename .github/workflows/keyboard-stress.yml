@@ -33,7 +33,9 @@ jobs:
           cache: maven
       # Three independent loops give 30 runs per mode without retrying a failed test.
       - name: Run both flow classes ten times
-        run: python3 tools/stress-keyboard-flows.py --runs 10 --mode "${{ matrix.mode }}"
+        run: >-
+          python3 tools/stress-keyboard-flows.py --runs 10 --mode "${{ matrix.mode }}"
+          --focus-timeline
       - name: Upload stress diagnostics
         if: always()
         uses: actions/upload-artifact@v7

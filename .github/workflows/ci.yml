@@ -19,7 +19,7 @@ jobs:
           java-version: '21'
           cache: maven
       - name: Verify
-        run: ./mvnw -B -ntp verify
+        run: ./mvnw -B -ntp -Duzima.focusTimeline=true verify
       - name: Upload test diagnostics
         if: always()
         uses: actions/upload-artifact@v7
@@ -48,7 +48,7 @@ jobs:
           java-version: '21'
           cache: maven
       - name: Verify
-        run: ./mvnw.cmd -B -ntp verify
+        run: ./mvnw.cmd -B -ntp "-Duzima.focusTimeline=true" verify
       - name: Upload test diagnostics
         if: always()
         uses: actions/upload-artifact@v7

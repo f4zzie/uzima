@@ -29,6 +29,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runs", type=int, default=30)
     parser.add_argument("--mode", choices=("default", "ci", "both"), default="both")
+    parser.add_argument("--focus-timeline", action="store_true")
+    parser.add_argument("--stop-on-failure", action="store_true",
+                        help="Stop the diagnostic batch at its first failure; never retry")
     args = parser.parse_args()
     if args.runs < 1:
         parser.error("--runs must be positive")
@@ -53,6 +56,7 @@ def main():
                 "./mvnw", "-B", "-ntp",
                 "-Dtest=QuoteEditorFlowTest,ClientsFlowTest",
                 *([] if mode == "default" else CI_FLAGS),
+                *(["-Duzima.focusTimeline=true"] if args.focus_timeline else []),
                 "test",
             ]
             started = time.time_ns()
@@ -90,6 +94,9 @@ def main():
                 for name, count in counts.items()
             )
             print(f"{mode} {iteration:02d}/{args.runs}: {progress}", flush=True)
+            if args.stop_on_failure and not result["passed"]:
+                print(f"Summary: {output / 'summary.json'}", flush=True)
+                return 1
 
     print(f"Summary: {output / 'summary.json'}", flush=True)
     return int(any(not result["passed"] for result in results["results"]))

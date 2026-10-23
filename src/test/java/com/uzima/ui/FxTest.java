@@ -79,6 +79,8 @@ public final class FxTest {
   private static void activate(Stage stage) {
     onFx(
         () -> {
+          traceFocus(stage.getScene());
+          markFocus(stage.getScene(), "stage activation requested");
           stage.show();
           stage.toFront();
           stage.requestFocus();
@@ -108,7 +110,9 @@ public final class FxTest {
           "Expected keyboard focus on "
               + expected
               + " within 15 seconds; "
-              + onFx(() -> focusState(stage, expectedNode.get())),
+              + onFx(
+                  () ->
+                      focusState(stage, expectedNode.get()) + FocusTimeline.dump(stage.getScene())),
           e);
     }
   }
@@ -125,7 +129,19 @@ public final class FxTest {
         + describe(expectedNode);
   }
 
-  private static String describe(Node node) {
+  /** Call on the FX thread before showing the scene to capture startup as well as navigation. */
+  public static void traceFocus(Scene scene) {
+    if (scene != null) {
+      FocusTimeline.attach(scene);
+    }
+  }
+
+  /** Test-only marker for navigation and asynchronous page readiness. */
+  public static void markFocus(Scene scene, String event) {
+    FocusTimeline.mark(scene, event);
+  }
+
+  static String describe(Node node) {
     return node == null
         ? "null"
         : node.getClass().getSimpleName()

@@ -71,7 +71,14 @@ class QuoteEditorFlowTest {
         () -> {
           var nav = flow.navigator().orElseThrow();
           page = new JobEditorPage(data.ui.backend, nav, pages, clientId, jobId);
+          page.model()
+              .stateProperty()
+              .addListener(
+                  (obs, old, now) ->
+                      FxTest.markFocus(stage.getScene(), "editor state " + old + " -> " + now));
+          FxTest.markFocus(stage.getScene(), "navigator.push(editor) sent");
           nav.push(page.title(), page.root());
+          FxTest.markFocus(stage.getScene(), "navigator.push(editor) returned");
         });
     QuoteEditorViewModel model = page.model();
     waitUntil(() -> model.stateProperty().get() == QuoteEditorViewModel.State.READY);

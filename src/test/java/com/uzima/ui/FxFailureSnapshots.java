@@ -76,6 +76,7 @@ public final class FxFailureSnapshots
         Window window = windows.get(i);
         var scene = FxTest.onFx(window::getScene);
         if (scene != null) {
+          System.err.print(FxTest.onFx(() -> FocusTimeline.dump(scene)));
           var path = UiSnapshots.save(scene, "failures/" + name + "-window-" + i);
           System.err.println("TestFX failure snapshot: " + path.toAbsolutePath());
         }
