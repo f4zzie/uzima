@@ -365,14 +365,10 @@ public final class JobEditorPage {
         .ifPresent(e -> focus(e.getKey()));
   }
 
-  private void focus(String key) {
-    focus(key, 0);
-  }
-
   private void focus(String key, int attempt) {
     FormField field = fields.get(key);
     if (field == null || field.getInput() == null) {
-      return;
+      throw new IllegalStateException("Cannot focus field '" + key + "': input node is null");
     }
     Node input = field.getInput();
     input.requestFocus();
@@ -380,6 +376,10 @@ public final class JobEditorPage {
       // The pane may not yet be laid out in the scene; retry on the next pulse so the focus
       // request lands once the node is showing. Capped so a mis-wired field can't loop forever.
       Platform.runLater(() -> focus(key, attempt + 1));
+    }
+    if (!input.isFocused()) {
+      throw new IllegalStateException(
+          "Control '" + key + "' did not receive focus after " + (attempt + 1) + " attempts");
     }
   }
 
