@@ -186,7 +186,7 @@
         <version>${surefire.version}</version>
         <configuration>
           <!-- @{argLine} lets JaCoCo prepend its agent. -->
-          <argLine>@{argLine} -Duser.timezone=Africa/Nairobi -Dfile.encoding=UTF-8 -Dmonocle.buffers.maxsize=100000000</argLine>
+          <argLine>@{argLine} -Duser.timezone=Africa/Nairobi -Dfile.encoding=UTF-8</argLine>
           <!-- UI tests always run headless on Monocle with software rendering; they never open a
                window on the desktop. -->
           <systemPropertyVariables>
@@ -194,7 +194,10 @@
             <testfx.headless>true</testfx.headless>
             <glass.platform>Monocle</glass.platform>
             <monocle.platform>Headless</monocle.platform>
-            <headless.geometry>1280x720-32</headless.geometry>
+            <!-- Monocle 21 sizes its framebuffer from this geometry, not buffer.maxsize.
+                 Keep the virtual screen larger than the 1366x768 test stages and their popups.
+                 A smaller screen triggers Monocle's clipped full-width pixel-copy bug. -->
+            <headless.geometry>1920x1080-32</headless.geometry>
             <prism.order>sw</prism.order>
             <prism.text>t2k</prism.text>
             <prism.lcdtext>false</prism.lcdtext>

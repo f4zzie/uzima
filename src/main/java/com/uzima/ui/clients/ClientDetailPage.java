@@ -33,6 +33,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Window;
 
 /**
  * One client: contact details and borehole location, totals across their jobs, and the jobs
@@ -130,24 +131,24 @@ public final class ClientDetailPage implements Refreshable {
   private void focusFirstAction(int attempt) {
     List<Node> actions = header == null ? List.of() : header.getActions();
     Node target = actions.isEmpty() ? jobs.tableView() : actions.get(actions.size() - 1);
-    if (target.getScene() == null) {
-      // Not in the scene yet; focus once it is.
-      target
-          .sceneProperty()
-          .addListener(
-              new ChangeListener<Scene>() {
-                @Override
-                public void changed(ObservableValue<? extends Scene> obs, Scene old, Scene now) {
-                  if (now != null) {
-                    target.sceneProperty().removeListener(this);
-                    Platform.runLater(ClientDetailPage.this::focusFirstAction);
-                  }
-                }
-              });
+    Scene scene = target.getScene();
+    Window window = scene != null ? scene.getWindow() : null;
+    boolean inShowingScene = scene != null && window != null && window.isShowing();
+    if (!inShowingScene) {
+      // Not in a showing scene yet; focus once it is.
+      target.sceneProperty().addListener(new ChangeListener<Scene>() {
+        @Override
+        public void changed(ObservableValue<? extends Scene> obs, Scene old, Scene now) {
+          if (now != null) {
+            target.sceneProperty().removeListener(this);
+            Platform.runLater(ClientDetailPage.this::focusFirstAction);
+          }
+        }
+      });
       return;
     }
     target.requestFocus();
-    if (!target.isFocused() && attempt < 5) {
+    if (!target.isFocused() && attempt < 15) {
       Platform.runLater(() -> focusFirstAction(attempt + 1));
     }
   }

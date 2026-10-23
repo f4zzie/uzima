@@ -51,6 +51,11 @@ class QuoteEditorFlowTest {
   @AfterEach
   void close() {
     data.close();
+    FxTest.onFx(() -> {
+      if (stage != null && stage.isShowing()) {
+        stage.hide();
+      }
+    });
   }
 
   /** Opens the editor as a detail page over Jobs, as the app does. */

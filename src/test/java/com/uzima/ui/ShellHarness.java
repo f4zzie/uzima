@@ -30,6 +30,7 @@ public final class ShellHarness {
                         : d)
             .toList();
     AppFlow flow = new AppFlow(backend, destinations);
+    // Test the app's window size, independently of the larger virtual screen used by Monocle.
     stage.setScene(UiTheme.apply(new Scene(flow.root(), 1366, 768)));
     stage.show();
     // Earlier test classes leave windows open; keyboard input and Node.isFocused() follow the

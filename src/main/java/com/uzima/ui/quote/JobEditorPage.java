@@ -38,10 +38,10 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.GridPane;
-import javafx.stage.Window;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.Window;
 import javafx.util.StringConverter;
 
 /**
@@ -378,15 +378,17 @@ public final class JobEditorPage {
     Node input = field.getInput();
     // Wait for the node to be in a scene and showing before requesting focus.
     // In headless Monocle, the scene may not be laid out on the first pulse.
-    Window window = input.getScene() != null ? input.getScene().getWindow() : null;
-    if (window == null || !window.isShowing()) {
-      if (attempt < 10) {
+    Scene scene = input.getScene();
+    Window window = scene != null ? scene.getWindow() : null;
+    boolean inShowingScene = scene != null && scene.getWindow() != null && scene.getWindow().isShowing();
+    if (!inShowingScene) {
+      if (attempt < 15) {
         Platform.runLater(() -> focus(key, attempt + 1));
       }
       return;
     }
     input.requestFocus();
-    if (!input.isFocused() && attempt < 10) {
+    if (!input.isFocused() && attempt < 15) {
       // Still not focused after layout; retry on next pulse.
       Platform.runLater(() -> focus(key, attempt + 1));
     }
